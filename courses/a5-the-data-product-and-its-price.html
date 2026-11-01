@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Leader session 5 of 6. Price a data product as a range from stated assumptions, count only the layers whose gates pass, and find the one assumption that decides whether the first year makes or loses money. Serai's seller growth pack: first-year net from minus USD 235,200 to USD 512,400, and what skipping data engineering does to it.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="The data product and its price - learn ship social commerce with phoebe">
+<meta property="og:description" content="Leader session 5 of 6. Four assumptions, one range, three gates. Skip data engineering and 65% of the price is held while the cost stays put.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/a5-the-data-product-and-its-price.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The data product and its price - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Leader session 5 of 6. A price range from stated assumptions, a share of price per live layer, and the assumption that decides the sign.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Leader session 5 · The data product and its price - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Leader session 5 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Leader session 5 of 6</div>
+    <h1>The data product <span class="accent">and its price</span></h1>
+    <p class="sub">Four sessions built the layers. Tonight Serai Commerce, the constructed Southeast Asian enabler from session 1, tries to sell what sits on top of them: a seller growth pack of registry numbers each brand can benchmark itself against, a list of customers likely to order again, and draft listing copy. Nobody knows yet how many sellers will pay or how much. So the price is a range built from four stated assumptions, each layer carries a share of it only while its gate passes, and one assumption decides whether the first year makes money at all. You leave with a one-page price sheet you could defend in a budget meeting.</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Advanced-practical</span>
+      <span class="chip audience">Commerce and data leaders</span>
+      <span class="chip audience">Product and finance partners pricing a data product</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-21 · Ranges, live layers, the sign</span>
+      <span class="a3" style="flex:4">21-41 · Build-along: your price sheet</span>
+      <span class="a4" style="flex:1">41-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Where tonight sits on the roadmap</h2>
+    </div>
+    <p class="lede">Your estate sheet from session 1 has five rows. Sessions 2 to 4 filled in the bottom four: the order to build them in, what the model is worth, and gen AI a seller can trust. Tonight fills the top row, the <strong>data product</strong>, with a price range and the rule that ties it to the layers below. Strategy questions such as packaging, willingness to pay and pricing models belong to the <a href="https://phoebefu6.github.io/learn-data-product-with-phoebe/">Data Product course</a> and the planned <a href="https://phoebefu6.github.io/learn-data-monetisation-with-phoebe/">Data Monetisation course</a>; follow those links for the theory. Here we price one product honestly. <strong>Serai Commerce is constructed</strong>, and so is every product figure on this page: the seller counts, the prices, the build and run costs, the share each layer carries and the gates. The orders underneath are real derived Olist rows.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A one-page price sheet for your own data product: who buys it and for which decision, what it contains and which gate each part depends on, a revenue range and a cost range from assumptions you write down, the net range, and the single assumption you will test with real buyers before anyone signs. Plus one sentence for the budget meeting: "we price only the layers that pass their gates".</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers who buys, what it costs to run, and ranges from stated assumptions</span>
+      <h2>Ranges from stated assumptions</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A data product's price is a guess until sellers pay for it. The honest way to write a guess down is as a range, with every input named, so anyone in the room can point at the one they disagree with. Serai needs four inputs: how many sellers pay, what each pays a month, what the build costs and what each seller costs to serve.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 368" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn build-up of Serai's first-year range from four constructed assumptions, as Builder session 10 prints it with every layer live. Revenue: 40 sellers times USD 150 times 12 is USD 72,000 at the low end, 160 sellers times USD 350 times 12 is USD 672,000 at the high end. Cost: USD 150,000 build plus USD 20 times 40 sellers times 12 is USD 159,600, up to USD 240,000 plus USD 35 times 160 sellers times 12, USD 307,200. The first-year net runs from minus USD 235,200, low revenue minus high cost, to USD 512,400, high revenue minus low cost, on an axis with zero marked.">
+        <defs>
+          <filter id="a5aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="51" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a5aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a5aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a5aH { font: 800 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #1A2232; }
+          .a5aL { font: 600 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #1A2232; }
+          .a5aS { font: 400 11px Inter, -apple-system, Segoe UI, sans-serif; fill: #4E5869; }
+          .a5aV { font: 800 16px Inter, -apple-system, Segoe UI, sans-serif; fill: #6A4C04; }
+          .a5aA { font: 700 11px Inter, -apple-system, Segoe UI, sans-serif; fill: #6A4C04; }
+          .a5aN { font: 400 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a5aH" x="30" y="26">FIRST-YEAR RANGE, BUILT FROM FOUR ASSUMPTIONS</text>
+        <text class="a5aS" x="420" y="26">every input is Serai's constructed assumption · all layers live</text>
+
+        <g filter="url(#a5aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="44" width="400" height="104" rx="12" transform="rotate(-0.4 230 96)" fill="#FFFFFF"/>
+          <rect x="450" y="44" width="400" height="104" rx="12" transform="rotate(0.3 650 96)" fill="#FFFFFF"/>
+          <circle cx="818" cy="70" r="13"/>
+          <path d="M812 70 Q818 62 824 70 Q818 78 812 70"/>
+          <path d="M230 152 L230 198" marker-end="url(#a5aAr)"/>
+          <path d="M650 152 L650 198" marker-end="url(#a5aAr)"/>
+          <rect x="115" y="206" width="631" height="30" rx="6" transform="rotate(-0.3 430 221)" fill="#A9C4EA"/>
+          <path d="M313 196 L313 248" stroke-dasharray="5 5"/>
+          <path d="M60 252 L820 252"/>
+          <path d="M60 247 L60 257"/>
+          <path d="M313 247 L313 257"/>
+          <path d="M566 247 L566 257"/>
+          <path d="M820 247 L820 257"/>
+        </g>
+
+        <text class="a5aH" x="46" y="68">REVENUE</text>
+        <text class="a5aS" x="46" y="86">paying sellers x price a month x 12 x live share</text>
+        <text class="a5aL" x="46" y="112">low   40 x USD 150 x 12 x 100% = USD 72,000</text>
+        <text class="a5aL" x="46" y="134">high 160 x USD 350 x 12 x 100% = USD 672,000</text>
+
+        <text class="a5aH" x="466" y="68">COST</text>
+        <text class="a5aS" x="466" y="86">build + run cost a seller-month x sellers x 12</text>
+        <text class="a5aL" x="466" y="112">low  USD 150,000 + 20 x 40 x 12 = USD 159,600</text>
+        <text class="a5aL" x="466" y="134">high USD 240,000 + 35 x 160 x 12 = USD 307,200</text>
+
+        <text class="a5aL" x="430" y="226" text-anchor="middle">first-year net, all layers live</text>
+
+        <text class="a5aA" x="60" y="272" text-anchor="middle">-300k</text>
+        <text class="a5aA" x="313" y="272" text-anchor="middle">0</text>
+        <text class="a5aA" x="566" y="272" text-anchor="middle">+300k</text>
+        <text class="a5aA" x="820" y="272" text-anchor="middle">+600k</text>
+
+        <text class="a5aV" x="115" y="294">-USD 235,200</text>
+        <text class="a5aS" x="115" y="312">low revenue minus high cost</text>
+        <text class="a5aV" x="746" y="294" text-anchor="end">USD 512,400</text>
+        <text class="a5aS" x="746" y="312" text-anchor="end">high revenue minus low cost</text>
+
+        <text class="a5aN" x="30" y="346">Each end takes every input at its worst or best; the low end even pays to serve 160 sellers while 40 pay.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - four named assumptions produce one range, and the range crosses zero</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Who buys a seller growth pack, and for which decision<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A data product is bought by a person with a recurring decision, not by "the market". Serai's pack has three parts and each one maps to a buyer inside a brand:</p>
+        <table class="clean">
+          <thead><tr><th>Part of the pack</th><th>Built on layer</th><th>Who reads it</th><th>The decision it serves</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Registry numbers</strong>: orders, GMV and repeat rate, one definition each, so a brand can benchmark itself against the book</td><td>2 · Analytics</td><td>Brand manager</td><td>Where am I behind, and is it the channel or the product?</td></tr>
+            <tr><td><strong>Repeat list</strong>: customers ranked by how likely they are to order again</td><td>3 · Machine learning</td><td>Brand CRM lead</td><td>Who gets next month's limited contacts?</td></tr>
+            <tr><td><strong>Copy drafts</strong>: listing copy and review summaries, scored against facts</td><td>4 · Gen AI</td><td>Content or catalogue lead</td><td>What do we publish without a rewrite?</td></tr>
+          </tbody>
+        </table>
+        <p>If you cannot name the buyer and the decision for a part, it is a feature someone wanted to build, and it should carry no share of the price.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>What it costs to run, not only to build<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The build is a one-off: Serai assumes USD 150,000 to 240,000 for the first year. The run cost grows with every seller served: USD 20 to 35 a seller a month for refreshing the registry, re-scoring the repeat list, generating and checking copy, and answering the seller who asks why a number moved. At 160 sellers and USD 35 that is USD 67,200 a year on top of the build.</p>
+        <p>Two things follow. A run cost per seller means more sellers never make the product free to operate. And the run cost does not fall when a layer's gate fails: if the registry is held, Serai still pays to compute it, test it and explain why it is not shipping.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Read the range before you trust it<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Builder session 10 prints the net as "low revenue minus high cost, to high revenue minus low cost". That is a corner bound: each end takes every input at its own worst or best at the same time. It is deliberately wide. The low end even charges the run cost of 160 sellers against the revenue of 40, a pairing no real year produces, so treat minus USD 235,200 as a floor nobody should plan to hit, not as a scenario.</p>
+        <p>Also notice the top of the seller range. 160 paying sellers is more than three times Serai's own book of 48 brands, so the high end quietly assumes buyers Serai does not manage today. An assumption that big belongs on the sheet in plain words, not inside a number.</p>
+        <p>A range is not a forecast and its midpoint is not one either. Its job is to show which input to test first. Part 3 finds it.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The licence is a pricing input too.</strong> Serai's rows are derived from the Olist public dataset, published on Kaggle under CC BY-NC-SA 4.0: non-commercial and share-alike. That is fine for learning and for proving the method. It means a product sold for money could not ship these rows; a real seller growth pack would be built on Serai's own sellers' data, under their contracts. Check the licence of every source before the price sheet goes to finance, because a source you cannot sell from has a price of zero.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers each layer's share of the price, switched by its gate</span>
+      <h2>Price by live layers</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">The pack has three parts and each one depends on a different layer. So Serai splits the price: the registry carries 40%, the repeat list 35% and the copy drafts 25%. A part only counts toward the price while its layer passes its gate. A failed gate does not discount the product; it switches that share off.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 328" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn grid of four rows, each a bar split into three shares of the price: registry 40 percent, model 35 percent, gen AI 25 percent, as Builder session 10 prints them. Every layer built: all three live, live share 100 percent. Leaked field: the model's lift of 1.65 times is under its 2.0 gate, so the model share is held and the live share is 65 percent. Data engineering skipped: registry and gen AI fail their gates, only the model is live, share 35 percent. Both at once: every gate fails, share 0 percent.">
+        <defs>
+          <filter id="a5bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="53" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a5bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a5bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a5bH { font: 800 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #1A2232; }
+          .a5bL { font: 600 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #1A2232; }
+          .a5bS { font: 400 11px Inter, -apple-system, Segoe UI, sans-serif; fill: #4E5869; }
+          .a5bV { font: 800 16px Inter, -apple-system, Segoe UI, sans-serif; fill: #6A4C04; }
+          .a5bR { font: 800 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #991B1B; }
+          .a5bRV { font: 800 16px Inter, -apple-system, Segoe UI, sans-serif; fill: #991B1B; }
+          .a5bN { font: 400 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a5bH" x="30" y="26">WHICH LAYERS COUNT TOWARD THE PRICE</text>
+        <text class="a5bS" x="330" y="26">share per layer is an assumption · gates are Serai's constructed policy</text>
+
+        <text class="a5bH" x="216" y="60">REGISTRY 40%</text>
+        <text class="a5bS" x="216" y="78">agreement &gt;= 99.5%</text>
+        <text class="a5bH" x="434" y="60">MODEL 35%</text>
+        <text class="a5bS" x="434" y="78">lift &gt;= 2.0x</text>
+        <text class="a5bH" x="621" y="60">GEN AI 25%</text>
+        <text class="a5bS" x="621" y="78">pass 70%, golden 85%</text>
+        <text class="a5bH" x="774" y="60">LIVE SHARE</text>
+        <text class="a5bS" x="774" y="78">of full price</text>
+
+        <g filter="url(#a5bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="210" y="94" width="214" height="34" rx="6" fill="#FBF5E6"/>
+          <rect x="428" y="94" width="185" height="34" rx="6" fill="#FBF5E6"/>
+          <rect x="617" y="94" width="133" height="34" rx="6" fill="#FBF5E6"/>
+          <rect x="772" y="94" width="80" height="34" rx="6" transform="rotate(0.5 812 111)" fill="#FFFFFF"/>
+
+          <rect x="210" y="144" width="214" height="34" rx="6" fill="#FBF5E6"/>
+          <rect x="428" y="144" width="185" height="34" rx="6" fill="#FEF2F2" stroke="#991B1B" stroke-dasharray="6 4"/>
+          <rect x="617" y="144" width="133" height="34" rx="6" fill="#FBF5E6"/>
+          <rect x="772" y="144" width="80" height="34" rx="6" transform="rotate(-0.5 812 161)" fill="#FFFFFF"/>
+
+          <rect x="210" y="194" width="214" height="34" rx="6" fill="#FEF2F2" stroke="#991B1B" stroke-dasharray="6 4"/>
+          <rect x="428" y="194" width="185" height="34" rx="6" fill="#FBF5E6"/>
+          <rect x="617" y="194" width="133" height="34" rx="6" fill="#FEF2F2" stroke="#991B1B" stroke-dasharray="6 4"/>
+          <rect x="772" y="194" width="80" height="34" rx="6" transform="rotate(0.5 812 211)" fill="#A9C4EA"/>
+
+          <rect x="210" y="244" width="214" height="34" rx="6" fill="#FEF2F2" stroke="#991B1B" stroke-dasharray="6 4"/>
+          <rect x="428" y="244" width="185" height="34" rx="6" fill="#FEF2F2" stroke="#991B1B" stroke-dasharray="6 4"/>
+          <rect x="617" y="244" width="133" height="34" rx="6" fill="#FEF2F2" stroke="#991B1B" stroke-dasharray="6 4"/>
+          <rect x="772" y="244" width="80" height="34" rx="6" transform="rotate(-0.5 812 261)" fill="#FFFFFF"/>
+
+          <rect x="160" y="256" width="34" height="16" rx="8"/>
+          <circle cx="168" cy="264" r="5"/>
+        </g>
+
+        <text class="a5bL" x="30" y="109">Every layer built</text>
+        <text class="a5bS" x="30" y="124">every gate passes</text>
+        <text class="a5bL" x="30" y="159">Leaked field</text>
+        <text class="a5bS" x="30" y="174">lift 1.65x, under 2.0</text>
+        <text class="a5bL" x="30" y="209">DE layer skipped</text>
+        <text class="a5bS" x="30" y="224">registry and gen AI fail</text>
+        <text class="a5bL" x="30" y="259">Both at once</text>
+        <text class="a5bS" x="30" y="274">every gate fails</text>
+
+        <text class="a5bL" x="317" y="116" text-anchor="middle">live</text>
+        <text class="a5bL" x="520" y="116" text-anchor="middle">live</text>
+        <text class="a5bL" x="683" y="116" text-anchor="middle">live</text>
+        <text class="a5bV" x="812" y="117" text-anchor="middle">100%</text>
+
+        <text class="a5bL" x="317" y="166" text-anchor="middle">live</text>
+        <text class="a5bR" x="520" y="166" text-anchor="middle">held</text>
+        <text class="a5bL" x="683" y="166" text-anchor="middle">live</text>
+        <text class="a5bV" x="812" y="167" text-anchor="middle">65%</text>
+
+        <text class="a5bR" x="317" y="216" text-anchor="middle">held</text>
+        <text class="a5bL" x="520" y="216" text-anchor="middle">live</text>
+        <text class="a5bR" x="683" y="216" text-anchor="middle">held</text>
+        <text class="a5bL" x="812" y="217" text-anchor="middle">35%</text>
+
+        <text class="a5bR" x="317" y="266" text-anchor="middle">held</text>
+        <text class="a5bR" x="520" y="266" text-anchor="middle">held</text>
+        <text class="a5bR" x="683" y="266" text-anchor="middle">held</text>
+        <text class="a5bRV" x="812" y="267" text-anchor="middle">0%</text>
+
+        <text class="a5bN" x="30" y="304">The cost does not shrink with the share: skip DE and the net falls to -USD 282,000 to USD 75,600.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a failed gate switches a share off; it never discounts it</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>What skipping data engineering does to the price<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Session 2 showed the damage: with the raw exports feeding everything, the registry's repeat rate reads 4.61% and agrees with the reference only 65.14% of the time, and gen AI passes 7 of 20 outputs with 50% golden agreement. Both gates fail. The model survives at 3.30x lift, so only its 35% stays live.</p>
+        <table class="clean">
+          <thead><tr><th>Setting</th><th>Live share</th><th>First-year revenue</th><th>First-year net</th></tr></thead>
+          <tbody>
+            <tr><td>Every layer built</td><td>100%</td><td>USD 72,000 to 672,000</td><td>-USD 235,200 to USD 512,400</td></tr>
+            <tr><td>Leaked field (model held)</td><td>65%</td><td>USD 46,800 to 436,800</td><td>-USD 260,400 to USD 277,200</td></tr>
+            <tr><td>DE layer skipped</td><td>35%</td><td>USD 25,200 to 235,200</td><td>-USD 282,000 to USD 75,600</td></tr>
+            <tr><td>Both at once</td><td>0%</td><td>USD 0</td><td>-USD 307,200 to -USD 159,600</td></tr>
+          </tbody>
+        </table>
+        <p>The cost column never moves: USD 159,600 to 307,200 in every row. Skipping the bottom layer saves none of the product's cost, because the run cost is per seller served. It removes revenue in proportion to the share held, which is why the top of the range falls by USD 436,800 and the bottom by only USD 46,800. The upside is what a skipped layer costs most.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why switch off, rather than discount<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A discount says "the numbers are a bit worse". A held share says "we will not sell this part until it passes". The second is the one a seller can trust: a registry that agrees with its control total 65.14% of the time is not a cheaper registry, it is a wrong one, and a review summary quoting a count the rows do not support is the confident, erroneous content NIST's Generative AI Profile calls confabulation.</p>
+        <p>The NIST AI Risk Management Framework names four functions, "govern, map, measure, and manage". The share switch is "measure" wired to "manage": a measured number, a threshold someone owns, and a commercial consequence when it is missed. That consequence is what makes the gate real to the people who would otherwise ship anyway.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>A gate measured on 24 repeat buyers<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The model's 35% rests on a month T+1 lift of at least 2.0x. That month holds 574 orders and 24 real repeats; the top decile of 58 orders caught 9 of them, lift 3.71x. With 24 positives, one hit moves lift by 0.41. With the leaked field the model caught 4, lift 1.65x, and its share was held. Before a share depends on a gate, ask how many events the gate was measured on and how far one event moves it. If the answer is "a lot", write a second month into the gate before you write the share into a contract.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Store 2 has 153 reviews, or 155.</strong> On the repaired rows, Serai's Store 2 has 153 reviews with a mean score of 3.9 and 18% at one or two stars; on the raw exports it reads 155, because re-sent orders bring their reviews with them. The review scores are real Olist scores; the summaries are pre-written and constructed. A good summary that quotes 153 now fails a check that reads 155 from dirty rows, and every summary like it fails the same way. That is how 25% of a price disappears without anyone writing a bad sentence.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers which assumption moves the low end most</span>
+      <h2>The assumption that decides the sign</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">The range crosses zero, so somewhere in the four inputs is the one that decides whether the first year makes or loses money. Find it by moving each input, alone, from the value the low end uses to its other end, and watching how far the low end moves. This is arithmetic on Serai's stated assumptions, nothing measured.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 342" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn sensitivity chart of the low end of Serai's first-year net, minus USD 235,200, computed by hand from the stated assumptions. Moving each input alone to its other end: paying sellers from 40 to 160 adds USD 216,000 and the low end reaches minus USD 19,200; price from USD 150 to 350 adds USD 96,000, to minus USD 139,200; build from USD 240,000 to 150,000 adds USD 90,000, to minus USD 145,200; sellers served on the cost side from 160 to 40 adds USD 50,400, to minus USD 184,800; run cost from USD 35 to 20 adds USD 28,800, to minus USD 206,400. No single input reaches break-even.">
+        <defs>
+          <filter id="a5cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="57" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a5cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a5cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a5cH { font: 800 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #1A2232; }
+          .a5cL { font: 600 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #1A2232; }
+          .a5cS { font: 400 11px Inter, -apple-system, Segoe UI, sans-serif; fill: #4E5869; }
+          .a5cA { font: 700 11px Inter, -apple-system, Segoe UI, sans-serif; fill: #6A4C04; }
+          .a5cN { font: 400 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a5cH" x="30" y="26">WHAT LIFTS THE LOW END</text>
+        <text class="a5cS" x="300" y="26">arithmetic on the stated assumptions, others held at the low end; not measured</text>
+
+        <text class="a5cA" x="294" y="58">today's low end -USD 235,200</text>
+        <text class="a5cA" x="742" y="58">break-even</text>
+
+        <g filter="url(#a5cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M288 66 L288 298"/>
+          <path d="M735 68 L735 298" stroke-dasharray="5 5"/>
+          <rect x="288" y="76" width="410" height="30" rx="5" transform="rotate(-0.4 493 91)" fill="#A9C4EA"/>
+          <rect x="288" y="122" width="182" height="30" rx="5" transform="rotate(0.4 379 137)" fill="#FBF5E6"/>
+          <rect x="288" y="168" width="171" height="30" rx="5" transform="rotate(-0.3 373 183)" fill="#FBF5E6"/>
+          <rect x="288" y="214" width="96" height="30" rx="5" transform="rotate(0.3 336 229)" fill="#FBF5E6"/>
+          <rect x="288" y="260" width="55" height="30" rx="5" transform="rotate(-0.3 315 275)" fill="#FBF5E6"/>
+          <circle cx="795" cy="150" r="11"/>
+          <path d="M803 158 L814 169"/>
+        </g>
+
+        <text class="a5cL" x="30" y="89">Paying sellers, 40 to 160</text>
+        <text class="a5cS" x="30" y="103">revenue side</text>
+        <text class="a5cL" x="30" y="135">Price, USD 150 to 350</text>
+        <text class="a5cS" x="30" y="149">a seller a month</text>
+        <text class="a5cL" x="30" y="181">Build, USD 240,000 to 150,000</text>
+        <text class="a5cS" x="30" y="195">one-off</text>
+        <text class="a5cL" x="30" y="227">Sellers served, 160 to 40</text>
+        <text class="a5cS" x="30" y="241">cost side of the low end</text>
+        <text class="a5cL" x="30" y="273">Run cost, USD 35 to 20</text>
+        <text class="a5cS" x="30" y="287">a seller a month</text>
+
+        <text class="a5cL" x="298" y="96">+USD 216,000 · low end -USD 19,200</text>
+        <text class="a5cA" x="480" y="142">+USD 96,000 · -USD 139,200</text>
+        <text class="a5cA" x="469" y="188">+USD 90,000 · -USD 145,200</text>
+        <text class="a5cA" x="394" y="234">+USD 50,400 · -USD 184,800</text>
+        <text class="a5cA" x="353" y="280">+USD 28,800 · -USD 206,400</text>
+
+        <text class="a5cN" x="30" y="322">No single input flips the sign; paying sellers comes closest, and still ends at -USD 19,200.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the paying-seller count decides the sign; everything else is second order</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Break-even in sellers, the number to take to the room<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Turn the winning input into a threshold. Hold one seller count on both sides of the sum, so the sellers who pay are the sellers you serve, and ask how many it takes to cover the build. Each seller adds price minus run cost, times 12, a year.</p>
+        <table class="clean">
+          <thead><tr><th>Setting</th><th>Each seller adds a year</th><th>Build to cover</th><th>Break-even sellers</th></tr></thead>
+          <tbody>
+            <tr><td>All live, worst inputs (USD 150, run 35)</td><td>(150 - 35) x 12 = USD 1,380</td><td>USD 240,000</td><td>174</td></tr>
+            <tr><td>All live, best inputs (USD 350, run 20)</td><td>(350 - 20) x 12 = USD 3,960</td><td>USD 150,000</td><td>38</td></tr>
+            <tr><td>DE skipped, worst inputs (35% of USD 150)</td><td>(52.50 - 35) x 12 = USD 210</td><td>USD 240,000</td><td>1,143</td></tr>
+            <tr><td>DE skipped, best inputs (35% of USD 350)</td><td>(122.50 - 20) x 12 = USD 1,230</td><td>USD 150,000</td><td>122</td></tr>
+          </tbody>
+        </table>
+        <p>Arithmetic on the stated assumptions, rounded up; your own will differ. With every layer live, Serai breaks even somewhere between 38 and 174 paying sellers, and the top of that sits above the 160 the range allows. Skip data engineering and the band moves to 122 to 1,143 sellers, against a book of 48 brands. That is the skip-DE anti-lever in one sentence a finance partner understands.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Test the seller count before anything else<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Price, build and run cost are worth negotiating, but none of them moves the low end as far as the number of sellers who pay. So the first test is a buyer test, not a build: put the pack in front of a handful of Serai's brands with a written price inside the USD 150 to 350 band and count who signs a letter of intent. Each signature is evidence on the input that decides the sign. A faster model or a cheaper build is evidence on inputs that do not.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Why no conversion uplift goes into the price<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>It is tempting to raise the price input by quoting a published sales uplift for AI-written copy. Session 4 showed why not: the evidence disagrees. Fang et al. (2026) ran randomized field experiments on a cross-border e-commerce platform and report effects "ranging from no detectable impact to 16.3%" depending on the workflow; Cicek et al. (2024, reported) found in survey experiments that mentioning AI in product copy lowered purchase intent. Different questions, settings and outcomes. Neither tells you what Serai's sellers will pay, so the price input stays an assumption you test with buyers.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>One order, several sellers.</strong> In the Olist data an order may hold several items, each fulfilled by a different seller. Before "paying sellers" goes on a price sheet, decide what a seller is: a brand, a storefront on one marketplace, or a legal entity that may run several. The answer can move the count more than any pricing debate, and the count is the input that decides the sign.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>Your price sheet on one page</h2>
+      <span class="tag demo">★ 20 min · everyone builds</span>
+    </div>
+    <p class="lede">You need your estate sheet from session 1 and a rough idea of what your own product would cost to build. No product of your own? Price Serai's pack with the numbers on this page. Six boxes, filled in order, and the last one is the test you will run first.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The price sheet as a hand-drawn grid of six boxes, filled for Serai. One, buyer and job: brand CRM leads and brand managers. Two, contents and gates: registry numbers, repeat list and copy drafts, each counted only when its gate passes. Three, price range: USD 72,000 to 672,000. Four, cost range: USD 159,600 to 307,200. Five, net: minus USD 235,200 to USD 512,400. Six, highlighted, test first: paying sellers, break-even between 38 and 174 sellers.">
+        <defs>
+          <filter id="a5dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="59" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a5dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a5dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a5dH { font: 800 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #1A2232; }
+          .a5dL { font: 600 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #1A2232; }
+          .a5dS { font: 400 11px Inter, -apple-system, Segoe UI, sans-serif; fill: #4E5869; }
+          .a5dB { font: 800 11px Inter, -apple-system, Segoe UI, sans-serif; fill: #1D3A66; }
+          .a5dN { font: 400 12px Inter, -apple-system, Segoe UI, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a5dH" x="30" y="30">THE PRICE SHEET · SIX BOXES, FILLED IN ORDER</text>
+
+        <g filter="url(#a5dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="50" width="260" height="100" rx="10" transform="rotate(-0.6 160 100)" fill="#FFFFFF"/>
+          <rect x="310" y="50" width="260" height="100" rx="10" transform="rotate(0.5 440 100)" fill="#FFFFFF"/>
+          <rect x="590" y="50" width="260" height="100" rx="10" transform="rotate(-0.4 720 100)" fill="#FFFFFF"/>
+          <rect x="30" y="160" width="260" height="100" rx="10" transform="rotate(0.4 160 210)" fill="#FFFFFF"/>
+          <rect x="310" y="160" width="260" height="100" rx="10" transform="rotate(-0.5 440 210)" fill="#FFFFFF"/>
+          <rect x="590" y="160" width="260" height="100" rx="10" transform="rotate(0.6 720 210)" fill="#A9C4EA"/>
+          <path d="M830 34 L830 58 Q830 66 838 66 Q846 66 846 58 L846 30 Q846 24 840 24 Q834 24 834 30 L834 54"/>
+        </g>
+
+        <text class="a5dH" x="46" y="76">1 · BUYER AND JOB</text>
+        <text class="a5dS" x="46" y="96">who pays, for which decision</text>
+        <text class="a5dL" x="46" y="122">brand CRM leads,</text>
+        <text class="a5dL" x="46" y="138">brand managers</text>
+
+        <text class="a5dH" x="326" y="76">2 · CONTENTS AND GATES</text>
+        <text class="a5dS" x="326" y="96">registry 40%, repeat list 35%,</text>
+        <text class="a5dS" x="326" y="112">copy drafts 25%</text>
+        <text class="a5dL" x="326" y="138">each live only past its gate</text>
+
+        <text class="a5dH" x="606" y="76">3 · PRICE RANGE</text>
+        <text class="a5dS" x="606" y="96">sellers x price x 12 x live share</text>
+        <text class="a5dL" x="606" y="138">USD 72,000 to 672,000</text>
+
+        <text class="a5dH" x="46" y="186">4 · COST RANGE</text>
+        <text class="a5dS" x="46" y="206">build + run a seller-month x 12</text>
+        <text class="a5dL" x="46" y="248">USD 159,600 to 307,200</text>
+
+        <text class="a5dH" x="326" y="186">5 · NET</text>
+        <text class="a5dS" x="326" y="206">low revenue minus high cost, and back</text>
+        <text class="a5dL" x="326" y="248">-USD 235,200 to USD 512,400</text>
+
+        <text class="a5dH" x="606" y="186">6 · TEST FIRST</text>
+        <text class="a5dB" x="606" y="206">the assumption that decides the sign</text>
+        <text class="a5dL" x="606" y="232">paying sellers: break-even</text>
+        <text class="a5dL" x="606" y="248">between 38 and 174</text>
+
+        <text class="a5dN" x="30" y="284">Add a licence line under box 2: derived Olist rows are non-commercial (CC BY-NC-SA 4.0).</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the sheet ends on the test you run first, not on the number you hope for</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Box 1: name the buyer and the decision.</strong> One line per part of the product. If a part has no buyer, cross it out now; it carries no share.</p>
+        <div class="prompt-box good"><span class="label">★ Serai's buyers (constructed)</span>Registry numbers   brand manager      "where am I behind, channel or product?"
+Repeat list        brand CRM lead     "who gets next month's contacts?"
+Copy drafts        catalogue lead     "what do we publish without a rewrite?"</div>
+      </div>
+      <div class="step">
+        <p><strong>Box 2: split the price by layer and write each gate next to its share.</strong> Shares must add to 100%. Add the licence of every source the product ships.</p>
+        <div class="prompt-box good"><span class="label">★ Contents and gates (Serai's constructed policy)</span>Registry     40%   agreement with control total &gt;= 99.5%
+Repeat list  35%   month T+1 lift &gt;= 2.0x the base rate
+Copy drafts  25%   rubric pass &gt;= 70% AND golden agreement &gt;= 85%
+Under all    DE    0 blocking failures after repair
+Licence      derived Olist rows: CC BY-NC-SA 4.0, non-commercial;
+             a paid product needs Serai's own sellers' data</div>
+      </div>
+      <div class="step">
+        <p><strong>Boxes 3 and 4: write the four assumptions, then the two ranges.</strong> Every input as a low and a high, with where it came from. "Guess" is an honest source; a blank is not.</p>
+        <div class="prompt-box good"><span class="label">★ The four assumptions and the ranges</span>Paying sellers         40 to 160          (guess; 160 is beyond Serai's 48 brands)
+Price a seller-month   USD 150 to 350     (guess)
+Build, first year      USD 150,000 to 240,000
+Run a seller-month     USD 20 to 35
+
+Revenue   sellers x price x 12 x live share  =  USD 72,000 to 672,000
+Cost      build + run x sellers x 12         =  USD 159,600 to 307,200</div>
+      </div>
+      <div class="step">
+        <p><strong>Box 5: the net, and what a skipped layer does to it.</strong> Write the all-live range and the range with your weakest layer held.</p>
+        <div class="prompt-box good"><span class="label">★ Net, two ways</span>All layers live     low revenue - high cost  to  high revenue - low cost
+                    -USD 235,200  to  USD 512,400
+DE layer skipped    live share 35%, cost unchanged
+                    -USD 282,000  to  USD 75,600</div>
+      </div>
+      <div class="step">
+        <p><strong>Box 6: the test you run first.</strong> Move each input alone, find the one that moves the low end most, and turn it into a break-even count. Then write the test that gathers evidence on it.</p>
+        <div class="prompt-box good"><span class="label">★ Test first (arithmetic on the stated assumptions)</span>Decides the sign   paying sellers (40 to 160 lifts the low end by USD 216,000)
+Break-even         38 to 174 sellers with every layer live
+                   122 to 1,143 sellers with DE skipped
+First test         written price to a handful of brands; count letters of intent
+Next review        after the test, before any build money is released</div>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The price sheet that sounds confident and says nothing</span>
+Seller insights platform: strong recurring revenue in year one, AI-powered copy
+lifts seller sales, payback inside a year.
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 6</h2>
+      <span class="tag exercise">25 min</span>
+    </div>
+    <ol>
+      <li>Finish your six-box price sheet. Every input has a low, a high and a source, even if the source is "guess".</li>
+      <li>Move each input alone to its other end and write how far the low end of your net moves. Circle the one that moves it most.</li>
+      <li>Rewrite that input as a break-even count and write one test that gathers evidence on it within a month, with whom and at what written price.</li>
+      <li>Check the licence or contract of every data source your product ships. Mark any you could not sell from, and what replaces it.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Leader session 5 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · Skipping data engineering moves Serai's first-year net from -USD 235,200 to USD 512,400 down to -USD 282,000 to USD 75,600. Why does the top end fall so much further than the bottom?</p>
+      <button class="qopt" type="button">A · Skipping data engineering raises the build cost</button>
+      <button class="qopt" type="button">B · Revenue is scaled by the live share, the top end has the most revenue to lose, and the cost line stays put</button>
+      <button class="qopt" type="button">C · The model is held, and the model carries most of the price</button>
+      <button class="qopt" type="button">D · Fewer sellers sign up when the data is dirty</button>
+      <p class="qwhy">With only the model's 35% live, revenue falls by 65% at both ends: USD 436,800 off the top, USD 46,800 off the bottom. Cost is unchanged in every setting. The model is the one layer that stays live, and no seller count changes in the arithmetic.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">2 · Moved alone from the value the low end uses to its other end, which input lifts the low end of Serai's net the most?</p>
+      <button class="qopt" type="button">A · Price, USD 150 to 350 a seller a month</button>
+      <button class="qopt" type="button">B · Build, USD 240,000 to 150,000</button>
+      <button class="qopt" type="button">C · Run cost, USD 35 to 20 a seller a month</button>
+      <button class="qopt" type="button">D · Paying sellers, 40 to 160</button>
+      <p class="qwhy">Paying sellers adds USD 216,000 and brings the low end to -USD 19,200. Price adds USD 96,000, build USD 90,000, run cost USD 28,800. None flips the sign alone, which is why the first test is a buyer test.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · With the backfilled field in the model, training AUC is 0.9913 but month T+1 lift is 1.65x, under the 2.0 gate. What happens to the price?</p>
+      <button class="qopt" type="button">A · The model's 35% is held: live share 65%, net -USD 260,400 to USD 277,200</button>
+      <button class="qopt" type="button">B · Full price, because training AUC is the best on the board</button>
+      <button class="qopt" type="button">C · The model's share is discounted in proportion to the lift shortfall</button>
+      <button class="qopt" type="button">D · Nothing, because the registry and gen AI are unaffected</button>
+      <p class="qwhy">A failed gate switches its share off, it never discounts it, and training AUC is not the gate: the month the model never saw is. The registry and copy drafts keep their 40% and 25%.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Ranges from stated assumptions</span><span class="note">Revenue, cost and net ranges as Builder session 10 prints them; every product input is constructed for Serai</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Share of price switched off by gates</span><span class="note">Live share 100%, 65%, 35% and 0% under the four settings, measured on the bench; shares and gates are Serai's constructed policy</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Which input decides the sign, and break-even sellers</span><span class="note">Arithmetic on the stated assumptions, worked on this page; not measured</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Gates as "measure" wired to "manage"; confabulation</span><span class="note">NIST AI RMF 1.0 core functions and NIST AI 600-1 (2024), read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The licence of the rows</span><span class="note">Brazilian E-Commerce Public Dataset by Olist, Kaggle, CC BY-NC-SA 4.0, read at source; multi-seller orders as a real Olist pattern</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">AI copy and sales: the disagreement</span><span class="note">Fang et al. (2026), abstract read at source; Cicek et al. (2024), reported; taught in session 4, resolved by neither</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Pricing strategy, packaging and willingness to pay</span><span class="note">Owned by the Data Product course and the planned Data Monetisation course; linked, not retaught</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 5 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Name the buyer</b><span>One buyer and one decision per part of the product, or that part carries no share.</span></div>
+      <div class="cheat-item"><b>Four inputs, two ranges</b><span>Sellers, price, build, run. Serai: revenue USD 72,000 to 672,000; cost USD 159,600 to 307,200.</span></div>
+      <div class="cheat-item"><b>Read the corners</b><span>Net -USD 235,200 to USD 512,400 is low revenue minus high cost, and back. A floor, not a plan.</span></div>
+      <div class="cheat-item"><b>Switch, never discount</b><span>Registry 40%, model 35%, gen AI 25%, each live only past its gate. Skip DE: 35% live.</span></div>
+      <div class="cheat-item"><b>Cost stays put</b><span>Skip DE and the net falls to -USD 282,000 to USD 75,600; the upside takes the hit.</span></div>
+      <div class="cheat-item"><b>Test the sign first</b><span>Paying sellers decides it: break-even 38 to 174 sellers. Run a buyer test before a build.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>You have a priced product and the gates it depends on. Session 6 puts the five layers into four quarters with a gate at each step, names what to stop doing, and turns the scorecard into the go or hold board you take to your leadership team.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Leader session 5 of 6 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="a4-gen-ai-a-seller-can-trust.html">← Prev: Gen AI a seller can trust</a> &nbsp;·&nbsp; <a href="a6-the-12-month-roadmap.html">Next: The 12-month roadmap →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

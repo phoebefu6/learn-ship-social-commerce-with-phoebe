@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Leader session 1 of 6. A social-commerce data estate has five layers: data engineering, analytics, machine learning, gen AI and a data product. Each one consumes the layer below. See what three raw marketplace exports look like before anyone checks them, and read the five-layer scorecard a leader signs.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="Five layers, one estate - learn ship social commerce with phoebe">
+<meta property="og:description" content="Leader session 1 of 6. 8,766 rows arrive for 8,614 real orders. Five layers, built in order, and the scorecard that says which ones are live.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/a1-five-layers-one-estate.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Five layers, one estate - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Leader session 1 of 6. Five layers of a social-commerce data estate, each earning its place by what the next one needs.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Leader session 1 · Five layers, one estate - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Leader session 1 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Leader session 1 of 6</div>
+    <h1>Five layers, <span class="accent">one estate</span></h1>
+    <p class="sub">Every social-commerce data roadmap gets pitched from the top: a copy assistant, a churn model, a dashboard for brands. Tonight starts from the bottom. Serai Commerce, a constructed Southeast Asian enabler running 48 brands across three marketplaces, receives one file per marketplace. Its 8,614 real orders arrive as 8,766 rows. Five layers sit between those files and anything Serai could sell, and each layer only works if the one below it does. You leave with the five layers drawn for your own estate and the scorecard you would sign.</p>
+    <div class="chip-row">
+      <span class="chip level">🟢 Foundational</span>
+      <span class="chip audience">Commerce and data leaders</span>
+      <span class="chip audience">Anyone funding a data or AI roadmap</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · Five layers, one scorecard</span>
+      <span class="a3" style="flex:4">20-40 · Build-along: your estate</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>How the leader track works</h2>
+    </div>
+    <p class="lede">Six sessions, no code. The artifact you build across them is a <strong>one-page five-layer roadmap with a price range</strong>: what each layer consumes, the test that proves it works, the gate it must clear, who owns it, and what the data product on top is worth if every gate holds. Tonight is the shape of the estate. Session 2 is the order you build it in and what skipping costs. Session 3 is what a model is worth. Session 4 is gen AI a seller can trust. Session 5 is the product and its price. Session 6 is the 12-month roadmap. The running example is <strong>Serai Commerce</strong>, constructed for these pages and continued from the <a href="https://phoebefu6.github.io/learn-ship-ecommerce-enabler-with-phoebe/">Social Commerce Enablers course</a>, which owns Serai's business model. Its orders are real: 8,614 delivered orders from the public Olist dataset, derived and masked.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> The five layers of your own data estate on one sheet, each with the thing it consumes from the layer below, the test that proves it, its gate and its owner. Plus one sentence for your next steering meeting: "we will not fund layer N until layer N minus one passes its gate". Every later session in both tracks fills in one row of that sheet.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the five layers and what each consumes</span>
+      <h2>Each layer eats the one below</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A data estate is not a list of projects. It is a stack in which every layer takes something from the layer below and turns it into something the layer above can trust. Name what each layer consumes and the build order stops being a matter of taste.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn stack of five layers, data engineering at the bottom, then analytics, machine learning, gen AI and the data product at the top. Beside each layer is what it needs from the layer below: data engineering needs three raw marketplace exports, analytics needs one row per real order, the model needs labels that are real repeats, gen AI needs facts that are true, the product needs numbers a buyer can audit.">
+        <defs>
+          <filter id="a1aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a1aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a1aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a1aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a1aL { font: 600 12px Inter, sans-serif; fill: #1A2232; }
+          .a1aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a1aA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a1aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a1aH" x="30" y="26">FIVE LAYERS, BUILT FROM THE BOTTOM</text>
+        <text class="a1aS" x="330" y="26">each layer turns what it consumes into something the next can trust</text>
+
+        <g filter="url(#a1aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="70" y="50" width="520" height="46" rx="10" transform="rotate(-0.4 330 73)" fill="#FFFFFF"/>
+          <rect x="70" y="110" width="520" height="46" rx="10" transform="rotate(0.3 330 133)" fill="#FFFFFF"/>
+          <rect x="70" y="170" width="520" height="46" rx="10" transform="rotate(-0.3 330 193)" fill="#FFFFFF"/>
+          <rect x="70" y="230" width="520" height="46" rx="10" transform="rotate(0.3 330 253)" fill="#FBF5E6"/>
+          <rect x="70" y="290" width="520" height="46" rx="10" transform="rotate(-0.4 330 313)" fill="#A9C4EA"/>
+          <path d="M44 330 L44 58" marker-end="url(#a1aAr)"/>
+          <rect x="620" y="300" width="230" height="26" rx="6" fill="url(#a1aHc)" stroke="#966E08"/>
+        </g>
+
+        <text class="a1aH" x="88" y="70">5 · DATA PRODUCT</text>
+        <text class="a1aS" x="88" y="87">a pack Serai sells; priced as a range, gated by the layers below</text>
+        <text class="a1aH" x="88" y="130">4 · GEN AI</text>
+        <text class="a1aS" x="88" y="147">listing copy and review summaries, scored against facts</text>
+        <text class="a1aH" x="88" y="190">3 · MACHINE LEARNING</text>
+        <text class="a1aS" x="88" y="207">one repeat-purchase model, judged on a month it never saw</text>
+        <text class="a1aH" x="88" y="250">2 · ANALYTICS</text>
+        <text class="a1aS" x="88" y="267">the metric registry: orders, GMV, repeat rate, one definition each</text>
+        <text class="a1aH" x="88" y="310">1 · DATA ENGINEERING</text>
+        <text class="a1aL" x="88" y="327">one merged schema and the tests that guard it</text>
+
+        <text class="a1aA" x="620" y="70">needs: numbers a buyer can audit</text>
+        <text class="a1aA" x="620" y="130">needs: facts that are true</text>
+        <text class="a1aA" x="620" y="190">needs: labels that are real repeats</text>
+        <text class="a1aA" x="620" y="250">needs: one row per real order</text>
+        <text class="a1aA" x="620" y="290">needs: three raw exports</text>
+        <text class="a1aS" x="632" y="318">the pile, as it arrives</text>
+
+        <text class="a1aN" x="30" y="362">Read it upwards: a broken layer does not stay put, it hands its error to every layer above it.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - each layer is defined by what it needs from the one below</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The five layers, defined by what they consume and produce<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Layer</th><th>Consumes</th><th>Produces</th><th>The test that proves it</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1 · Data engineering</strong></td><td>Three marketplace exports, each in its own shape</td><td>One merged schema: orders, lines, payments, review scores, timestamps</td><td>Keys unique, customer keys resolve, timestamps in order, amounts not negative</td></tr>
+            <tr><td><strong>2 · Analytics</strong></td><td>One row per real order</td><td>A metric registry: one definition per metric, computed one way</td><td>The registry reproduces a control total</td></tr>
+            <tr><td><strong>3 · Machine learning</strong></td><td>Registry-defined history with honest labels</td><td>A ranked list of customers likely to order again</td><td>Lift on the next month, never on the training months</td></tr>
+            <tr><td><strong>4 · Gen AI</strong></td><td>True facts about listings and stores</td><td>Draft listing copy and review summaries</td><td>A rubric, checked against a hand-labelled golden set</td></tr>
+            <tr><td><strong>5 · Data product</strong></td><td>Everything above, each with its gate</td><td>A pack sellers pay for</td><td>A revenue and cost range from stated assumptions</td></tr>
+          </tbody>
+        </table>
+        <p>The analytics, model and gen AI layers all consume the same merged rows, so the data engineering layer is the one every other layer inherits. Sessions 2 to 6 take the layers one at a time; the builder track builds each of them for real, and Builder session 10 puts all five on one bench.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why "start with the AI" fails on this stack<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A copy assistant is the most visible thing on the stack and the cheapest demo. It is also the layer with the most dependencies. A review summary that says "153 reviews, average 3.9" is only right if the rows under it were de-duplicated and the stores resolved. When the rows are wrong the summary is fluent and wrong, which NIST's Generative AI Profile files under <strong>confabulation</strong>: "the production of confidently stated but erroneous or false content". Session 4 shows this happening on Serai's own summaries.</p>
+        <p>The demo-first roadmap is not stupid; it buys attention and budget. It becomes expensive when the demo is promoted to production on the same rows it was demoed on. Fund the demo, then fund the layers it needs before it goes in front of a seller.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Real orders under a constructed company.</strong> Olist, a Brazilian marketplace integrator, published around 100,000 orders from 2016 to 2018 made at multiple marketplaces in Brazil, described as "real commercial data" that "has been anonymised", under a non-commercial share-alike licence (CC BY-NC-SA 4.0). One order can hold several items, each fulfilled by a different seller. Serai's 8,614 orders are a seeded sample of the delivered ones, the same sample the Enablers course uses, so the numbers on both courses line up. The company, its three exports and their defects are constructed; the orders, prices, freight, timestamps and review scores are real.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers what raw exports look like before any check</span>
+      <h2>What arrives is not what happened</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">Add up the three files as they land and every headline number is slightly wrong, each in its own direction. Nothing looks broken. That is the problem the bottom layer exists to solve.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three hand-drawn panels comparing the naive sum of Serai's three raw exports with the reference totals from the source rows, as the bench prints them. Orders: 8,766 rows against 8,614 real orders, 98.27 percent agreement. GMV: naive BRL 1,408,549 including freight against BRL 1,197,842 of item value, 85.04 percent agreement. Repeat rate: naive 2.90 percent against 3.00 percent, 96.79 percent agreement.">
+        <defs>
+          <filter id="a1bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="17" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <style>
+          .a1bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a1bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a1bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a1bV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .a1bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a1bH" x="30" y="26">THE FILES SUMMED AS THEY LAND, AGAINST THE SOURCE</text>
+        <text class="a1bS" x="420" y="26">measured on the bench · rung 0 · bar length scaled per panel</text>
+
+        <g filter="url(#a1bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="44" width="260" height="190" rx="12" transform="rotate(-0.4 160 139)" fill="#FFFFFF"/>
+          <rect x="310" y="44" width="260" height="190" rx="12" transform="rotate(0.3 440 139)" fill="#FFFFFF"/>
+          <rect x="590" y="44" width="260" height="190" rx="12" transform="rotate(-0.3 720 139)" fill="#FFFFFF"/>
+          <rect x="46" y="82" width="228" height="28" rx="5" fill="#A9C4EA"/>
+          <rect x="46" y="120" width="224" height="28" rx="5" fill="#FBF5E6"/>
+          <rect x="326" y="82" width="228" height="28" rx="5" fill="#A9C4EA"/>
+          <rect x="326" y="120" width="194" height="28" rx="5" fill="#FBF5E6"/>
+          <rect x="606" y="82" width="221" height="28" rx="5" fill="#A9C4EA"/>
+          <rect x="606" y="120" width="228" height="28" rx="5" fill="#FBF5E6"/>
+        </g>
+
+        <text class="a1bH" x="46" y="70">ORDERS</text>
+        <text class="a1bL" x="56" y="100">raw rows 8,766</text>
+        <text class="a1bL" x="56" y="138">real orders 8,614</text>
+        <text class="a1bV" x="46" y="182">98.27%</text>
+        <text class="a1bS" x="46" y="202">re-sent orders counted twice</text>
+        <text class="a1bS" x="46" y="218">152 of them, constructed</text>
+
+        <text class="a1bH" x="326" y="70">GMV</text>
+        <text class="a1bL" x="336" y="100">naive BRL 1,408,549</text>
+        <text class="a1bL" x="336" y="138">item value BRL 1,197,842</text>
+        <text class="a1bV" x="326" y="182">85.04%</text>
+        <text class="a1bS" x="326" y="202">freight summed in, refunds</text>
+        <text class="a1bS" x="326" y="218">netted, re-sends doubled</text>
+
+        <text class="a1bH" x="606" y="70">REPEAT RATE</text>
+        <text class="a1bL" x="616" y="100">naive 2.90%</text>
+        <text class="a1bL" x="616" y="138">reference 3.00%</text>
+        <text class="a1bV" x="606" y="182">96.79%</text>
+        <text class="a1bS" x="606" y="202">a buyer on two marketplaces</text>
+        <text class="a1bS" x="606" y="218">counts as two one-timers</text>
+
+        <text class="a1bN" x="30" y="262">Three numbers, three different errors, and no error message: every file loaded without complaint.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - nothing fails loudly; the totals are just quietly wrong in three directions</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The four defects in Serai's exports, and which are real<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Defect</th><th>Count on the bench</th><th>Real or constructed</th><th>What it does to the numbers</th></tr></thead>
+          <tbody>
+            <tr><td>An order re-sent under a variant key</td><td>152</td><td>Constructed (1%, 2% and 4% by export)</td><td>Inflates orders and GMV; turns one-time buyers into "repeat" buyers</td></tr>
+            <tr><td>A customer key missing from the customer table</td><td>113</td><td>Constructed (0%, 1% and 5% by export)</td><td>Splits a returning customer into a stranger</td></tr>
+            <tr><td>A refund posted as a negative line</td><td>64</td><td>Constructed (Export B only)</td><td>Nets money out of a gross metric</td></tr>
+            <tr><td>Carrier pickup logged before payment approval</td><td>122, plus 1 order with no approval time</td><td>Real, in the Olist rows</td><td>Changes no metric, but breaks any delivery-time feature built on it</td></tr>
+          </tbody>
+        </table>
+        <p>The constructed rates are modest on purpose. Export C, the smallest marketplace, is the dirtiest, which is the usual pattern: the newest channel gets the least integration work. The real timestamp inversions are a useful reminder that a public, cleaned dataset still carries rows a careful check flags.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Why the naive repeat rate is low while the dirty registry is high<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The naive sum counts customers inside each export, so a person who bought once on two marketplaces looks like two one-time buyers: 2.90% against the true 3.00%. Session 2 shows the opposite error. Run the registry's definition on the raw rows and every re-sent order makes its customer look like a repeat buyer: the repeat rate reads 4.61%. Two wrong numbers, on either side of the right one, from the same files. Which one your team reports depends on who wrote the query.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers the five-layer scorecard and its gates</span>
+      <h2>The scorecard a leader signs</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">A leader does not need every metric on the bench. She needs one row per layer: what was measured, the gate it had to clear, and whether that layer is live. The same board shows what happens when a layer is skipped.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn scorecard with five rows and two columns, as the bench prints it. With every layer built: zero blocking failures, registry agreement 100.00 percent, lift 3.71 times, gen AI pass 75 percent with 90 percent golden agreement, so all four layers are live and the product carries 100 percent of its price. With the data engineering layer skipped: 333 blocking failures, registry agreement 65.14 percent, lift 3.30 times, gen AI pass 35 percent with 50 percent agreement, so only the model is live and the product carries 35 percent of its price.">
+        <defs>
+          <filter id="a1cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="19" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <style>
+          .a1cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a1cL { font: 600 12px Inter, sans-serif; fill: #1A2232; }
+          .a1cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a1cK { font: 800 11px Inter, sans-serif; fill: #1A2232; }
+          .a1cR { font: 800 11px Inter, sans-serif; fill: #991B1B; }
+          .a1cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a1cH" x="30" y="26">ONE ROW PER LAYER, TWO WAYS TO BUILD</text>
+        <text class="a1cS" x="330" y="26">measured on the bench · rung 5 · gates are Serai's constructed policy</text>
+
+        <g filter="url(#a1cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="220" y="44" width="300" height="236" rx="12" transform="rotate(-0.3 370 162)" fill="#FFFFFF"/>
+          <rect x="550" y="44" width="300" height="236" rx="12" transform="rotate(0.3 700 162)" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="452" y="82" width="54" height="22" rx="11" fill="#A9C4EA"/>
+          <rect x="452" y="122" width="54" height="22" rx="11" fill="#A9C4EA"/>
+          <rect x="452" y="162" width="54" height="22" rx="11" fill="#A9C4EA"/>
+          <rect x="452" y="202" width="54" height="22" rx="11" fill="#A9C4EA"/>
+          <rect x="782" y="82" width="54" height="22" rx="11" fill="#FFFFFF" stroke="#991B1B"/>
+          <rect x="782" y="122" width="54" height="22" rx="11" fill="#FFFFFF" stroke="#991B1B"/>
+          <rect x="782" y="162" width="54" height="22" rx="11" fill="#A9C4EA"/>
+          <rect x="782" y="202" width="54" height="22" rx="11" fill="#FFFFFF" stroke="#991B1B"/>
+        </g>
+
+        <text class="a1cH" x="236" y="66">EVERY LAYER BUILT</text>
+        <text class="a1cH" x="566" y="66">DE LAYER SKIPPED</text>
+
+        <text class="a1cL" x="200" y="97" text-anchor="end">DE</text>
+        <text class="a1cL" x="200" y="137" text-anchor="end">Analytics</text>
+        <text class="a1cL" x="200" y="177" text-anchor="end">ML</text>
+        <text class="a1cL" x="200" y="217" text-anchor="end">Gen AI</text>
+        <text class="a1cL" x="200" y="257" text-anchor="end">Product</text>
+
+        <text class="a1cS" x="236" y="97">0 blocking failures left</text>
+        <text class="a1cS" x="236" y="137">registry agreement 100.00%</text>
+        <text class="a1cS" x="236" y="177">month T+1 lift 3.71x</text>
+        <text class="a1cS" x="236" y="217">pass 75%, golden 90%</text>
+        <text class="a1cK" x="236" y="257">price share live 100%</text>
+        <text class="a1cK" x="465" y="97">live</text>
+        <text class="a1cK" x="465" y="137">live</text>
+        <text class="a1cK" x="465" y="177">live</text>
+        <text class="a1cK" x="465" y="217">live</text>
+
+        <text class="a1cS" x="566" y="97">333 blocking failures</text>
+        <text class="a1cS" x="566" y="137">registry agreement 65.14%</text>
+        <text class="a1cS" x="566" y="177">month T+1 lift 3.30x</text>
+        <text class="a1cS" x="566" y="217">pass 35%, golden 50%</text>
+        <text class="a1cR" x="566" y="257">price share live 35%</text>
+        <text class="a1cR" x="791" y="97">held</text>
+        <text class="a1cR" x="791" y="137">held</text>
+        <text class="a1cK" x="795" y="177">live</text>
+        <text class="a1cR" x="791" y="217">held</text>
+
+        <text class="a1cN" x="30" y="304">Skipping the bottom layer did not stop the model; it stopped the two layers sellers actually read.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - one skipped layer holds back 65% of what the product can charge</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Gates are a policy, not a standard<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Serai's constructed gates: no blocking data-quality failure after repair; registry agreement of at least 99.5% with a control total; a month T+1 lift of at least 2.0 times the base rate; gen AI that passes its rubric on at least 70% of outputs while the rubric agrees with a human golden verdict at least 85% of the time. None of these thresholds comes from a standard. They are the numbers Serai's leadership agreed it could defend to a paying seller, and your own will differ.</p>
+        <p>The NIST AI Risk Management Framework splits risk work into four functions, "govern, map, measure, and manage". A gate is where "measure" meets "manage": a measured number, a threshold someone owns, and a consequence when it is missed. A threshold without a consequence is a dashboard.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Ranges, not points, for the product row<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The product row prints a range because every input is an assumption: 40 to 160 paying sellers, USD 150 to 350 a seller a month, a build of USD 150,000 to 240,000 and a run cost of USD 20 to 35 a seller a month. With all four layers live the first-year net runs from minus USD 235,200 to USD 512,400. A range that crosses zero is not a failure of analysis. It tells you which assumption to go and test before anyone signs, and session 5 works out which one.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The model survived the dirty data; the registry did not.</strong> On the bench, skipping the data engineering layer moves the model's lift from 3.71x to 3.30x: its top 58 now hold 8 of the month's 24 real repeat buyers instead of 9. It moves the repeat rate from 3.00% to 4.61%. That is the honest nuance: re-sent rows mostly add noise to a ranking, but they rewrite a count. The layers that print numbers to a seller take the damage first.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>Your estate on one sheet</h2>
+      <span class="tag demo">★ 20 min · everyone builds</span>
+    </div>
+    <p class="lede">You need a list of the data and AI work your organisation is funding or being pitched, and ten minutes with whoever owns your order data. No list to hand? Do it for Serai with the numbers on this page. Your sheet will look different, which is the point.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The estate sheet as a hand-drawn grid of five rows and four columns: consumes, its test, its gate, owner. The data engineering row is filled in for Serai: consumes three raw exports, test four checks per export, gate zero blocking failures, owner the data platform lead. A side note says a row with no owner is not funded.">
+        <defs>
+          <filter id="a1dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="23" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <style>
+          .a1dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a1dL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a1dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a1dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a1dH" x="30" y="26">THE ESTATE SHEET · FIVE ROWS, FOUR QUESTIONS</text>
+
+        <g filter="url(#a1dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="44" width="820" height="210" rx="12" transform="rotate(-0.2 440 149)" fill="#FFFFFF"/>
+          <path d="M30 78 L850 78"/>
+          <path d="M150 44 L150 254"/>
+          <path d="M330 44 L330 254"/>
+          <path d="M510 44 L510 254"/>
+          <path d="M690 44 L690 254"/>
+          <rect x="34" y="214" width="812" height="36" rx="6" fill="#A9C4EA"/>
+        </g>
+
+        <text class="a1dH" x="44" y="66">LAYER</text>
+        <text class="a1dH" x="164" y="66">CONSUMES</text>
+        <text class="a1dH" x="344" y="66">ITS TEST</text>
+        <text class="a1dH" x="524" y="66">ITS GATE</text>
+        <text class="a1dH" x="704" y="66">OWNER</text>
+
+        <text class="a1dS" x="44" y="100">5 · product</text>
+        <text class="a1dS" x="44" y="128">4 · gen AI</text>
+        <text class="a1dS" x="44" y="156">3 · ML</text>
+        <text class="a1dS" x="44" y="184">2 · analytics</text>
+        <text class="a1dS" x="164" y="100">session 5</text>
+        <text class="a1dS" x="164" y="128">session 4</text>
+        <text class="a1dS" x="164" y="156">session 3</text>
+        <text class="a1dS" x="164" y="184">session 2 and 3</text>
+
+        <text class="a1dL" x="44" y="236">1 · DE</text>
+        <text class="a1dL" x="164" y="236">three raw exports</text>
+        <text class="a1dL" x="344" y="236">four checks per export</text>
+        <text class="a1dL" x="524" y="236">0 blocking failures</text>
+        <text class="a1dL" x="704" y="236">data platform lead</text>
+
+        <text class="a1dN" x="30" y="280">Fill it from the bottom. A row with no named owner is not funded, however good the demo looked.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - fill the sheet from the bottom row up, and stop at the first row with no owner</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>List every data and AI initiative on the table.</strong> Funded, pitched or rumoured. Write each on its own line with the team that wants it.</p>
+      </div>
+      <div class="step">
+        <p><strong>Put each one in a layer.</strong> A dashboard is analytics. A churn score is ML. A copy assistant is gen AI. A "brand insight pack" is a product. A pipeline or a schema change is data engineering. Anything that spans two layers is two items.</p>
+        <div class="prompt-box good"><span class="label">★ Serai's list, layered</span>5 product    Seller growth pack (registry numbers + repeat list + copy assistant)
+4 gen AI     Listing copy drafts; review summaries per store
+3 ML         Repeat-purchase list for brand CRM teams
+2 analytics  Orders, GMV, repeat rate for the monthly brand review
+1 DE         Merge three marketplace exports into one schema, with tests</div>
+      </div>
+      <div class="step">
+        <p><strong>For each layer, write what it consumes from the layer below.</strong> Use the words in the figure: rows, labels, facts, numbers. If you cannot say what a layer consumes, it is floating, and floating layers are where demos live.</p>
+      </div>
+      <div class="step">
+        <p><strong>Write the test and the gate.</strong> One measurable check per layer and the threshold that makes it live. Borrow Serai's gates if you have nothing yet, and mark them as borrowed.</p>
+      </div>
+      <div class="step">
+        <p><strong>Name an owner per row and write the sentence.</strong> Read it to whoever funds the roadmap.</p>
+        <div class="prompt-box good"><span class="label">★ The steering sentence</span>We fund the five layers in order. Layer N goes live only when layer N-1 passes its gate:
+DE has zero blocking failures, the registry matches its control total,
+the model beats the base rate on a month it never saw, and the gen AI rubric
+agrees with a human golden set. The product's price counts only live layers.</div>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The roadmap that sounds ambitious and orders nothing</span>
+Phase 1: launch AI-powered seller copilot. Phase 2: predictive analytics.
+Phase 3: unify the data platform.
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 2</h2>
+      <span class="tag exercise">25 min</span>
+    </div>
+    <ol>
+      <li>Finish your estate sheet: five rows, each with what it consumes, its test, its gate and an owner, or the word "none".</li>
+      <li>Ask your data team for the row count of last month's orders from each source system and the count of distinct order ids after merging. Write down the gap.</li>
+      <li>Find one metric your organisation reports two different values for. Write both definitions side by side.</li>
+      <li>Find the current roadmap or vendor pitch with the most ambitious AI item in it. Mark which layer it sits in and which lower layers it silently assumes.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Leader session 1 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · Serai's three exports hold 8,766 order rows for 8,614 real orders. Which layer exists to close that gap?</p>
+      <button class="qopt" type="button">A · Analytics, because the registry counts distinct orders</button>
+      <button class="qopt" type="button">B · Machine learning, because a model can learn to ignore duplicates</button>
+      <button class="qopt" type="button">C · Data engineering, with a keys-unique check and a repair rule</button>
+      <button class="qopt" type="button">D · Gen AI, because a summary can describe the gap</button>
+      <p class="qwhy">The re-sends carry a variant key, so a registry counting distinct keys still counts them; only a check that normalises keys finds them. The model and the summaries consume the same rows and inherit the error.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · With the data engineering layer skipped, the model's lift moves from 3.71x to 3.30x but the repeat rate moves from 3.00% to 4.61%. What is the honest reading?</p>
+      <button class="qopt" type="button">A · Re-sent rows mostly add noise to a ranking but rewrite a count, so the layers that print numbers to sellers break first</button>
+      <button class="qopt" type="button">B · The model is robust, so the data engineering layer can wait until after launch</button>
+      <button class="qopt" type="button">C · The repeat rate was wrong before and the raw exports fixed it</button>
+      <button class="qopt" type="button">D · Both numbers moved by about the same amount</button>
+      <p class="qwhy">The model lost one hit in 24 real repeats; the registry's repeat rate is off by more than half. B is the trap: a skipped layer still holds back the registry and gen AI rows, 65% of the product's price on Serai's assumptions.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">3 · Serai's product row prints a first-year net from minus USD 235,200 to USD 512,400. What should a leader do with a range that crosses zero?</p>
+      <button class="qopt" type="button">A · Report the midpoint as the forecast</button>
+      <button class="qopt" type="button">B · Reject the product, because it might lose money</button>
+      <button class="qopt" type="button">C · Ask for a single number with more decimal places</button>
+      <button class="qopt" type="button">D · Find which assumption moves the range most and test that one before signing</button>
+      <p class="qwhy">Every input is an assumption, so the range is honest and the midpoint is not a forecast. The useful move is to find the assumption that decides the sign; session 5 does it.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The five layers and what each consumes</span><span class="note">Taught as a method; every number on the scorecard is printed by the bench in Builder session 10</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Serai's rows: the Olist public dataset</span><span class="note">Brazilian E-Commerce Public Dataset by Olist, Kaggle, CC BY-NC-SA 4.0, read at source; derived and masked, no review text</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Raw-export defects and the naive sum</span><span class="note">Re-sends, orphan keys and refund lines are constructed; the 122 timestamp inversions are real; all counts measured on the bench</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Confabulation and gates as "measure" meeting "manage"</span><span class="note">NIST AI 600-1 (2024) and NIST AI RMF 1.0 core functions, read at source</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Serai's business model and the identity gate</span><span class="note">Owned by the Social Commerce Enablers course; linked, not retaught</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Product assumptions and gate thresholds</span><span class="note">Constructed for Serai; no benchmark claimed</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 1 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Five layers</b><span>Data engineering, analytics, machine learning, gen AI, data product. Built from the bottom.</span></div>
+      <div class="cheat-item"><b>Name what it consumes</b><span>Rows, labels, facts, numbers. A layer that consumes nothing named is a demo.</span></div>
+      <div class="cheat-item"><b>Raw is quietly wrong</b><span>Serai: 8,766 rows for 8,614 orders; naive GMV agrees 85.04% with the source.</span></div>
+      <div class="cheat-item"><b>Errors travel up</b><span>A broken layer hands its error to every layer above it, fluently.</span></div>
+      <div class="cheat-item"><b>One row per layer</b><span>Measured value, gate, live or held. The gate is a policy someone owns.</span></div>
+      <div class="cheat-item"><b>Ranges, not points</b><span>A net range that crosses zero tells you which assumption to test first.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>You have the five layers. Session 2 asks in what order to build them, and prices what Serai loses when the bottom layer is skipped: a repeat rate off by more than half, review summaries that quote the wrong counts, and 65% of the product held back.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Leader session 1 of 6 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← Course home</a> &nbsp;·&nbsp; <a href="a2-sequencing-and-skipping.html">Next: Sequencing and the cost of skipping →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

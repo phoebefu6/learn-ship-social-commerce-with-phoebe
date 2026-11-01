@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Builder session 2 of 10. Four data-quality checks per export (keys unique, customer key resolves, timestamps ordered, amounts not negative), a repair rule for each, and a gate that stops the pipeline: 333 blocking failures on the raw exports, 0 after repair. Built in pandas on the public Olist dataset.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="Data-quality tests that fail loudly - learn ship social commerce with phoebe">
+<meta property="og:description" content="Builder session 2 of 10. Four checks per export, drop or resolve or quarantine or flag, and a gate that stops the pipeline instead of warning.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/b2-tests-that-fail-loudly.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Data-quality tests that fail loudly - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Builder session 2 of 10. A failing test stops the pipeline; it never just warns.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Builder session 2 · Data-quality tests that fail loudly - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Builder session 2 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Builder session 2 of 10</div>
+    <h1>Data-quality tests that <span class="accent">fail loudly</span></h1>
+    <p class="sub">A schema says what a row should look like. A test says what happens when a row does not. Serai Commerce, the constructed enabler, receives three marketplace exports, and on the raw files four simple checks find 333 rows that would quietly bend every number above them. Tonight you write those four checks, give each one a repair rule, and wire them into a gate that stops the pipeline instead of printing a warning nobody reads.</p>
+    <div class="chip-row">
+      <span class="chip level">🟡 Intermediate</span>
+      <span class="chip audience">Data and analytics engineers</span>
+      <span class="chip audience">Anyone who owns a pipeline</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · Checks, repairs, the gate</span>
+      <span class="a3" style="flex:4">20-40 · Build-along: tests in pandas</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Where the tests sit</h2>
+    </div>
+    <p class="lede">Session 1 built the merged schema: five tables, each with a declared grain, and an order-level fact table that adds up to the cent. This session is the second half of the data engineering layer. Every sentence you wrote at the top of a table ("one row per order") becomes a test, and every test gets a decision written next to it: stop, repair, quarantine or flag. Serai Commerce is constructed, and so are the defects planted in its raw exports (re-sent orders, orphan customer keys, refund lines); the orders underneath are real derived Olist rows, and the timestamp inversions are real too. Serai's identity gate and its crosswalk come from the <a href="https://phoebefu6.github.io/learn-ship-ecommerce-enabler-with-phoebe/courses/b3-the-identity-gate.html">Social Commerce Enablers course, Analyst session 3</a>; this session uses the crosswalk and does not rebuild it.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> Four pandas checks that return the failing rows, not just a count; a repair rule for each written next to it; and a gate function that raises an error and stops the run when any blocking check fails. You will run it on the full public Olist file, watch it pass, then plant three re-sent orders and two refund lines and watch it stop.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the four checks and pass rates per export</span>
+      <h2>Four checks per export</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">Four questions cover most of what goes wrong in commerce exports. Is every order key unique? Does every customer key point at a real customer? Do the timestamps run in order? Is every amount zero or more? Ask them per export, because a pass rate you cannot split by source tells you there is a problem, not where it lives.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn grid of pass rates on Serai's raw exports. Export A, 3,972 rows: keys unique 99.07 percent with 37 re-sent rows, customer key resolves 100.00 percent, timestamps ordered 98.49 percent with 60 flagged, amounts not negative 100.00 percent of 4,527 lines. Export B, 2,971 rows: 98.01 percent with 59 re-sent, 99.29 percent with 21 orphan keys, 98.75 percent with 37 flagged, 98.16 percent with 64 negative lines of 3,477. Export C, 1,823 rows: 96.93 percent with 56 re-sent, 94.73 percent with 96 orphan keys, the worst cell, 98.35 percent with 30 flagged, 100.00 percent of 2,079 lines. Blocking failures total 333 of 8,766 rows.">
+        <defs>
+          <filter id="b2aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="43" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b2aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b2aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b2aH { font: 800 12px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1A2232; }
+          .b2aS { font: 400 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #4E5869; }
+          .b2aB { font: 800 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1D3A66; }
+          .b2aV { font: 800 16px Inter, -apple-system, "Segoe UI", sans-serif; fill: #6A4C04; }
+          .b2aBV { font: 800 16px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1D3A66; }
+          .b2aN { font: 400 12px Inter, -apple-system, "Segoe UI", sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b2aH" x="30" y="26">FOUR CHECKS, THREE EXPORTS, ONE PASS RATE EACH</text>
+        <text class="b2aS" x="30" y="44">raw exports as the bench prints them · Serai's export split and planted defects are constructed, the timestamps are real</text>
+
+        <g filter="url(#b2aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="190" y="108" width="150" height="62" rx="6" transform="rotate(-0.6 265 139)" fill="#FBF5E6"/>
+          <rect x="350" y="108" width="150" height="62" rx="6" transform="rotate(0.5 425 139)" fill="#FFFFFF"/>
+          <rect x="510" y="108" width="150" height="62" rx="6" transform="rotate(-0.4 585 139)" fill="#FBF5E6" stroke-dasharray="6 5"/>
+          <rect x="670" y="108" width="150" height="62" rx="6" transform="rotate(0.6 745 139)" fill="#FFFFFF"/>
+
+          <rect x="190" y="178" width="150" height="62" rx="6" transform="rotate(0.5 265 209)" fill="#FBF5E6"/>
+          <rect x="350" y="178" width="150" height="62" rx="6" transform="rotate(-0.5 425 209)" fill="#FBF5E6"/>
+          <rect x="510" y="178" width="150" height="62" rx="6" transform="rotate(0.4 585 209)" fill="#FBF5E6" stroke-dasharray="6 5"/>
+          <rect x="670" y="178" width="150" height="62" rx="6" transform="rotate(-0.6 745 209)" fill="#FBF5E6"/>
+
+          <rect x="190" y="248" width="150" height="62" rx="6" transform="rotate(-0.5 265 279)" fill="#E8D29A"/>
+          <rect x="350" y="248" width="150" height="62" rx="6" transform="rotate(0.6 425 279)" fill="#A9C4EA"/>
+          <rect x="510" y="248" width="150" height="62" rx="6" transform="rotate(-0.4 585 279)" fill="#FBF5E6" stroke-dasharray="6 5"/>
+          <rect x="670" y="248" width="150" height="62" rx="6" transform="rotate(0.5 745 279)" fill="#FFFFFF"/>
+
+          <circle cx="474" cy="268" r="9"/>
+          <path d="M481 275 L490 285"/>
+        </g>
+
+        <text class="b2aH" x="204" y="80">KEYS UNIQUE</text>
+        <text class="b2aS" x="204" y="96">after normalising</text>
+        <text class="b2aH" x="364" y="80">CUSTOMER KEY</text>
+        <text class="b2aS" x="364" y="96">resolves to a customer</text>
+        <text class="b2aH" x="524" y="80">TIMESTAMPS</text>
+        <text class="b2aS" x="524" y="96">ordered · flag only</text>
+        <text class="b2aH" x="684" y="80">AMOUNTS &gt;= 0</text>
+        <text class="b2aS" x="684" y="96">on order lines</text>
+
+        <text class="b2aH" x="30" y="134">EXPORT A</text>
+        <text class="b2aS" x="30" y="152">3,972 rows</text>
+        <text class="b2aH" x="30" y="204">EXPORT B</text>
+        <text class="b2aS" x="30" y="222">2,971 rows</text>
+        <text class="b2aH" x="30" y="274">EXPORT C</text>
+        <text class="b2aS" x="30" y="292">1,823 rows</text>
+
+        <text class="b2aV" x="204" y="136">99.07%</text>
+        <text class="b2aS" x="204" y="156">37 re-sent rows</text>
+        <text class="b2aV" x="364" y="136">100.00%</text>
+        <text class="b2aS" x="364" y="156">0 fail</text>
+        <text class="b2aV" x="524" y="136">98.49%</text>
+        <text class="b2aS" x="524" y="156">60 flagged</text>
+        <text class="b2aV" x="684" y="136">100.00%</text>
+        <text class="b2aS" x="684" y="156">of 4,527 lines</text>
+
+        <text class="b2aV" x="204" y="206">98.01%</text>
+        <text class="b2aS" x="204" y="226">59 re-sent rows</text>
+        <text class="b2aV" x="364" y="206">99.29%</text>
+        <text class="b2aS" x="364" y="226">21 orphan keys</text>
+        <text class="b2aV" x="524" y="206">98.75%</text>
+        <text class="b2aS" x="524" y="226">37 flagged</text>
+        <text class="b2aV" x="684" y="206">98.16%</text>
+        <text class="b2aS" x="684" y="226">64 of 3,477 lines</text>
+
+        <text class="b2aV" x="204" y="276">96.93%</text>
+        <text class="b2aS" x="204" y="296">56 re-sent rows</text>
+        <text class="b2aBV" x="364" y="276">94.73%</text>
+        <text class="b2aB" x="364" y="296">96 orphan keys</text>
+        <text class="b2aV" x="524" y="276">98.35%</text>
+        <text class="b2aS" x="524" y="296">30 flagged</text>
+        <text class="b2aV" x="684" y="276">100.00%</text>
+        <text class="b2aS" x="684" y="296">of 2,079 lines</text>
+
+        <text class="b2aN" x="30" y="336">Blocking = keys, customer key, amounts: 152 + 117 + 64 = 333 rows of 8,766. Dashed cells flag, never block.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the smallest export is the dirtiest, and only a per-export pass rate shows it</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The four checks, one sentence each<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Check</th><th>The sentence it tests</th><th>Grain it runs at</th><th>Blocking?</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Keys unique</strong></td><td>One row per order, after the key is trimmed and lower-cased</td><td>order row</td><td>Yes</td></tr>
+            <tr><td><strong>Customer key resolves</strong></td><td>Every order points at a customer the customer table knows</td><td>order row</td><td>Yes</td></tr>
+            <tr><td><strong>Timestamps ordered</strong></td><td>Purchase, then approval, then carrier pickup, then delivery, all present</td><td>order row</td><td>No, a flag</td></tr>
+            <tr><td><strong>Amounts &gt;= 0</strong></td><td>No price, freight or payment line is negative</td><td>line</td><td>Yes</td></tr>
+          </tbody>
+        </table>
+        <p>Each check comes straight from a sentence session 1 wrote at the top of a table. That is the point: a grain you declared but never tested is a hope. Notice the last column. Three checks protect the counts every later layer depends on, so they block. The timestamp check catches something real but harmless to the metrics, so it flags. Part 2 explains why that difference is a decision, not a technicality.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Reading the grid by export, not by total<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Export C is the smallest file, 1,823 rows, and the dirtiest: 96.93% of its keys unique and only 94.73% of its customer keys resolving. Export B is the only one carrying refund lines, so its amounts check passes at 98.16% while A and C sit at 100.00%. Summed across all three, the keys check would read a respectable-looking 98.27% (152 failing of 8,766), which hides the fact that one source is re-sending orders at more than three times the rate of another. When the alert says "Export C, customer key, 96 rows", the person who owns the Export C integration knows it is theirs before they open a notebook.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Normalise before you test for uniqueness<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Serai's re-sent orders arrive under a variant of the original key: extra whitespace, different case, a re-send suffix. Test uniqueness on the raw string and the re-send passes, because the two keys differ by a character. Test it after the key rule from session 1's mapping contract (strip, lower-case, drop the re-send suffix) and the duplicate surfaces. The general rule: a uniqueness test is only as strong as the normalisation in front of it, so run the key rule first and keep the raw key beside the normalised one for the audit trail.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The timestamp column is not planted.</strong> Every other defect in Serai's raw exports is constructed for teaching. The timestamp failures are not: in the real Olist rows, 122 of Serai's 8,614 orders show the carrier picking up the parcel before the payment was approved, and 1 has no approval time at all. On the full public file the build-along below counts 1,350 delivered orders with the same inversion. Real data carries real oddities, and a test suite has to say what it does with each one.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the repair rule for each failing check</span>
+      <h2>Repair, quarantine or flag</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A failing row is not one problem. A re-sent order should vanish, an orphan key can be fixed, a refund line belongs in a different table, and an odd timestamp on a real delivery should stay exactly where it is. Write the action next to the check, so the repair is as reviewable as the test.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn flow. 8,766 raw rows from Exports A, B and C pass through the four checks, which send failing rows into four bins. Drop: 152 re-sent orders, removed and logged. Resolve: 113 orphan customer keys, mapped through the crosswalk into the repaired frame. Flag and keep: 123 rows, 122 timestamp inversions and 1 missing approval, kept in the repaired frame. Quarantine: 64 negative refund lines, moved to an adjustments table. The repaired frame holds 8,614 orders with 0 blocking failures.">
+        <defs>
+          <filter id="b2bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="47" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b2bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b2bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b2bH { font: 800 12px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1A2232; }
+          .b2bL { font: 600 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1A2232; }
+          .b2bS { font: 400 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #4E5869; }
+          .b2bB { font: 800 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1D3A66; }
+          .b2bV { font: 800 18px Inter, -apple-system, "Segoe UI", sans-serif; fill: #6A4C04; }
+          .b2bN { font: 400 12px Inter, -apple-system, "Segoe UI", sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b2bH" x="30" y="26">ONE CHECK RESULT, FOUR DIFFERENT ACTIONS</text>
+        <text class="b2bS" x="30" y="44">repair counts as the bench prints them · re-sends, orphans and refund lines are constructed, timestamps are real</text>
+
+        <g filter="url(#b2bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M40 142 L172 142 L172 224"/>
+          <rect x="30" y="150" width="134" height="82" rx="6" transform="rotate(-1 97 191)" fill="url(#b2bHc)"/>
+          <path d="M168 192 L196 196" marker-end="url(#b2bAr)"/>
+          <rect x="202" y="160" width="128" height="72" rx="10" transform="rotate(0.8 266 196)" fill="#A9C4EA"/>
+
+          <path d="M334 186 L374 94" marker-end="url(#b2bAr)"/>
+          <path d="M336 192 L374 166" marker-end="url(#b2bAr)"/>
+          <path d="M336 200 L374 238" marker-end="url(#b2bAr)"/>
+          <path d="M334 208 L374 308" marker-end="url(#b2bAr)"/>
+
+          <rect x="380" y="64" width="300" height="58" rx="8" transform="rotate(-0.6 530 93)" fill="#FFFFFF"/>
+          <rect x="380" y="136" width="300" height="58" rx="8" transform="rotate(0.5 530 165)" fill="#FFFFFF"/>
+          <rect x="380" y="208" width="300" height="58" rx="8" transform="rotate(-0.4 530 237)" fill="#FBF5E6"/>
+          <rect x="380" y="280" width="300" height="58" rx="8" transform="rotate(0.6 530 309)" fill="#FFFFFF"/>
+
+          <path d="M684 165 L716 150" marker-end="url(#b2bAr)"/>
+          <path d="M684 237 L716 186" marker-end="url(#b2bAr)"/>
+          <path d="M684 309 L716 309" marker-end="url(#b2bAr)"/>
+
+          <rect x="722" y="116" width="134" height="88" rx="10" transform="rotate(-0.5 789 160)" fill="#FFFFFF"/>
+          <rect x="722" y="280" width="134" height="58" rx="8" transform="rotate(0.5 789 309)" fill="#FFFFFF"/>
+        </g>
+
+        <text class="b2bH" x="30" y="132">RAW EXPORTS</text>
+        <text class="b2bV" x="30" y="260">8,766</text>
+        <text class="b2bS" x="30" y="278">rows from A, B and C</text>
+
+        <text class="b2bB" x="216" y="190">RUN THE</text>
+        <text class="b2bB" x="216" y="206">FOUR CHECKS</text>
+        <text class="b2bS" x="202" y="254">every row, every export</text>
+
+        <text class="b2bV" x="394" y="101">152</text>
+        <text class="b2bH" x="450" y="86">DROP</text>
+        <text class="b2bS" x="450" y="104">re-sent order, key repeats</text>
+        <text class="b2bS" x="692" y="98">removed, logged</text>
+
+        <text class="b2bV" x="394" y="173">113</text>
+        <text class="b2bH" x="450" y="158">RESOLVE</text>
+        <text class="b2bS" x="450" y="176">orphan key, via the crosswalk</text>
+
+        <text class="b2bV" x="394" y="245">123</text>
+        <text class="b2bH" x="450" y="230">FLAG AND KEEP</text>
+        <text class="b2bS" x="450" y="248">122 inverted, 1 no approval</text>
+
+        <text class="b2bV" x="394" y="317">64</text>
+        <text class="b2bH" x="450" y="302">QUARANTINE</text>
+        <text class="b2bS" x="450" y="320">negative refund line</text>
+
+        <text class="b2bH" x="736" y="140">REPAIRED</text>
+        <text class="b2bV" x="736" y="166">8,614</text>
+        <text class="b2bS" x="736" y="186">orders, 0 blocking</text>
+        <text class="b2bH" x="736" y="304">ADJUSTMENTS</text>
+        <text class="b2bS" x="736" y="322">64 refund lines</text>
+
+        <text class="b2bN" x="30" y="364">Rows that pass every check go straight to the repaired frame and are not drawn.</text>
+        <text class="b2bN" x="30" y="384">4 re-sent rows also carried an orphan key: one drop cleared two failures, so 117 key failures needed 113 fixes.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - same failing check, four different actions, and only one of them deletes anything</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The repair rule, written beside each check<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Failing row</th><th>Action</th><th>Why that action</th><th>Serai raw exports</th></tr></thead>
+          <tbody>
+            <tr><td>Re-sent order (key repeats after normalising)</td><td><strong>Drop</strong>, log the dropped key</td><td>It is the same order twice; keeping it doubles GMV and invents a same-day repeat customer</td><td>152 dropped</td></tr>
+            <tr><td>Customer key not in the customer table</td><td><strong>Resolve</strong> through the crosswalk</td><td>The order is real; only the pointer is broken, and the identity gate knows the right person</td><td>113 resolved</td></tr>
+            <tr><td>Negative line (a refund posted as a line)</td><td><strong>Quarantine</strong> to an adjustments table</td><td>Refunds are real money but not item value; mixing them into lines corrupts GMV both ways</td><td>64 quarantined</td></tr>
+            <tr><td>Timestamps out of order, or one missing</td><td><strong>Flag and keep</strong></td><td>A real delivery with an odd log; dropping it deletes a real order and moves every count</td><td>122 + 1 flagged</td></tr>
+          </tbody>
+        </table>
+        <p>Read the third column out loud in review. If nobody can say why a row is dropped rather than repaired, the rule is not ready. A crosswalk you cannot resolve through (a key the identity gate has never seen) is not a repair case at all: it becomes a quarantine, and the count goes in the run report.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why timestamp inversions are flagged, not dropped<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A carrier scan logged before payment approval is almost certainly a logging artefact: two systems with different clocks, or an approval written after the fact. The parcel still shipped and arrived, the customer still paid, and the review score still exists. Drop those 122 orders and Serai's order count, GMV and repeat rate all move for a reason that has nothing to do with the business. Keep them with a flag and they change no metric, while anyone measuring approval-to-pickup time can filter them out on purpose. The rule of thumb: drop only what you can prove is not a real event; flag what is real but odd.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>The quarantine table is a deliverable, not a bin<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Give the adjustments table the same care as the fact table: a grain (one row per adjustment line), the source export, the original order key, and the date it was quarantined. Finance will ask for refunds by month, and the answer should come from this table rather than from somebody re-reading raw files. A quarantine nobody can query is a delete with extra steps. The same goes for the drop log: when an integration owner disputes a dropped re-send, the logged key is the evidence.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Multiple reviews per order, kept on purpose.</strong> In Serai's sample, 39 orders carry more than one review row and 68 carry none. Neither is an error to drop: some customers really review twice, and many never answer the survey Olist sends after delivery. Session 1 kept every review row in the schema and chose the first by answer time for the fact table. The same instinct applies to every check here: know which oddities are the world being messy and which are the pipeline being wrong.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers the gate that stops the pipeline</span>
+      <h2>Fail loudly</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">A check that only warns has already decided the question for you: it ships the bad rows. The registry, the model and the gen AI layer all read whatever the data engineering layer hands them, so the honest move is a gate that raises an error, names the export and the check, and stops the run until the repair is done.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 390" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three hand-drawn pipeline lanes over the same raw exports. Lane one, warn and continue, on a red panel: checks log 333 warnings, the registry reads repeat rate 4.61 percent with 65.14 percent agreement, the model reaches lift 3.30x, gen AI passes 7 of 20 and Store 2 reads 155 reviews. Lane two, fail loudly on raw rows: the gate finds 333 blocking failures and stops; registry, model and gen AI do not run. Lane three, fail loudly after repair: 0 blocking failures and 123 flagged rows kept; registry repeat 3.00 percent with 100.00 percent agreement, model AUC 0.7894 and lift 3.71x, gen AI 15 of 20 pass with 90 percent agreement.">
+        <defs>
+          <filter id="b2cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="53" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b2cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b2cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b2cH { font: 800 12px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1A2232; }
+          .b2cR { font: 800 12px Inter, -apple-system, "Segoe UI", sans-serif; fill: #991B1B; }
+          .b2cS { font: 400 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #4E5869; }
+          .b2cF { font: 400 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #5C6577; }
+          .b2cB { font: 800 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1D3A66; }
+          .b2cV { font: 800 15px Inter, -apple-system, "Segoe UI", sans-serif; fill: #6A4C04; }
+          .b2cX { font: 800 15px Inter, -apple-system, "Segoe UI", sans-serif; fill: #991B1B; }
+          .b2cBV { font: 800 15px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1D3A66; }
+          .b2cN { font: 400 12px Inter, -apple-system, "Segoe UI", sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b2cH" x="30" y="26">THE SAME RAW EXPORTS, THREE WAYS TO RUN THEM</text>
+        <text class="b2cS" x="30" y="44">numbers as the bench prints them for "skip DE" and "all layers" · gates and defects are Serai's, constructed</text>
+
+        <g filter="url(#b2cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="20" y="58" width="840" height="92" rx="12" transform="rotate(-0.2 440 104)" fill="#FEF2F2" stroke="#FCA5A5"/>
+          <rect x="190" y="72" width="130" height="62" rx="8" transform="rotate(-0.6 255 103)" fill="#FFFFFF"/>
+          <path d="M324 103 L346 103" marker-end="url(#b2cAr)"/>
+          <rect x="350" y="72" width="140" height="62" rx="8" transform="rotate(0.5 420 103)" fill="#FFFFFF"/>
+          <path d="M494 103 L516 103" marker-end="url(#b2cAr)"/>
+          <rect x="520" y="72" width="140" height="62" rx="8" transform="rotate(-0.4 590 103)" fill="#FFFFFF"/>
+          <path d="M664 103 L686 103" marker-end="url(#b2cAr)"/>
+          <rect x="690" y="72" width="150" height="62" rx="8" transform="rotate(0.5 765 103)" fill="#FFFFFF"/>
+
+          <rect x="190" y="172" width="130" height="62" rx="8" transform="rotate(0.6 255 203)" fill="#A9C4EA"/>
+          <path d="M340 178 L340 228" stroke-width="5"/>
+          <path d="M352 182 L362 176 L374 176 L384 182 L384 196 L374 202 L362 202 L352 196 Z"/>
+          <rect x="400" y="172" width="120" height="62" rx="8" transform="rotate(-0.5 460 203)" stroke="#CDD2DC" stroke-dasharray="6 5"/>
+          <rect x="540" y="172" width="120" height="62" rx="8" transform="rotate(0.4 600 203)" stroke="#CDD2DC" stroke-dasharray="6 5"/>
+          <rect x="690" y="172" width="150" height="62" rx="8" transform="rotate(-0.4 765 203)" stroke="#CDD2DC" stroke-dasharray="6 5"/>
+
+          <rect x="190" y="268" width="130" height="62" rx="8" transform="rotate(-0.5 255 299)" fill="#FBF5E6"/>
+          <path d="M324 299 L346 299" marker-end="url(#b2cAr)"/>
+          <rect x="350" y="268" width="140" height="62" rx="8" transform="rotate(0.6 420 299)" fill="#FFFFFF"/>
+          <path d="M494 299 L516 299" marker-end="url(#b2cAr)"/>
+          <rect x="520" y="268" width="140" height="62" rx="8" transform="rotate(-0.5 590 299)" fill="#FFFFFF"/>
+          <path d="M664 299 L686 299" marker-end="url(#b2cAr)"/>
+          <rect x="690" y="268" width="150" height="62" rx="8" transform="rotate(0.4 765 299)" fill="#FFFFFF"/>
+        </g>
+
+        <text class="b2cR" x="34" y="98">WARN AND</text>
+        <text class="b2cR" x="34" y="114">CONTINUE</text>
+        <text class="b2cH" x="204" y="92">CHECKS</text>
+        <text class="b2cX" x="204" y="112">333</text>
+        <text class="b2cS" x="204" y="128">warnings logged</text>
+        <text class="b2cH" x="364" y="92">REGISTRY</text>
+        <text class="b2cX" x="364" y="112">repeat 4.61%</text>
+        <text class="b2cS" x="364" y="128">agreement 65.14%</text>
+        <text class="b2cH" x="534" y="92">MODEL</text>
+        <text class="b2cV" x="534" y="112">lift 3.30x</text>
+        <text class="b2cS" x="534" y="128">108 "positives"</text>
+        <text class="b2cH" x="704" y="92">GEN AI</text>
+        <text class="b2cX" x="704" y="112">7 of 20 pass</text>
+        <text class="b2cS" x="704" y="128">Store 2 reads 155</text>
+
+        <text class="b2cH" x="34" y="198">FAIL LOUDLY,</text>
+        <text class="b2cH" x="34" y="214">RAW ROWS</text>
+        <text class="b2cB" x="204" y="192">GATE STOPS</text>
+        <text class="b2cBV" x="204" y="212">333</text>
+        <text class="b2cB" x="204" y="228">blocking</text>
+        <text class="b2cF" x="352" y="222">stop</text>
+        <text class="b2cF" x="414" y="208">registry not run</text>
+        <text class="b2cF" x="554" y="208">model not run</text>
+        <text class="b2cF" x="704" y="208">gen AI not run</text>
+
+        <text class="b2cH" x="34" y="294">FAIL LOUDLY,</text>
+        <text class="b2cH" x="34" y="310">AFTER REPAIR</text>
+        <text class="b2cH" x="204" y="288">CHECKS</text>
+        <text class="b2cV" x="204" y="308">0 blocking</text>
+        <text class="b2cS" x="204" y="324">123 flagged, kept</text>
+        <text class="b2cH" x="364" y="288">REGISTRY</text>
+        <text class="b2cV" x="364" y="308">repeat 3.00%</text>
+        <text class="b2cS" x="364" y="324">agreement 100.00%</text>
+        <text class="b2cH" x="534" y="288">MODEL</text>
+        <text class="b2cV" x="534" y="308">lift 3.71x</text>
+        <text class="b2cS" x="534" y="324">AUC 0.7894</text>
+        <text class="b2cH" x="704" y="288">GEN AI</text>
+        <text class="b2cV" x="704" y="308">15 of 20 pass</text>
+        <text class="b2cS" x="704" y="324">90% agreement</text>
+
+        <text class="b2cN" x="30" y="362">Between lanes two and three: drop 152, resolve 113, quarantine 64. Same rows, honest numbers.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a warning lets 4.61% reach the registry; a stopped run reaches nobody until the repair makes it 3.00%</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Blocking and flagging, as code<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Two lists, decided in advance. Blocking checks raise an error that stops the run and prints every failing check with its count and export. Flag checks write their rows to a flags table and let the run continue. The gate never decides which list a check belongs to at run time; a human decided that in review, with the reason written down.</p>
+        <div class="prompt-box good"><span class="label">★ The gate, in one function</span>BLOCKING = ["keys unique", "customer key resolves", "amounts &gt;= 0"]
+FLAG = ["timestamps ordered"]
+
+def gate(results):                      # results: {check: {export: failing_rows}}
+    failed = {c: n for c in BLOCKING for e, n in results[c].items() if n}
+    if failed:
+        raise DataQualityError(f"blocking failures, stop the run: {failed}")
+    write_flags(results, FLAG)          # kept rows, queryable later</div>
+        <p>The block above is the shape, not a runnable script; the build-along writes the runnable version against the real file.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>What warn-and-continue costs, layer by layer<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Serai's bench can skip the data engineering layer and let every later layer read the raw exports. The registry reads a repeat rate of 4.61% instead of 3.00%, and its agreement with the reference falls to 65.14% on that metric, because every re-sent order looks like a second purchase. The gen AI layer drops from 15 to 7 of 20 outputs passing, with agreement down to 50%, because review summaries quote the true review count while the raw frame says Store 2 has 155 reviews instead of 153. The model is the honest surprise: lift moves only from 3.71x to 3.30x, because re-sends mostly add noise to its label. With 24 positives in the scoring month, one hit moves lift by 0.41, so treat that gap as roughly one order. Damage is uneven, which is exactly why a warning feels safe and is not.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>A stop must reach a person<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A pipeline that stops in silence is no better than one that warns in silence. The failure message should name the export, the check, the count and the first few failing keys, and it should reach whoever owns that export's integration. Keep yesterday's good tables in place while the run is stopped, so dashboards show slightly stale but correct numbers rather than fresh wrong ones, and say on the dashboard that the data is held. Contract-style testing, orchestration and alert routing at depth belong to the <a href="https://phoebefu6.github.io/learn-dataops-with-phoebe/courses/b3-data-testing-contracts.html">DataOps course, Builder session 3 there</a>; this session stops at the four checks and the gate.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Why the registry cannot catch a re-send later.</strong> Olist's real rows contain genuine same-day repeat orders: in Serai's sample, 83 of the 197 orders followed by another within 90 days were followed on the same day. A re-sent order looks exactly like one of those once it reaches the analytics layer: same customer, same day, a second order key. Downstream, nobody can tell them apart. The only place the difference is visible is the key check at the gate, which is why it blocks rather than warns. Session 4 comes back to the real same-day repeats.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>The four checks and the gate, in pandas</h2>
+      <span class="tag demo">★ 22 min · everyone builds</span>
+    </div>
+    <p class="lede">Use the same download as session 1, <code>kagglehub.dataset_download("olistbr/brazilian-ecommerce")</code>, and run each block from a scratch folder. The outputs in the comments are what these exact blocks print on the full public file (pandas 2.1). Serai's bench runs the same four checks on its seeded 8,614-order sample with planted defects, which is why its numbers differ from these.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The build-along as five hand-drawn blocks. Load: 96,478 delivered orders. Blocking checks: keys unique, customer key resolves and amounts not negative each pass at 100.00 percent. Flags: 1,396 orders with timestamps out of order or missing, kept. Gate: passes on the clean file. Plant: three re-sent orders and two refund lines, and the gate stops the pipeline.">
+        <defs>
+          <filter id="b2dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="59" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b2dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b2dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b2dH { font: 800 12px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1A2232; }
+          .b2dS { font: 400 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #4E5869; }
+          .b2dB { font: 800 11px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1D3A66; }
+          .b2dV { font: 800 14px Inter, -apple-system, "Segoe UI", sans-serif; fill: #6A4C04; }
+          .b2dBV { font: 800 14px Inter, -apple-system, "Segoe UI", sans-serif; fill: #1D3A66; }
+          .b2dN { font: 400 12px Inter, -apple-system, "Segoe UI", sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b2dH" x="30" y="26">FIVE BLOCKS: CHECK, FLAG, GATE, THEN BREAK IT ON PURPOSE</text>
+
+        <g filter="url(#b2dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="50" width="150" height="120" rx="10" transform="rotate(-0.6 105 110)" fill="#FFFFFF"/>
+          <path d="M184 110 L196 110" marker-end="url(#b2dAr)"/>
+          <rect x="200" y="50" width="150" height="120" rx="10" transform="rotate(0.5 275 110)" fill="#FFFFFF"/>
+          <path d="M354 110 L366 110" marker-end="url(#b2dAr)"/>
+          <rect x="370" y="50" width="150" height="120" rx="10" transform="rotate(-0.5 445 110)" fill="#FBF5E6"/>
+          <path d="M524 110 L536 110" marker-end="url(#b2dAr)"/>
+          <rect x="540" y="50" width="150" height="120" rx="10" transform="rotate(0.5 615 110)" fill="#FFFFFF"/>
+          <path d="M694 110 L706 110" marker-end="url(#b2dAr)"/>
+          <rect x="710" y="50" width="150" height="120" rx="10" transform="rotate(-0.5 785 110)" fill="#A9C4EA"/>
+        </g>
+
+        <text class="b2dH" x="44" y="74">1 · LOAD</text>
+        <text class="b2dS" x="44" y="94">delivered orders,</text>
+        <text class="b2dS" x="44" y="110">lines, payments</text>
+        <text class="b2dV" x="44" y="148">96,478</text>
+
+        <text class="b2dH" x="214" y="74">2 · BLOCKING</text>
+        <text class="b2dS" x="214" y="94">keys, customer key,</text>
+        <text class="b2dS" x="214" y="110">amounts &gt;= 0</text>
+        <text class="b2dV" x="214" y="148">100.00% each</text>
+
+        <text class="b2dH" x="384" y="74">3 · FLAGS</text>
+        <text class="b2dS" x="384" y="94">timestamp order,</text>
+        <text class="b2dS" x="384" y="110">kept, not dropped</text>
+        <text class="b2dV" x="384" y="148">1,396 flagged</text>
+
+        <text class="b2dH" x="554" y="74">4 · GATE</text>
+        <text class="b2dS" x="554" y="94">raise on any</text>
+        <text class="b2dS" x="554" y="110">blocking failure</text>
+        <text class="b2dV" x="554" y="148">pass</text>
+
+        <text class="b2dB" x="724" y="74">5 · PLANT</text>
+        <text class="b2dB" x="724" y="94">3 re-sends,</text>
+        <text class="b2dB" x="724" y="110">2 refund lines</text>
+        <text class="b2dBV" x="724" y="148">stopped</text>
+
+        <text class="b2dN" x="30" y="200">The public file passes all three blocking checks. Your next export may not; that is what the gate is for.</text>
+        <text class="b2dN" x="30" y="224">1,350 delivered orders show carrier pickup before approval on the full file; Serai's sample has 122.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a gate you have never seen fail is a gate you have not tested, so block 5 breaks it on purpose</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Load the files and keep delivered orders.</strong> Point <code>d</code> at the downloaded folder. Parse all four timestamps on read so the order check compares times, not strings.</p>
+        <div class="prompt-box good"><span class="label">★ Block 1 · load</span>import pandas as pd
+d = "path/to/olist/"
+ts = ["order_purchase_timestamp", "order_approved_at", "order_delivered_carrier_date", "order_delivered_customer_date"]
+orders = pd.read_csv(d + "olist_orders_dataset.csv", parse_dates=ts)
+items = pd.read_csv(d + "olist_order_items_dataset.csv")
+pays = pd.read_csv(d + "olist_order_payments_dataset.csv")
+cust = pd.read_csv(d + "olist_customers_dataset.csv")
+
+o = orders[orders.order_status == "delivered"]
+li = items[items.order_id.isin(o.order_id)]
+pa = pays[pays.order_id.isin(o.order_id)]
+print("orders", len(o), "lines", len(li), "payments", len(pa))
+
+# prints: orders 96478 lines 110197 payments 100756</div>
+      </div>
+      <div class="step">
+        <p><strong>Write the three blocking checks so each returns the failing rows.</strong> A boolean per row, True for a failure, means the same function feeds the pass rate, the count and the list of keys to investigate.</p>
+        <div class="prompt-box good"><span class="label">★ Block 2 · blocking checks</span>def keys_unique(o):
+    return o.order_id.duplicated()                      # True = a failing row
+
+def key_resolves(o, cust):
+    return ~o.customer_id.isin(cust.customer_id)
+
+def amounts_non_negative(li, pa):
+    return pd.concat([li.price &lt; 0, li.freight_value &lt; 0, pa.payment_value &lt; 0])
+
+for name, fails in [("keys unique", keys_unique(o)),
+                    ("customer key resolves", key_resolves(o, cust)),
+                    ("amounts &gt;= 0", amounts_non_negative(li, pa))]:
+    print(f"{name:22} pass {1 - fails.mean():.2%}  fail {fails.sum()}")
+
+# prints: keys unique            pass 100.00%  fail 0
+#         customer key resolves  pass 100.00%  fail 0
+#         amounts &gt;= 0           pass 100.00%  fail 0</div>
+        <p>On Serai's exports you would normalise the key first (session 1's key rule) and run each check grouped by <code>source_export</code>. The public file has one source and clean keys, so every blocking check passes here.</p>
+      </div>
+      <div class="step">
+        <p><strong>Write the timestamp check as a flag.</strong> Break it into its parts so the printout says which step is out of order, then keep the flagged order keys in their own table.</p>
+        <div class="prompt-box good"><span class="label">★ Block 3 · the flag check</span>p, a, c, dl = (o[col] for col in ts)
+inverted = (a &lt; p) | (c &lt; a) | (dl &lt; c)
+missing = o[ts].isna().any(axis=1)
+print("approval before purchase", (a &lt; p).sum(),
+      "| carrier before approval", (c &lt; a).sum(),
+      "| delivery before carrier", (dl &lt; c).sum(),
+      "| a timestamp missing", missing.sum())
+flags = o.loc[inverted | missing, ["order_id"]].assign(flag="timestamp order")
+print("flagged and kept", len(flags), "of", len(o))
+
+# prints: approval before purchase 0 | carrier before approval 1350 | delivery before carrier 23 | a timestamp missing 23
+#         flagged and kept 1396 of 96478</div>
+        <p>Carrier before approval is the same real inversion Serai's sample shows 122 times. None of these orders leaves <code>o</code>; the flags table only points at them.</p>
+      </div>
+      <div class="step">
+        <p><strong>Wire the blocking checks into a gate that raises.</strong> The error message carries every failing check and its count, so whoever reads it knows where to look.</p>
+        <div class="prompt-box good"><span class="label">★ Block 4 · the gate</span>class DataQualityError(Exception):
+    pass
+
+def gate(o, li, pa, cust):
+    counts = {"keys unique": keys_unique(o).sum(),
+              "customer key resolves": key_resolves(o, cust).sum(),
+              "amounts &gt;= 0": amounts_non_negative(li, pa).sum()}
+    failed = {k: int(v) for k, v in counts.items() if v}
+    if failed:
+        raise DataQualityError(f"blocking failures {failed}")
+    return "all blocking checks pass"
+
+print(gate(o, li, pa, cust))
+
+# prints: all blocking checks pass</div>
+      </div>
+      <div class="step">
+        <p><strong>Break it on purpose.</strong> Plant three re-sent orders and two refund lines, the same two defect classes Serai's exports carry, and watch the gate stop the run.</p>
+        <div class="prompt-box good"><span class="label">★ Block 5 · plant two defects</span>o_bad = pd.concat([o, o.head(3)])                       # three re-sent orders
+li_bad = li.copy()
+li_bad.loc[li_bad.index[:2], "price"] *= -1             # two refund lines
+try:
+    gate(o_bad, li_bad, pa, cust)
+except DataQualityError as e:
+    print("pipeline stopped:", e)
+
+# prints: pipeline stopped: blocking failures {'keys unique': 3, 'amounts &gt;= 0': 2}</div>
+        <p>In a real pipeline you would not catch the error: you would let it end the run. The <code>try</code> is only here so the notebook keeps going.</p>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">The check that looks finished and protects nothing</span>
+if o.order_id.duplicated().any():
+    print("warning: duplicate order keys")   # the run carries on with them
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 3</h2>
+      <span class="tag exercise">30 min</span>
+    </div>
+    <ol>
+      <li>Add a <code>source</code> column to the public orders with three values of your choice, then make block 2 print a pass rate per check per source, the way the grid in Part 1 does.</li>
+      <li>Write the repair step for the planted defects in block 5: drop the re-sends, move the negative lines to an adjustments table, and re-run the gate until it passes.</li>
+      <li>Pick ten of the 1,350 carrier-before-approval orders and print all four timestamps side by side. Write one sentence on whether you would ever drop them.</li>
+      <li>For one pipeline you own, list every check it runs today and mark each one blocking or flag, with the reason in one line.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Builder session 2 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · Why are Serai's 122 timestamp inversions flagged and kept rather than dropped?</p>
+      <button class="qopt" type="button">A · Because the timestamp check is too slow to block on</button>
+      <button class="qopt" type="button">B · Because flagged rows are dropped later by the registry</button>
+      <button class="qopt" type="button">C · Because they are real orders with an odd log; dropping them would delete real deliveries and move every count, while keeping them changes no metric</button>
+      <button class="qopt" type="button">D · Because inversions only happen in Export C</button>
+      <p class="qwhy">Drop only what you can prove is not a real event. A carrier scan logged before approval is a logging oddity on a real delivery, so it is flagged, kept, and filterable by anyone who needs clean timing.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · The raw exports have 333 blocking failures, but the repair drops 152, resolves 113 and quarantines 64, which sums to 329. Where did the other 4 go?</p>
+      <button class="qopt" type="button">A · Four re-sent rows also carried an orphan customer key, so dropping each re-send cleared two failures at once</button>
+      <button class="qopt" type="button">B · Four rows were silently lost by the repair</button>
+      <button class="qopt" type="button">C · The timestamp flags absorbed them</button>
+      <button class="qopt" type="button">D · Rounding in the pass rates</button>
+      <p class="qwhy">The customer key check fails on 117 rows: 113 originals plus 4 re-sent copies of the same orders. Dropping a re-send removes its key failure too, so only 113 keys need resolving. Counting failures and counting fixes are different things; reconcile them in the run report.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">3 · A colleague proposes logging a warning on duplicate order keys instead of stopping the run. What does the bench say that costs Serai?</p>
+      <button class="qopt" type="button">A · Nothing, because the model's lift barely changes</button>
+      <button class="qopt" type="button">B · Only a small rounding difference in GMV</button>
+      <button class="qopt" type="button">C · It costs runtime but not accuracy</button>
+      <button class="qopt" type="button">D · Re-sends reach the registry as fake repeat orders: the repeat rate reads 4.61% instead of 3.00%, and downstream nobody can tell them from real same-day repeats</button>
+      <p class="qwhy">The model is the layer that survives (lift 3.71x to 3.30x, about one hit of 24), which is what makes a warning feel safe. The registry and the gen AI facts take the damage, and once a re-send is past the gate it looks exactly like a real same-day repeat.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Four checks per export and their pass rates</span><span class="note">Serai's raw exports as the bench computes them; the export split and planted defects are constructed, the timestamp inversions are real Olist rows</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Drop, resolve, quarantine, flag: 333 blocking to 0</span><span class="note">Bench repair counts, cross-checked by an independent Python reference and the in-browser engine</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The cost of warn-and-continue</span><span class="note">The bench's skip-DE run: repeat 4.61%, agreement 65.14%, lift 3.30x, gen AI 7 of 20</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Checks and gate on the public file</span><span class="note">Brazilian E-Commerce Public Dataset by Olist, Kaggle, CC BY-NC-SA 4.0; build-along run on the full file, every printed number shown is what it prints</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">The identity gate and its crosswalk</span><span class="note">Owned by the Social Commerce Enablers course, Analyst session 3; used here, not rebuilt</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Data contracts, orchestration and alerting at depth</span><span class="note">Owned by the DataOps course, Builder session 3; linked, not retaught</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 2 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Four checks</b><span>Keys unique, customer key resolves, timestamps ordered, amounts &gt;= 0.</span></div>
+      <div class="cheat-item"><b>Per export, always</b><span>Export C: 94.73% of customer keys resolve. A total would hide it.</span></div>
+      <div class="cheat-item"><b>Four actions</b><span>Drop 152 re-sends, resolve 113 keys, quarantine 64 refunds, flag 123.</span></div>
+      <div class="cheat-item"><b>Flag what is real</b><span>Drop only what you can prove is not a real event; keep odd timestamps.</span></div>
+      <div class="cheat-item"><b>Stop, do not warn</b><span>333 blocking failures stop the run; 0 after repair lets it through.</span></div>
+      <div class="cheat-item"><b>Test the gate</b><span>Plant a re-send and a refund line; a gate you never saw fail is untested.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>The data engineering layer is done: a schema with declared grains and a gate that only lets a clean frame through. Session 3 builds the first analytics layer on top of it: orders, GMV and repeat rate as tested definitions in a metric registry, checked against a naive sum and an independent reference.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Builder session 2 of 10 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="b1-the-merged-schema.html">← Prev: The merged schema</a> &nbsp;·&nbsp; <a href="b3-metric-registry-as-code.html">Next: Building the metric registry →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Builder session 5 of 10. The machine learning layer of a social-commerce data estate: one repeat-purchase model with seven features known at purchase, a label window that closes before the cutoff, and month T+1 as the only honest score. AUC 0.7894 and top-decile lift 3.71x on 24 positives, read with the humility that sample size demands.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="A repeat-purchase model with a time split - learn ship social commerce with phoebe">
+<meta property="og:description" content="Builder session 5 of 10. Seven features as of purchase, a label window that closes before the cutoff, and why a random split would flatter the model.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/b5-model-with-a-time-split.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="A repeat-purchase model with a time split - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Builder session 5 of 10. Train on the past, score the next month, and never let a label peek past the cutoff.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Builder session 5 · A repeat-purchase model with a time split - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Builder session 5 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Builder session 5 of 10</div>
+    <h1>A repeat-purchase model with a <span class="accent">time split</span></h1>
+    <p class="sub">Serai Commerce, the constructed enabler running on 8,614 real derived Olist orders, wants to know which of this month's buyers will come back within 90 days, so its brands can spend a follow-up budget on the likeliest ones. Tonight you build that model the honest way: seven features that exist at the moment of purchase, a label window that closes before the cutoff, and one score that counts, the month the model has never seen. You also see what a random split would have told you instead, and why you should not believe it.</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Advanced-practical</span>
+      <span class="chip audience">Data scientists</span>
+      <span class="chip audience">Analytics engineers moving into ML</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-20 · Features, split, AUC and lift</span>
+      <span class="a3" style="flex:5">20-42 · Build-along: the model in scikit-learn</span>
+      <span class="a4" style="flex:1">42-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Where the model sits in the estate</h2>
+    </div>
+    <p class="lede">Sessions 1 to 4 built the schema, the tests, the registry and the cohorts. The model is the third layer, and it only works because the first two hold: its label is "this customer ordered again within 90 days", which is a repeat-purchase definition, and session 3 already made that definition exact. Tonight is one model, built carefully. Session 6 then tries to break it with a leak. Model depth beyond that, calibration, tuning, deployment and monitoring, belongs to the <a href="https://phoebefu6.github.io/learn-ml-production-with-phoebe/">ML production</a>, <a href="https://phoebefu6.github.io/learn-model-evaluation-with-phoebe/">model evaluation</a> and <a href="https://phoebefu6.github.io/learn-feature-engineering-with-phoebe/">feature engineering</a> courses; this session picks the shipping side and links out for the rest.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A scikit-learn script that builds seven as-of-purchase features on the public Olist file, labels each order by whether the same person ordered again within 90 days, trains on orders up to 2017-11-02, scores February 2018, and prints AUC and top-decile lift for the time split next to the flattering random split, so you can show a colleague the difference in two lines of output.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the seven features and the one left out</span>
+      <h2>Features as of purchase</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A model is asked its question at one moment. For Serai, that moment is the purchase: the order lands, the score is computed, the brand decides whether to follow up. Every feature must be a value that existed at that moment. If a column is filled in later, it does not belong, however predictive it looks.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn timeline of one order. Left of the purchase moment, in a panel labelled known at purchase, seven features: prior orders by the customer as a log, recency of the prior order, order value in BRL as a log, freight share of the order, instalments, voucher used, and items in the order. Right of the purchase moment, a red panel: review score is left out, because the survey is sent after delivery or when the estimate is due, and 83 of 197 repeat orders within 90 days were placed the same day, before any review existed. The timeline runs from the customer's past orders through purchase, where the model scores, to delivery and the review.">
+        <defs>
+          <filter id="b5aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="61" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b5aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b5aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b5aH { font: 800 12px Inter, system-ui, sans-serif; fill: #1A2232; }
+          .b5aR { font: 800 12px Inter, system-ui, sans-serif; fill: #991B1B; }
+          .b5aL { font: 600 11px Inter, system-ui, sans-serif; fill: #1A2232; }
+          .b5aS { font: 400 11px Inter, system-ui, sans-serif; fill: #4E5869; }
+          .b5aB { font: 800 11px Inter, system-ui, sans-serif; fill: #1D3A66; }
+          .b5aN { font: 400 12px Inter, system-ui, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b5aH" x="30" y="26">SEVEN FEATURES, ALL KNOWN AT THE MOMENT OF PURCHASE</text>
+
+        <g filter="url(#b5aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="44" width="520" height="164" rx="12" transform="rotate(0.3 290 126)" fill="#FBF5E6" stroke="#966E08"/>
+          <rect x="46" y="76" width="236" height="24" rx="5" transform="rotate(-1.2 164 88)" fill="#FFFFFF"/>
+          <rect x="296" y="76" width="236" height="24" rx="5" transform="rotate(1 414 88)" fill="#FFFFFF"/>
+          <rect x="46" y="108" width="236" height="24" rx="5" transform="rotate(0.8 164 120)" fill="#FFFFFF"/>
+          <rect x="296" y="108" width="236" height="24" rx="5" transform="rotate(-0.9 414 120)" fill="#FFFFFF"/>
+          <rect x="46" y="140" width="236" height="24" rx="5" transform="rotate(-0.7 164 152)" fill="#FFFFFF"/>
+          <rect x="296" y="140" width="236" height="24" rx="5" transform="rotate(1.1 414 152)" fill="#FFFFFF"/>
+          <rect x="46" y="172" width="236" height="24" rx="5" transform="rotate(0.9 164 184)" fill="#FFFFFF"/>
+          <rect x="600" y="44" width="250" height="164" rx="12" transform="rotate(-0.4 725 126)" fill="#FEF2F2" stroke="#FCA5A5"/>
+          <path d="M40 236 L846 236" marker-end="url(#b5aAr)"/>
+          <path d="M560 214 L560 262" stroke-width="3"/>
+          <path d="M700 228 L700 244"/>
+          <path d="M800 228 L800 244"/>
+          <circle cx="330" cy="184" r="11" fill="#FFFFFF"/>
+          <path d="M330 184 L330 177 M330 184 L336 187"/>
+          <rect x="470" y="268" width="180" height="24" rx="6" transform="rotate(-0.8 560 280)" fill="#A9C4EA"/>
+        </g>
+
+        <text class="b5aH" x="46" y="64">KNOWN AT PURCHASE</text>
+        <text class="b5aL" x="58" y="92">prior orders by customer (log)</text>
+        <text class="b5aL" x="308" y="92">recency of the prior order</text>
+        <text class="b5aL" x="58" y="124">order value in BRL (log)</text>
+        <text class="b5aL" x="308" y="124">freight share of the order</text>
+        <text class="b5aL" x="58" y="156">instalments</text>
+        <text class="b5aL" x="308" y="156">voucher used, 0 or 1</text>
+        <text class="b5aL" x="58" y="188">items in the order</text>
+        <text class="b5aS" x="350" y="188">stamped at the order time</text>
+
+        <text class="b5aR" x="616" y="68">✗ REVIEW SCORE, LEFT OUT</text>
+        <text class="b5aS" x="616" y="94">survey sent after delivery,</text>
+        <text class="b5aS" x="616" y="112">or when the estimate is due</text>
+        <text class="b5aS" x="616" y="146">83 of 197 repeats were same-day,</text>
+        <text class="b5aS" x="616" y="164">placed before any review existed</text>
+
+        <text class="b5aS" x="44" y="256">customer's past orders</text>
+        <text class="b5aS" x="700" y="258" text-anchor="middle">delivered</text>
+        <text class="b5aS" x="800" y="258" text-anchor="middle">review sent</text>
+        <text class="b5aB" x="560" y="284" text-anchor="middle">PURCHASE · THE MODEL SCORES</text>
+
+        <text class="b5aN" x="30" y="318">A feature is allowed only if its value existed at the moment the model will be asked.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - every feature sits left of the purchase line; review score sits right of it, so it stays out</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The seven features, and what each one is standing in for<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Feature</th><th>As computed</th><th>The behaviour it proxies</th></tr></thead>
+          <tbody>
+            <tr><td><strong>prior orders</strong></td><td>log(1 + orders this person placed before this one)</td><td>habit: people who came back once come back again</td></tr>
+            <tr><td><strong>recency</strong></td><td>1 / (1 + days since the prior order), 0 for a first order</td><td>momentum: a recent second order is a warmer signal</td></tr>
+            <tr><td><strong>order value</strong></td><td>log(1 + item value in BRL)</td><td>commitment, with the log taming a long tail</td></tr>
+            <tr><td><strong>freight share</strong></td><td>freight / (freight + item value)</td><td>friction: heavy shipping cost per item discourages a return</td></tr>
+            <tr><td><strong>instalments</strong></td><td>the most instalments on any payment row</td><td>price sensitivity and payment habit</td></tr>
+            <tr><td><strong>voucher</strong></td><td>1 if any payment row is a voucher</td><td>promotion-driven buying</td></tr>
+            <tr><td><strong>items</strong></td><td>lines in the order</td><td>basket breadth</td></tr>
+          </tbody>
+        </table>
+        <p>Every one of them is computed from the order itself and from the same person's earlier orders. None needs a timestamp later than the purchase. The bench fits them as a logistic regression by full-batch gradient descent: features standardised, weights starting from zero, learning rate 1.0, 1,000 steps, an L2 term of 0.001. Starting from zero with a fixed step count means there is no random seed in the optimiser at all; the only seed in the chain is the sample draw that produced Serai's 8,614 orders. Rerun it and you get the same weights to the last digit.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why review score is left out, even though it is right there<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Review score sits in the order-level fact table from session 1, one column over from instalments, and it is tempting. But Olist's dataset notes say the satisfaction survey goes out once the customer receives the product or the estimated delivery date is due. At the moment Serai wants to score an order, the review does not exist yet. A model trained with it would be graded on information it could never have at prediction time.</p>
+        <p>Serai's sample makes it concrete: 83 of the 197 repeat orders within 90 days were placed on the same day as the order before them. For those customers the next order happened before any review could have been written. Session 6 hunts this kind of timing trap properly; tonight the rule is simply "stamped at order time, or it waits".</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The survey timing is in the data documentation, not in the columns.</strong> Nothing in Olist's review table flags the score as post-delivery: it is a tidy integer from 1 to 5 next to an order id. The timing lives in a sentence of the dataset description. That is the normal state of commerce data, and it is why a feature list needs a "time known" column written by someone who read the documentation, not inferred from the schema.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the time split and the label window</span>
+      <h2>The label window closes before the cutoff</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">The label asks about the 90 days after each order. So a training order is only usable once its 90 days have fully passed. If month T ends on 2018-01-31, the last order you may train on is from 2017-11-02. Train on anything later and some labels are still open: a customer who will come back in February is recorded as "did not return", and the model learns from wrong answers.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn timeline of the time split. Training orders run from September 2016 to 2017-11-02: 2,744 orders with 60 positives. Each training order's 90-day label window ends by 2018-01-31, the cutoff at the end of month T. The scoring month T+1 is February 2018: 574 orders, 24 repeats, base rate 4.18 percent. Its own 90-day outcome is read later and never used for training.">
+        <defs>
+          <filter id="b5bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="67" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b5bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b5bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b5bH { font: 800 12px Inter, system-ui, sans-serif; fill: #1A2232; }
+          .b5bL { font: 600 11px Inter, system-ui, sans-serif; fill: #1A2232; }
+          .b5bS { font: 400 11px Inter, system-ui, sans-serif; fill: #4E5869; }
+          .b5bB { font: 800 11px Inter, system-ui, sans-serif; fill: #1D3A66; }
+          .b5bA { font: 700 11px Inter, system-ui, sans-serif; fill: #6A4C04; }
+          .b5bN { font: 400 12px Inter, system-ui, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b5bH" x="30" y="26">ONE SPLIT, DRAWN TO SCALE</text>
+        <text class="b5bS" x="230" y="26">drawn to scale, September 2016 to May 2018 · counts from Serai's bench</text>
+
+        <text class="b5bH" x="50" y="78">TRAIN ORDERS</text>
+        <text class="b5bS" x="50" y="96">2,744 orders · 60 repeat within 90 days</text>
+        <text class="b5bH" x="578" y="62">LABEL WINDOW</text>
+        <text class="b5bS" x="578" y="80">90 days, all closed</text>
+        <text class="b5bH" x="722" y="62">MONTH T+1</text>
+        <text class="b5bS" x="722" y="80">Feb 2018 · 574 orders</text>
+        <text class="b5bS" x="722" y="96">24 repeats · 4.18%</text>
+
+        <g filter="url(#b5bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="50" y="110" width="522" height="40" rx="6" transform="rotate(-0.3 311 130)" fill="url(#b5bHc)"/>
+          <rect x="572" y="110" width="110" height="40" rx="6" transform="rotate(0.4 627 130)" fill="#A9C4EA"/>
+          <rect x="684" y="110" width="34" height="40" rx="5" transform="rotate(-0.6 701 130)" fill="#FFFFFF"/>
+          <path d="M718 168 L826 168" stroke-dasharray="6 6" marker-end="url(#b5bAr)"/>
+          <path d="M40 212 L850 212" marker-end="url(#b5bAr)"/>
+          <path d="M572 204 L572 220"/>
+          <path d="M682 104 L682 222" stroke-width="3"/>
+          <rect x="784" y="128" width="20" height="14" rx="2" transform="rotate(-2 794 135)" fill="#FFFFFF"/>
+          <path d="M788 128 C788 118 800 118 800 128"/>
+        </g>
+
+        <text class="b5bB" x="627" y="128" text-anchor="middle">90-day label</text>
+        <text class="b5bB" x="627" y="144" text-anchor="middle">windows</text>
+        <text class="b5bS" x="722" y="186">its outcome, read later</text>
+
+        <text class="b5bA" x="50" y="232">2016-09</text>
+        <text class="b5bA" x="572" y="234" text-anchor="middle">2017-11-02</text>
+        <text class="b5bA" x="700" y="234" text-anchor="start">2018-01-31</text>
+        <text class="b5bL" x="700" y="252" text-anchor="start">cutoff · end of month T</text>
+
+        <text class="b5bN" x="30" y="284">Training stops 90 days before the cutoff, so every training label is fully observed by 2018-01-31.</text>
+        <text class="b5bN" x="30" y="306">Month T+1 is scored with the model frozen at the cutoff; its labels never touch training.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the blue band is why training ends on 2017-11-02 and not on the cutoff itself</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Three dates, and the arithmetic between them<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Start from the cutoff and work backwards. The cutoff is the last day of data you would have if you were running the model for real: 2018-01-31, the end of month T. The label needs 90 days of future, so the latest order whose label is complete is 90 days before that: 2017-11-02. That gives 2,744 training orders, of which 60 were followed by another order from the same person within 90 days. Scoring happens on month T+1, February 2018: 574 orders, 24 of which turned out to be repeats, a base rate of 4.18%.</p>
+        <div class="prompt-box good"><span class="label">★ The split, as three constants</span>CUTOFF      = "2018-01-31"   # end of month T: the last day you may look at
+LABEL_DAYS  = 90
+TRAIN_END   = "2017-11-02"   # CUTOFF minus LABEL_DAYS: every label closed
+SCORE_MONTH = ("2018-02-01", "2018-02-28")   # month T+1, never seen in training</div>
+        <p>Write them as constants at the top of the script, derived from each other, so nobody moves one without the other.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why a random split would flatter the model<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A random 80/20 split shuffles all orders and holds out a fifth. Three things then go wrong at once. Orders from the scoring period sit in training, so the model learns that period's habits before it is asked about them. The same person's earlier and later orders land on both sides, so the model has effectively met the customer it is scoring. And training rows near the end carry labels that look into the very weeks the test rows come from. None of this raises an error. It just makes the number better than anything the model will see in production.</p>
+        <p>scikit-learn's documentation for <code>TimeSeriesSplit</code> names the problem directly: it "provides train/test indices to split time-ordered data, where other cross-validation methods are inappropriate, as they would lead to training on future data and evaluating on past data." In the build-along you run both splits on the full public file and see the gap for yourself.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Walk-forward folds with TimeSeriesSplit<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>One time split gives one number. To see how stable it is, walk forward: train on the first block, test on the next, then train on the first two, test on the third, and so on. scikit-learn's <code>TimeSeriesSplit</code> does exactly that, and its documentation notes that "successive training sets are supersets of those that come before them." One thing it does not know about is your label window. Each fold's training set must still stop 90 days before its test block starts, or the open-label problem returns inside every fold. Step 7 of the build-along adds that trim by hand.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The library that ships shuffling by default also ships the warning.</strong> scikit-learn is the most common place a first model gets built, and its general-purpose splitters shuffle or ignore order. The same library documents <code>TimeSeriesSplit</code> with a plain statement that other cross-validation methods are inappropriate for time-ordered data. The tool will not choose for you; the date column has to.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers AUC, lift and reading a small sample</span>
+      <h2>AUC and lift, read honestly</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">AUC answers "does the model rank repeat buyers above one-time buyers?" Lift answers the question a brand actually pays for: "if I follow up only with the top tenth, how many more repeat buyers do I reach than by picking at random?" On month T+1 the bench prints AUC 0.7894 and top-decile lift 3.71x. Both are real. Both rest on 24 positives.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hand-drawn bars of the model's scores on Serai's bench. AUC on a scale from 0.5, chance, to 1.0: training AUC in-sample 0.6248, month T+1 AUC 0.7894. Top-decile lift over the 4.18 percent base rate: random pick 1.00x, training in-sample 2.49x, month T+1 3.71x, which is 9 repeats among the top 58 orders, above Serai's constructed gate of 2.0. With 24 positives, one hit moves lift by 0.41.">
+        <defs>
+          <filter id="b5cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="71" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b5cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b5cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b5cH { font: 800 12px Inter, system-ui, sans-serif; fill: #1A2232; }
+          .b5cL { font: 600 11px Inter, system-ui, sans-serif; fill: #1A2232; }
+          .b5cS { font: 400 11px Inter, system-ui, sans-serif; fill: #4E5869; }
+          .b5cV { font: 800 16px Inter, system-ui, sans-serif; fill: #6A4C04; }
+          .b5cA { font: 700 11px Inter, system-ui, sans-serif; fill: #6A4C04; }
+          .b5cN { font: 400 12px Inter, system-ui, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b5cH" x="30" y="26">RANKING · AUC FROM 0.5 (CHANCE) TO 1.0</text>
+        <text class="b5cS" x="330" y="26">Serai's bench, normal run · numbers as the bench prints them</text>
+
+        <text class="b5cL" x="40" y="62">train AUC, in-sample</text>
+        <text class="b5cL" x="40" y="98">month T+1 AUC</text>
+        <text class="b5cS" x="40" y="114">574 orders, never seen</text>
+
+        <g filter="url(#b5cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M250 42 L250 124"/>
+          <rect x="250" y="46" width="135" height="24" rx="4" transform="rotate(-0.4 317 58)" fill="#FBF5E6"/>
+          <rect x="250" y="84" width="313" height="24" rx="4" transform="rotate(0.3 406 96)" fill="#A9C4EA"/>
+          <path d="M250 182 L250 284"/>
+          <rect x="250" y="190" width="135" height="22" rx="4" transform="rotate(-0.5 317 201)" fill="#FFFFFF"/>
+          <rect x="250" y="222" width="336" height="22" rx="4" transform="rotate(0.4 418 233)" fill="#FBF5E6"/>
+          <rect x="250" y="254" width="501" height="22" rx="4" transform="rotate(-0.3 500 265)" fill="url(#b5cHc)"/>
+          <path d="M520 184 L520 282" stroke-dasharray="4 5"/>
+          <circle cx="836" cy="44" r="10" fill="#FFFFFF"/>
+          <path d="M843 51 L852 60"/>
+        </g>
+
+        <text class="b5cV" x="395" y="64">0.6248</text>
+        <text class="b5cV" x="573" y="102">0.7894</text>
+        <text class="b5cA" x="250" y="140" text-anchor="middle">0.5</text>
+        <text class="b5cS" x="660" y="102">ranks well on unseen data</text>
+
+        <text class="b5cH" x="30" y="166">TOP DECILE · LIFT OVER THE 4.18% BASE RATE</text>
+        <text class="b5cA" x="520" y="178" text-anchor="middle">Serai gate 2.0</text>
+
+        <text class="b5cL" x="40" y="205">random pick</text>
+        <text class="b5cL" x="40" y="237">train, in-sample</text>
+        <text class="b5cL" x="40" y="269">month T+1: 9 of top 58</text>
+
+        <text class="b5cV" x="395" y="207">1.00x</text>
+        <text class="b5cV" x="596" y="239">2.49x</text>
+        <text class="b5cV" x="761" y="271">3.71x</text>
+
+        <text class="b5cN" x="30" y="308">24 positives in month T+1: one hit more or fewer in the top 58 moves lift by 0.41.</text>
+        <text class="b5cN" x="30" y="328">Train AUC below test AUC is small-sample noise in a weak training label, not a sign of a good model.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - month T+1 clears the gate, and one hit either way would still leave it above 2.0</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>AUC in one sentence, lift in one sentence<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p><strong>AUC.</strong> Pick one repeat buyer and one non-repeat buyer at random; AUC is the chance the model scores the repeat buyer higher. 0.5 is a coin, 1.0 is perfect. scikit-learn's <code>roc_auc_score</code> computes it "from prediction scores", which is why you pass probabilities, not 0/1 predictions. Month T+1 reads 0.7894.</p>
+        <p><strong>Lift at the top decile.</strong> Sort February's 574 orders by score, take the top 58, count the repeats: 9. Random picking would find 4.18% of 58, about 2.4. Nine divided by that is a lift of 3.71x. A brand following up with those 58 customers reaches more than three and a half times as many future repeat buyers as one following up with 58 customers picked at random.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Twenty-four positives, and what that does to every number<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Month T+1 has 24 repeat buyers. The top decile found 9 of them. Had it found 8, lift would read 3.30x; had it found 10, 4.12x. Each hit is worth 0.41 of lift. That is the honest width of the number, and it should be said out loud whenever the 3.71x is shown. The same small-sample noise explains the odd ordering of the two AUCs: training AUC is 0.6248 on 2,744 orders with only 60 positives, a weak and noisy label, so it is below the test AUC by chance, not because the model got better on data it had never seen.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>What scikit-learn's logistic regression does that a statistics textbook does not<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>scikit-learn's linear-models guide describes logistic regression as "implemented as a linear model for classification rather than regression", and adds: "Regularization is applied by default, which is common in machine learning but not in statistics." The bench mirrors that with a small L2 term of 0.001 on standardised features. The practical consequence: the weights are shrunk a little toward zero, so they are not the unbiased coefficients a statistics package would print, and you should not read them as effect sizes. They are good for ranking, which is the job.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The bigger file disagrees, and that is the lesson.</strong> Run the same seven features on the full public file in the build-along, with scikit-learn's default solver, and month T+1 (February 2018, 6,555 orders, 216 repeats) prints AUC 0.5907 and lift 2.13x, not 0.7894 and 3.71x. Same data source, same features, same split rule, a larger sample and a different optimiser. Neither number is wrong. The bench's 24 positives make its figure wide; the full file's 216 make its figure narrower and lower. Report the sample size beside every AUC you show.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>The model in scikit-learn, time split first</h2>
+      <span class="tag demo">★ 22 min · everyone builds</span>
+    </div>
+    <p class="lede">Download the public dataset with <code>kagglehub.dataset_download("olistbr/brazilian-ecommerce")</code> (no login needed) and run each block in order from a scratch folder. The printed lines below are what the script prints on the full public file, run with pandas and scikit-learn as written. The bench works on Serai's seeded 8,614-order sample with its own optimiser, so these numbers differ from the bench's, and that difference is part of the lesson.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The build-along as a hand-drawn pipeline of five steps: features as of purchase, a label for a repeat within 90 days, a time split training to 2017-11-02, a standard scaler plus logistic regression, and scoring February 2018. Below, two panels printed by the build-along on the full public file. Random 80/20 split: AUC 0.6249 and lift 2.41x, which looks better and measures nothing you will face. Time split: AUC 0.5907 and lift 2.13x, the number the next month will actually see.">
+        <defs>
+          <filter id="b5dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="73" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b5dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b5dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b5dH { font: 800 12px Inter, system-ui, sans-serif; fill: #1A2232; }
+          .b5dR { font: 800 12px Inter, system-ui, sans-serif; fill: #991B1B; }
+          .b5dS { font: 400 11px Inter, system-ui, sans-serif; fill: #4E5869; }
+          .b5dB { font: 800 11px Inter, system-ui, sans-serif; fill: #1D3A66; }
+          .b5dV { font: 800 16px Inter, system-ui, sans-serif; fill: #6A4C04; }
+          .b5dX { font: 800 16px Inter, system-ui, sans-serif; fill: #991B1B; }
+          .b5dN { font: 400 12px Inter, system-ui, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b5dH" x="30" y="26">FIVE STEPS, THEN TWO SPLITS SIDE BY SIDE</text>
+
+        <g filter="url(#b5dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="42" width="150" height="56" rx="8" transform="rotate(-0.8 105 70)" fill="#FFFFFF"/>
+          <path d="M182 70 L198 70" marker-end="url(#b5dAr)"/>
+          <rect x="200" y="42" width="150" height="56" rx="8" transform="rotate(0.7 275 70)" fill="#FFFFFF"/>
+          <path d="M352 70 L368 70" marker-end="url(#b5dAr)"/>
+          <rect x="370" y="42" width="150" height="56" rx="8" transform="rotate(-0.6 445 70)" fill="#A9C4EA"/>
+          <path d="M522 70 L538 70" marker-end="url(#b5dAr)"/>
+          <rect x="540" y="42" width="150" height="56" rx="8" transform="rotate(0.6 615 70)" fill="#FFFFFF"/>
+          <path d="M692 70 L708 70" marker-end="url(#b5dAr)"/>
+          <rect x="710" y="42" width="150" height="56" rx="8" transform="rotate(-0.7 785 70)" fill="#FFFFFF"/>
+          <rect x="40" y="120" width="390" height="120" rx="12" transform="rotate(-0.3 235 180)" fill="#FEF2F2" stroke="#FCA5A5"/>
+          <rect x="450" y="120" width="390" height="120" rx="12" transform="rotate(0.3 645 180)" fill="#FBF5E6" stroke="#966E08"/>
+        </g>
+
+        <text class="b5dH" x="42" y="64">1 · FEATURES</text>
+        <text class="b5dS" x="42" y="84">as of purchase</text>
+        <text class="b5dH" x="212" y="64">2 · LABEL</text>
+        <text class="b5dS" x="212" y="84">repeat in 90 days</text>
+        <text class="b5dB" x="382" y="64">3 · SPLIT</text>
+        <text class="b5dB" x="382" y="84">train to 2017-11-02</text>
+        <text class="b5dH" x="552" y="64">4 · FIT</text>
+        <text class="b5dS" x="552" y="84">scaler + logistic</text>
+        <text class="b5dH" x="722" y="64">5 · SCORE</text>
+        <text class="b5dS" x="722" y="84">Feb 2018: AUC, lift</text>
+
+        <text class="b5dR" x="58" y="146">✗ RANDOM 80/20 SPLIT</text>
+        <text class="b5dS" x="58" y="168">future orders and the same people on both sides</text>
+        <text class="b5dX" x="58" y="200">AUC 0.6249 · lift 2.41x</text>
+        <text class="b5dS" x="58" y="224">looks better, measures nothing you will face</text>
+
+        <text class="b5dH" x="468" y="146">✓ TRAIN TO 2017-11-02, SCORE FEB 2018</text>
+        <text class="b5dS" x="468" y="168">6,555 orders scored, 216 repeats, base 3.30%</text>
+        <text class="b5dV" x="468" y="200">AUC 0.5907 · lift 2.13x</text>
+        <text class="b5dS" x="468" y="224">the number the next month will actually see</text>
+
+        <text class="b5dN" x="30" y="268">Printed by the build-along on the full public file, 96,477 delivered orders. Serai's bench sample differs.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the random split adds 0.03 AUC and 0.28 lift that the next month will never pay out</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Load and roll everything up to one row per order.</strong> The session 1 rule holds: roll up first, then join. One delivered order has no payment row and drops out of the inner join, which is why the count is 96,477 rather than session 1's 96,478.</p>
+        <div class="prompt-box good"><span class="label">★ Block 1 · load and roll up</span>import numpy as np
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split, TimeSeriesSplit
+
+d = "path/to/olist/"
+orders = pd.read_csv(d + "olist_orders_dataset.csv", parse_dates=["order_purchase_timestamp"])
+items = pd.read_csv(d + "olist_order_items_dataset.csv")
+pays = pd.read_csv(d + "olist_order_payments_dataset.csv")
+cust = pd.read_csv(d + "olist_customers_dataset.csv")
+
+o = orders[orders.order_status == "delivered"].merge(cust[["customer_id", "customer_unique_id"]], on="customer_id")
+lines_o = items.groupby("order_id").agg(n_lines=("order_item_id", "size"), price=("price", "sum"), freight=("freight_value", "sum"))
+pays_o = pays.groupby("order_id").agg(inst=("payment_installments", "max"),
+                                      voucher=("payment_type", lambda s: int((s == "voucher").any())))
+f = o.set_index("order_id").join(lines_o, how="inner").join(pays_o, how="inner").reset_index()
+f["day"] = f.order_purchase_timestamp.dt.normalize()
+f = f.sort_values(["customer_unique_id", "order_purchase_timestamp", "order_id"]).reset_index(drop=True)
+print("orders", len(f))
+
+# prints: orders 96477</div>
+      </div>
+      <div class="step">
+        <p><strong>Build the seven features and the label.</strong> Every feature looks only at this order and the same person's earlier rows (<code>cumcount</code>, <code>shift(1)</code>). The label is the only thing that looks forward (<code>shift(-1)</code>), and it is the target, never an input.</p>
+        <div class="prompt-box good"><span class="label">★ Block 2 · features as of purchase, label 90 days ahead</span>g = f.groupby("customer_unique_id")
+f["prior"] = g.cumcount()
+gap = (f.day - g.day.shift(1)).dt.days
+f["recency"] = np.where(f.prior &gt; 0, 1 / (1 + gap), 0.0)
+nxt = (g.day.shift(-1) - f.day).dt.days
+f["y"] = (nxt &lt;= 90).astype(int)          # another order within 90 days: the target
+f["log_prior"] = np.log1p(f.prior)
+f["log_value"] = np.log1p(f.price)
+f["freight_share"] = f.freight / (f.freight + f.price)
+FEATS = ["log_prior", "recency", "log_value", "freight_share", "inst", "voucher", "n_lines"]
+print("positives", f.y.sum(), f"base rate {f.y.mean():.2%}")
+
+# prints: positives 2149 base rate 2.23%</div>
+      </div>
+      <div class="step">
+        <p><strong>Split by time, with the label window closed.</strong> Train on orders up to 2017-11-02 so every label has its full 90 days by the 2018-01-31 cutoff; score February 2018.</p>
+        <div class="prompt-box good"><span class="label">★ Block 3 · the time split</span>train = f[f.day &lt;= "2017-11-02"]
+test = f[(f.day &gt;= "2018-02-01") &amp; (f.day &lt;= "2018-02-28")]
+print("train", len(train), "positives", train.y.sum(), "| month T+1", len(test), "positives", test.y.sum(), f"base {test.y.mean():.2%}")
+
+# prints: train 31117 positives 868 | month T+1 6555 positives 216 base 3.30%</div>
+      </div>
+      <div class="step">
+        <p><strong>Fit and read AUC on both sides.</strong> The scaler sits inside the pipeline so its means and spreads come from training rows only. Pass probabilities, not class labels, to <code>roc_auc_score</code>.</p>
+        <div class="prompt-box good"><span class="label">★ Block 4 · fit, then AUC</span>model = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000))
+model.fit(train[FEATS], train.y)
+p_tr = model.predict_proba(train[FEATS])[:, 1]
+p_te = model.predict_proba(test[FEATS])[:, 1]
+print(f"train AUC {roc_auc_score(train.y, p_tr):.4f}  month T+1 AUC {roc_auc_score(test.y, p_te):.4f}")
+
+# prints: train AUC 0.6257  month T+1 AUC 0.5907</div>
+      </div>
+      <div class="step">
+        <p><strong>Compute top-decile lift.</strong> This is the number a brand budget is set against. Sort with a stable sort so ties break the same way every run.</p>
+        <div class="prompt-box good"><span class="label">★ Block 5 · lift at the top decile</span>def lift_top_decile(y, p):
+    order = np.argsort(-p, kind="stable")
+    n = int(np.ceil(len(y) * 0.10))
+    hits = int(np.asarray(y)[order[:n]].sum())
+    return n, hits, (hits / n) / np.mean(y)
+
+n, hits, lift = lift_top_decile(test.y.values, p_te)
+print(f"top decile {n} orders, {hits} repeats, lift {lift:.2f}x")
+
+# prints: top decile 656 orders, 46 repeats, lift 2.13x</div>
+      </div>
+      <div class="step">
+        <p><strong>Now do it the flattering way, once, on purpose.</strong> Shuffle the same period into a random 80/20 split and score it. Seeing the better number appear is what makes the time-split habit stick.</p>
+        <div class="prompt-box good"><span class="label">★ Block 6 · the random split, for comparison only</span>rtr, rte = train_test_split(f[f.day &lt;= "2018-02-28"], test_size=0.2, random_state=20260929)
+m2 = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000)).fit(rtr[FEATS], rtr.y)
+p2 = m2.predict_proba(rte[FEATS])[:, 1]
+n2, h2, l2 = lift_top_decile(rte.y.values, p2)
+print(f"random split AUC {roc_auc_score(rte.y, p2):.4f}  lift {l2:.2f}x")
+
+# prints: random split AUC 0.6249  lift 2.41x</div>
+      </div>
+      <div class="step">
+        <p><strong>Walk forward with TimeSeriesSplit, trimming each fold's training rows to closed labels.</strong> Four folds, four numbers: the spread tells you how much to trust any single one.</p>
+        <div class="prompt-box good"><span class="label">★ Block 7 · walk-forward folds</span>ts = f[f.day &lt;= "2018-02-28"].sort_values("order_purchase_timestamp")
+for k, (a, b) in enumerate(TimeSeriesSplit(n_splits=4).split(ts)):
+    tr, te = ts.iloc[a], ts.iloc[b]
+    tr = tr[tr.day &lt;= te.day.min() - pd.Timedelta(days=90)]   # close every label before the test block
+    mk = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000)).fit(tr[FEATS], tr.y)
+    print(f"fold {k + 1}: train {len(tr)} test {len(te)} AUC {roc_auc_score(te.y, mk.predict_proba(te[FEATS])[:, 1]):.4f}")
+
+# prints: fold 1: train 3130 test 11463 AUC 0.6247
+#         fold 2: train 11889 test 11463 AUC 0.5941
+#         fold 3: train 21342 test 11463 AUC 0.6051
+#         fold 4: train 28312 test 11463 AUC 0.5687</div>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The split that looks standard and measures the past with the future</span>
+X_train, X_test, y_train, y_test = train_test_split(f[FEATS], f.y, test_size=0.2)
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 6</h2>
+      <span class="tag exercise">30 min</span>
+    </div>
+    <ol>
+      <li>Move the cutoff one month earlier (end of month T = 2017-12-31), recompute the training end date from the 90-day window, score January 2018, and write down how AUC and lift move.</li>
+      <li>Change block 3 to train on orders up to 2018-01-31 instead of 2017-11-02, rerun, and count how many training orders now carry a label of 0 that turns into 1 once you look past the cutoff.</li>
+      <li>Add review score as an eighth feature, rerun the time split, and write two sentences on why the result must not be shipped, whichever way it moves.</li>
+      <li>For one model your team runs, write the three constants (cutoff, label window, training end) and check that the training end really is the cutoff minus the window.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Builder session 5 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · Review score predicts repeat purchase reasonably well. Why is it left out of the feature list?</p>
+      <button class="qopt" type="button">A · Because the licence forbids using review scores</button>
+      <button class="qopt" type="button">B · Because scores from 1 to 5 cannot be standardised</button>
+      <button class="qopt" type="button">C · Because the survey arrives after delivery, so the score does not exist at the purchase moment when the model is asked</button>
+      <button class="qopt" type="button">D · Because too many orders have more than one review</button>
+      <p class="qwhy">Olist sends the survey once the product arrives or the estimate is due. At scoring time it is not there, and 83 of 197 repeat orders were placed the same day, before any review could exist. A feature must exist at the moment of prediction.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">2 · Month T ends on 2018-01-31 and the label is "another order within 90 days". Why does training stop at 2017-11-02?</p>
+      <button class="qopt" type="button">A · To keep the training set small enough to fit quickly</button>
+      <button class="qopt" type="button">B · Because later orders still have open label windows, and customers who will return after the cutoff would be recorded as non-repeat</button>
+      <button class="qopt" type="button">C · Because Olist data before November 2017 is cleaner</button>
+      <button class="qopt" type="button">D · Because TimeSeriesSplit requires a 90-day gap by default</button>
+      <p class="qwhy">2018-01-31 minus 90 days is 2017-11-02. Every training order up to then has its full window observed by the cutoff. Train later and some labels are wrong answers. TimeSeriesSplit does not know about your label window; you add the gap yourself.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">3 · Month T+1 has 24 positives and the top 58 orders hold 9 of them: lift 3.71x. What is the honest way to report it?</p>
+      <button class="qopt" type="button">A · "The model is 3.71 times better than chance, full stop"</button>
+      <button class="qopt" type="button">B · "Lift is unreliable, so report AUC only"</button>
+      <button class="qopt" type="button">C · "Training AUC is lower than test AUC, so the model generalises unusually well"</button>
+      <button class="qopt" type="button">D · "3.71x on 24 positives: one hit either way moves it by 0.41, so it sits between about 3.3x and 4.1x and clears the 2.0 gate either way"</button>
+      <p class="qwhy">Nine hits out of 24 is a small count. Saying how much one hit moves the number is the honest width. And train AUC below test AUC here is small-sample noise in a weak label, not evidence of a good model.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The model, its split and its scores on Serai's sample</span><span class="note">Logistic regression by gradient descent, seven features, weights from zero; train to 2017-11-02, score February 2018; numbers as the bench prints them, checked by an independent Python reference</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">TimeSeriesSplit and why random splits mislead on time-ordered data</span><span class="note">scikit-learn developers. TimeSeriesSplit; LogisticRegression (Linear Models user guide); roc_auc_score. https://scikit-learn.org/stable/ (read at source)</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Logistic regression as a regularised linear classifier; AUC from scores</span><span class="note">scikit-learn Linear Models user guide and roc_auc_score reference, read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Survey timing behind the review-score exclusion</span><span class="note">Olist (2018). Brazilian E-Commerce Public Dataset by Olist. Kaggle, CC BY-NC-SA 4.0, dataset description read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Time split vs random split on the full public file</span><span class="note">Build-along run on the full public file; every printed number shown above is what it prints</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Leakage as a formal problem</span><span class="note">Session 6, the leakage hunt, with Kaufman et al. (2012) on learn-predict separation</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Calibration, tuning, deployment and monitoring</span><span class="note">Not covered; owned by the ML production, model evaluation and feature engineering courses</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 5 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>As of purchase</b><span>A feature is allowed only if its value existed when the model is asked. Review score waits.</span></div>
+      <div class="cheat-item"><b>Three constants</b><span>Cutoff 2018-01-31, label 90 days, train end 2017-11-02 = cutoff minus window.</span></div>
+      <div class="cheat-item"><b>Month T+1 only</b><span>Score the month the model never saw: 574 orders, 24 repeats, base 4.18%.</span></div>
+      <div class="cheat-item"><b>AUC and lift</b><span>AUC 0.7894 ranks; lift 3.71x (9 of top 58) is what a brand pays for.</span></div>
+      <div class="cheat-item"><b>Say the width</b><span>24 positives: one hit moves lift by 0.41. Report sample size beside every score.</span></div>
+      <div class="cheat-item"><b>No shuffling</b><span>A random split trains on the future. TimeSeriesSplit, plus a label-window trim per fold.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>You have a model that clears the gate honestly. Session 6 adds one innocent-looking column, a backfilled "has a later order" flag, watches training AUC jump to 0.9913, and then shows month T+1 lift falling to 1.65x, under the gate. Bring tonight's three constants.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Builder session 5 of 10 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="b4-cohorts-and-repeat-purchase.html">← Prev: Cohorts and repeat purchase</a> &nbsp;·&nbsp; <a href="b6-the-leakage-hunt.html">Next: The leakage hunt →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Builder session 7 of 10. Score gen AI listing copy and review summaries with a rubric written as code: required facts read from the rows, banned claims, length. Check the rubric against a hand-labelled golden set, find the false pass and the false fail, and watch good copy fail when the rows underneath are dirty.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="Listing copy and review summaries, scored - learn ship social commerce with phoebe">
+<meta property="og:description" content="Builder session 7 of 10. A rubric as code, a golden set that checks it, and the re-send that turns 15 passing drafts into 7.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/b7-copy-and-summaries-scored.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Listing copy and review summaries, scored - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Builder session 7 of 10. The facts in the copy come from the rows, so the rows decide whether good copy passes.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Builder session 7 · Listing copy and review summaries, scored - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Builder session 7 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Builder session 7 of 10</div>
+    <h1>Listing copy and review summaries, <span class="accent">scored</span></h1>
+    <p class="sub">A language model will happily write a listing that says "best", a summary that says customers "love" a store, and a review count it never looked up. Serai Commerce, the constructed enabler, wants draft copy for its sellers, and it will only ship drafts that pass a check. Tonight you write that check as code: three tests every draft must pass, facts read from the rows rather than typed in, and a hand-labelled golden set that tells you when the check itself is wrong.</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Advanced-practical</span>
+      <span class="chip audience">ML and AI engineers</span>
+      <span class="chip audience">Analytics engineers who own the facts</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · Rubric, facts, golden set</span>
+      <span class="a3" style="flex:4">20-42 · Build-along: the rubric in Python</span>
+      <span class="a4" style="flex:1">42-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Where the gen AI layer sits</h2>
+    </div>
+    <p class="lede">Sessions 1 to 6 gave Serai a schema, its tests, a metric registry, cohorts and one repeat-purchase model. Sessions 7 and 8 are the gen AI layer. Tonight is the part that can be fully automated: scoring draft listing copy and draft review summaries before a seller ever sees them. Two things are honest up front. First, no language model runs here: Serai's 20 drafts (10 listings, 10 store summaries) are pre-written and constructed, written by hand to behave the way model drafts behave. Second, the facts they talk about are real: product category and weight from the Olist products table, and review counts, mean score and the share of one- and two-star reviews recomputed from real review SCORES. No review text is read anywhere, because the Olist data is licensed CC BY-NC-SA 4.0 and Serai ships scores only. Eval method in depth, from sampling a golden set to judging with a second model, belongs to <a href="https://phoebefu6.github.io/learn-ai-evals-with-phoebe/">Learn AI Evals with Phoebe</a>; tonight applies it to seller copy.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A Python rubric that scores any draft against three checks (required facts present, banned claims absent, length in range), a facts function that reads those required facts from one-row-per-order data, and a golden-set check that reports agreement, false passes and false fails. You run it on five drafts you write yourself, then rerun it on un-repaired rows and watch a correct summary fail.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the three checks and why they are code</span>
+      <h2>The rubric as code</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A rubric is a function: it takes a draft and the facts for the thing the draft describes, and it returns pass or fail with a reason. Writing it as code, not as a checklist a reviewer keeps in their head, is what lets it run on every draft, every day, with the same answer twice.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 304" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn rubric. A constructed draft summary for Store 2 goes into three checks. Check one, required facts: 153 reviews, mean 3.9 and 18 percent one or two stars must appear, read from the rows. Check two, banned claims: ten patterns such as best, guarantee and love. Check three, length: 25 to 70 words for a listing, 20 to 60 for a summary. A draft passes only if all three pass. Across Serai's 20 constructed drafts, 15 pass.">
+        <defs>
+          <filter id="b7aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="71" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b7aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b7aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b7aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b7aL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b7aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b7aB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .b7aV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b7aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b7aH" x="30" y="26">THREE CHECKS, ONE FUNCTION</text>
+        <text class="b7aS" x="250" y="26">each check reads the draft and the rows, never the model's opinion of its own work</text>
+
+        <g filter="url(#b7aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="56" width="200" height="190" rx="10" transform="rotate(-1.2 130 151)" fill="#FFFFFF"/>
+          <path d="M48 172 L210 172" stroke="#CDD2DC"/>
+          <path d="M48 190 L196 190" stroke="#CDD2DC"/>
+          <path d="M48 208 L204 208" stroke="#CDD2DC"/>
+          <path d="M200 220 L222 198 L228 204 L206 226 Z" fill="#E8D29A"/>
+          <path d="M200 220 L196 232 L206 226"/>
+          <path d="M234 151 L284 86" marker-end="url(#b7aAr)"/>
+          <path d="M234 151 L284 152" marker-end="url(#b7aAr)"/>
+          <path d="M234 151 L284 218" marker-end="url(#b7aAr)"/>
+          <rect x="290" y="56" width="300" height="60" rx="10" transform="rotate(0.6 440 86)" fill="#FBF5E6"/>
+          <rect x="290" y="122" width="300" height="60" rx="10" transform="rotate(-0.5 440 152)" fill="#FBF5E6"/>
+          <rect x="290" y="188" width="300" height="60" rx="10" transform="rotate(0.4 440 218)" fill="#FBF5E6"/>
+          <path d="M594 86 L644 140" marker-end="url(#b7aAr)"/>
+          <path d="M594 152 L644 152" marker-end="url(#b7aAr)"/>
+          <path d="M594 218 L644 164" marker-end="url(#b7aAr)"/>
+          <rect x="650" y="100" width="200" height="104" rx="12" transform="rotate(-0.6 750 152)" fill="#A9C4EA"/>
+        </g>
+
+        <text class="b7aH" x="46" y="82">DRAFT S1 · STORE 2</text>
+        <text class="b7aS" x="46" y="100">a review summary, 36 words</text>
+        <text class="b7aL" x="46" y="124">says 153 reviews, mean 3.9,</text>
+        <text class="b7aL" x="46" y="142">18% one or two stars</text>
+        <text class="b7aS" x="46" y="240">pre-written, constructed</text>
+
+        <text class="b7aH" x="306" y="80">1 · REQUIRED FACTS PRESENT</text>
+        <text class="b7aS" x="306" y="100">153 reviews · 3.9 · 18%, read from the rows</text>
+        <text class="b7aH" x="306" y="146">2 · BANNED CLAIMS ABSENT</text>
+        <text class="b7aS" x="306" y="166">ten patterns, such as best, guarantee, love</text>
+        <text class="b7aH" x="306" y="212">3 · LENGTH IN RANGE</text>
+        <text class="b7aS" x="306" y="232">listing 25-70 words · summary 20-60</text>
+
+        <text class="b7aB" x="666" y="126">PASS = ALL THREE PASS</text>
+        <text class="b7aL" x="666" y="146">one reason per failure</text>
+        <text class="b7aV" x="666" y="180">15 of 20 pass</text>
+        <text class="b7aS" x="666" y="196">Serai's constructed drafts</text>
+
+        <text class="b7aN" x="30" y="284">The rubric only knows what you wrote into it. Part 3 is about the two things it missed.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a draft passes only when every check passes, and each failure names its reason</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The three checks, and what each one is for<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Check</th><th>What it tests</th><th>What it catches</th><th>What it cannot catch</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Required facts present</strong></td><td>Every fact for this listing or store appears in the text, in the exact form the rubric expects</td><td>A count the model guessed, a mean it rounded wrong, a fact it left out</td><td>A true fact in a different format; a false fact the rubric was never told to check</td></tr>
+            <tr><td><strong>Banned claims absent</strong></td><td>No match for a list of patterns: superlatives, guarantees, "free shipping", authenticity and certification claims, absolutes, and sentiment words</td><td>Claims a seller cannot back with data, and words like "love" that review scores cannot show</td><td>A new phrasing of the same claim that no pattern matches</td></tr>
+            <tr><td><strong>Length in range</strong></td><td>Word count: 25 to 70 for a listing, 20 to 60 for a summary</td><td>Rambling drafts and one-line stubs</td><td>Anything about content</td></tr>
+          </tbody>
+        </table>
+        <p>On Serai's 20 constructed drafts the rubric passes 15. Two listings fail on banned claims (L2 says "best" and "free shipping"; L6 says "authentic" and "guaranteed"), one summary fails on "love" (S3), one summary states a review count the rows do not support (S5), and one listing, L4, fails for a reason Part 3 unpacks. The banned list, the length limits and the 70% pass gate are Serai's constructed policy, not an industry standard. Write your own from your marketplace's listing rules and your legal team's list of claims you cannot substantiate.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why "love" is banned in a summary built from scores<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A review score is a number from 1 to 5. It tells you how a buyer rated an order, not why, and not how they feel about the store. A summary that says customers "love" a store is making a sentiment claim the data cannot support, however high the mean. Serai's summaries are written from scores only, because the review text cannot be shipped under the licence, so the rubric bans the words that would pretend otherwise. The general rule: a generated claim may be no stronger than the evidence the generator was given.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Regex patterns are a floor, not a ceiling<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Word-boundary patterns such as <code>\bbest\b</code> catch the obvious cases cheaply and never drift. They also miss "unbeatable", "top-rated" and every phrasing nobody thought of. That is acceptable for a first gate as long as you treat the pattern list as a living file: every time a reviewer rejects a draft the rubric passed, the reason becomes a new pattern or a new required fact. Part 3's golden set is how you find those reasons systematically rather than by complaint.</p>
+        <div class="prompt-box good"><span class="label">★ Four of Serai's ten banned patterns</span>BANNED = {
+    "superlative":                  r"\bbest\b",
+    "guarantee":                    r"\bguarantee(d|s)?\b",
+    "free shipping":                r"\bfree shipping",
+    "sentiment scores cannot show": r"\b(love|loves|loved|rave|raves)\b",
+}</div>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The security community already names this failure.</strong> OWASP's Top 10 for LLM Applications 2025 lists LLM09 Misinformation, which "occurs when LLMs produce false or misleading information that appears credible". Among its prevention measures is automatic validation of key outputs. A rubric that checks every draft before it ships is exactly that: the cheapest validation there is, run on every output rather than on a sample.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers required facts recomputed from the data</span>
+      <h2>Facts come from rows</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">The required-fact check is only as good as the facts it compares against. Serai's rubric never stores "Store 2 has 153 reviews" as a constant. It recomputes the count, the mean and the low-score share from the order rows every time it runs. That is the right design, and it means a defect in the rows becomes a defect in the gen AI layer.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two hand-drawn panels for Store 2 and constructed draft S1. Left, repaired rows with one row per order: the rows give 153 reviews, mean 3.9 and 18 percent one or two stars; S1 says the same, so the required-fact check passes. Right, raw rows with re-sent orders kept: a re-sent order counts twice and the rows give 155 reviews; S1 still says 153, so the check fails. Across all 20 drafts, repaired rows give 15 of 20 passing with 90 percent agreement with the golden verdict; raw rows give 7 of 20 passing with 50 percent agreement and 9 false fails.">
+        <defs>
+          <filter id="b7bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="73" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b7bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b7bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b7bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b7bR { font: 800 12px Inter, sans-serif; fill: #991B1B; }
+          .b7bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b7bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b7bV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b7bX { font: 800 16px Inter, sans-serif; fill: #991B1B; }
+          .b7bA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b7bB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .b7bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b7bH" x="30" y="26">THE SAME SUMMARY, TWO SETS OF ROWS</text>
+        <text class="b7bS" x="300" y="26">Store 2 · draft S1 is constructed, the review scores are real Olist rows</text>
+
+        <g filter="url(#b7bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="46" width="400" height="214" rx="12" transform="rotate(-0.3 230 153)" fill="#FBF5E6" stroke="#966E08"/>
+          <rect x="450" y="46" width="400" height="214" rx="12" transform="rotate(0.3 650 153)" fill="#FEF2F2" stroke="#FCA5A5"/>
+          <rect x="52" y="90" width="44" height="20" rx="3" transform="rotate(-2 74 100)" fill="url(#b7bHc)"/>
+          <rect x="104" y="90" width="44" height="20" rx="3" transform="rotate(1.5 126 100)" fill="url(#b7bHc)"/>
+          <rect x="156" y="90" width="44" height="20" rx="3" transform="rotate(-1 178 100)" fill="url(#b7bHc)"/>
+          <rect x="208" y="90" width="44" height="20" rx="3" transform="rotate(2 230 100)" fill="url(#b7bHc)"/>
+          <rect x="472" y="90" width="44" height="20" rx="3" transform="rotate(-2 494 100)" fill="url(#b7bHc)"/>
+          <rect x="524" y="90" width="44" height="20" rx="3" transform="rotate(1.5 546 100)" fill="url(#b7bHc)"/>
+          <rect x="576" y="90" width="44" height="20" rx="3" transform="rotate(-1 598 100)" fill="url(#b7bHc)"/>
+          <path d="M630 90 L672 92 L671 111 L629 109 Z" stroke="#991B1B" stroke-dasharray="4 3"/>
+          <path d="M650 116 C 640 128, 608 128, 600 116" stroke="#991B1B" marker-end="url(#b7bAr)"/>
+          <rect x="52" y="184" width="200" height="56" rx="8" transform="rotate(0.8 152 212)" fill="#A9C4EA"/>
+          <rect x="472" y="184" width="200" height="56" rx="8" transform="rotate(-0.8 572 212)" fill="#FFFFFF" stroke="#991B1B"/>
+          <path d="M120 296 L760 296" stroke="#CDD2DC"/>
+          <path d="M400 290 L470 290" marker-end="url(#b7bAr)"/>
+        </g>
+
+        <text class="b7bH" x="48" y="72">REPAIRED ROWS · ONE ROW PER ORDER</text>
+        <text class="b7bS" x="270" y="104">reviewed orders</text>
+        <text class="b7bV" x="52" y="144">153 reviews · 3.9 · 18%</text>
+        <text class="b7bS" x="52" y="164">facts the rubric recomputes from these rows</text>
+        <text class="b7bB" x="64" y="206">S1 says 153 · 3.9 · 18%</text>
+        <text class="b7bL" x="64" y="226">required facts present: pass</text>
+
+        <text class="b7bR" x="468" y="72">RAW ROWS · RE-SENT ORDERS KEPT</text>
+        <text class="b7bS" x="684" y="104">a re-send</text>
+        <text class="b7bS" x="684" y="118">counts twice</text>
+        <text class="b7bX" x="472" y="144">155 reviews</text>
+        <text class="b7bS" x="472" y="164">two extra reviewed orders, all re-sends</text>
+        <text class="b7bL" x="484" y="206">S1 still says 153</text>
+        <text class="b7bR" x="484" y="226">required fact missing: fail</text>
+
+        <text class="b7bA" x="120" y="284">ALL 20 DRAFTS, REPAIRED ROWS</text>
+        <text class="b7bA" x="500" y="284">ALL 20 DRAFTS, RAW ROWS</text>
+        <text class="b7bV" x="120" y="320">15 of 20 · 90% agree</text>
+        <text class="b7bX" x="500" y="320">7 of 20 · 50% agree</text>
+        <text class="b7bS" x="500" y="338">9 false fails: every good summary now fails</text>
+
+        <text class="b7bN" x="30" y="352">The copy did not change. The facts did.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the rubric recomputes facts from the rows, so a re-sent order turns a correct summary into a failure</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Store 2, clean and raw<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>On the repaired frame from session 2, Store 2 has 153 reviewed orders, a mean score of 3.9 and 18% of scores at one or two stars. Draft S1 says exactly that, and passes. Skip the data engineering layer and run the same rubric on the raw exports, where 152 re-sent orders are still sitting under variant keys: Store 2 now reads 155 reviews. S1 has not changed a word, and it fails its required-fact check. Across all 20 drafts the pass count falls from 15 to 7, agreement with the golden verdict falls from 90% to 50%, and 9 drafts that a careful reviewer would publish now fail. Every one of the ten summaries is affected; the listings, whose facts come from the products table rather than from order rows, are not.</p>
+        <table class="clean">
+          <thead><tr><th>Rows the rubric reads</th><th>Store 2 facts</th><th>Drafts passing</th><th>Agreement with golden</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Repaired (sessions 1 and 2 built)</strong></td><td>153 reviews · 3.9 · 18%</td><td>15 of 20 (75%)</td><td>90%</td></tr>
+            <tr><td><strong>Raw exports (DE skipped)</strong></td><td>155 reviews</td><td>7 of 20 (35%)</td><td>50%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The failure that would not show up in production<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Serai's drafts were written from the true facts, so dirty rows make good drafts fail, loudly. In production the direction is usually reversed and much quieter: the model is fed facts from the same dirty rows the rubric checks against, the draft says "155 reviews", the rubric recomputes 155, and the draft passes. Both sides agree and both are wrong. That is why the gen AI layer sits on top of the data engineering layer and not beside it. A rubric is a consistency check between text and facts; it cannot tell you the facts are true. Only the tests in session 2 can.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Which review counts as the order's review<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A "review count" sounds unambiguous until you read the rows. The fact function counts reviewed orders: one score per order, the first by answer time, as the fact table from session 1 keeps it. Change that choice (last review, mean of all reviews, every review row) and the required facts change with it, and every summary written to the old definition fails. Put the choice in the metric registry from session 3, next to the other definitions, so the copy layer and the analytics layer cannot disagree about what "153 reviews" means.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Olist's review rows do not line up one to one with orders.</strong> In Serai's 8,614-order sample, 39 orders carry more than one review and 68 carry none; on the full public file it is 525 and 646. Olist also documents that the satisfaction survey goes out when the customer receives the product or when the estimated delivery date is due, so a score can exist for an order that has not yet arrived. Any summary that quotes a count is quoting a definition. Make it the registry's definition, not the model's guess.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers the golden set, false passes and false fails</span>
+      <h2>Checking the checker</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">A rubric that passes 15 of 20 drafts tells you nothing until you know whether it passed the right 15. The golden set answers that: a careful person labels every draft "fit to publish" or not, by hand, and you measure how often the rubric agrees. Serai's gate asks for at least 70% of drafts passing and at least 85% agreement with the golden verdict, both constructed policy.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hand-drawn tiles for all 20 constructed drafts, L1 to L10 and S1 to S10. The top row is the rubric's verdict, pass or fail; the bottom row is the golden verdict, fit to publish yes or no. The rows agree on 18 of 20 drafts, 90 percent against an 85 percent gate. Two columns disagree. L4 is a false fail: it gives the weight as 1.75 kg, which is correct, but the rubric looks for 1750 g. L8 is a false pass: it says the watch ships from Sao Paulo, but the seller is in Rio de Janeiro state, and the rubric never checks origin.">
+        <defs>
+          <filter id="b7cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="79" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b7cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b7cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b7cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b7cR { font: 800 12px Inter, sans-serif; fill: #991B1B; }
+          .b7cL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b7cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b7cT { font: 600 10.5px Inter, sans-serif; fill: #1A2232; }
+          .b7cF { font: 700 10.5px Inter, sans-serif; fill: #991B1B; }
+          .b7cA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b7cV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b7cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b7cH" x="30" y="26">RUBRIC AGAINST GOLDEN, ALL 20 DRAFTS</text>
+        <text class="b7cS" x="300" y="26">constructed drafts · golden yes = fit to publish · two columns disagree</text>
+
+        <g filter="url(#b7cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="157" y="52" width="42" height="140" rx="8" transform="rotate(0.5 178 122)" fill="#A9C4EA" stroke="#1D3A66"/>
+          <rect x="317" y="52" width="42" height="140" rx="8" transform="rotate(-0.5 338 122)" fill="#A9C4EA" stroke="#1D3A66"/>
+          <rect x="40" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="80" y="72" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="120" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="160" y="72" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="200" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="240" y="72" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="280" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="320" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="360" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="400" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="440" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="480" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="520" y="72" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="560" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="600" y="72" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="640" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="680" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="720" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="760" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="800" y="72" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="40" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="80" y="138" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="120" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="160" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="200" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="240" y="138" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="280" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="320" y="138" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="360" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="400" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="440" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="480" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="520" y="138" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="560" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="600" y="138" width="36" height="30" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="640" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="680" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="720" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="760" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="800" y="138" width="36" height="30" rx="4" fill="#FFFFFF"/>
+          <path d="M178 198 L150 222" marker-end="url(#b7cAr)"/>
+          <path d="M338 198 L520 222" marker-end="url(#b7cAr)"/>
+          <rect x="40" y="228" width="390" height="98" rx="10" transform="rotate(-0.5 235 277)" fill="#FFFFFF"/>
+          <rect x="450" y="228" width="390" height="98" rx="10" transform="rotate(0.5 645 277)" fill="#FFFFFF"/>
+          <circle cx="806" cy="262" r="12"/>
+          <path d="M815 271 L826 282"/>
+        </g>
+
+        <text class="b7cA" x="40" y="64">RUBRIC VERDICT</text>
+        <text class="b7cA" x="40" y="130">GOLDEN VERDICT</text>
+        <text class="b7cT" x="46" y="91">pass</text>
+        <text class="b7cF" x="88" y="91">fail</text>
+        <text class="b7cT" x="126" y="91">pass</text>
+        <text class="b7cF" x="168" y="91">fail</text>
+        <text class="b7cT" x="206" y="91">pass</text>
+        <text class="b7cF" x="248" y="91">fail</text>
+        <text class="b7cT" x="286" y="91">pass</text>
+        <text class="b7cT" x="326" y="91">pass</text>
+        <text class="b7cT" x="366" y="91">pass</text>
+        <text class="b7cT" x="406" y="91">pass</text>
+        <text class="b7cT" x="446" y="91">pass</text>
+        <text class="b7cT" x="486" y="91">pass</text>
+        <text class="b7cF" x="528" y="91">fail</text>
+        <text class="b7cT" x="566" y="91">pass</text>
+        <text class="b7cF" x="608" y="91">fail</text>
+        <text class="b7cT" x="646" y="91">pass</text>
+        <text class="b7cT" x="686" y="91">pass</text>
+        <text class="b7cT" x="726" y="91">pass</text>
+        <text class="b7cT" x="766" y="91">pass</text>
+        <text class="b7cT" x="806" y="91">pass</text>
+        <text class="b7cT" x="49" y="157">yes</text>
+        <text class="b7cF" x="91" y="157">no</text>
+        <text class="b7cT" x="129" y="157">yes</text>
+        <text class="b7cT" x="169" y="157">yes</text>
+        <text class="b7cT" x="209" y="157">yes</text>
+        <text class="b7cF" x="251" y="157">no</text>
+        <text class="b7cT" x="289" y="157">yes</text>
+        <text class="b7cF" x="331" y="157">no</text>
+        <text class="b7cT" x="369" y="157">yes</text>
+        <text class="b7cT" x="409" y="157">yes</text>
+        <text class="b7cT" x="449" y="157">yes</text>
+        <text class="b7cT" x="489" y="157">yes</text>
+        <text class="b7cF" x="531" y="157">no</text>
+        <text class="b7cT" x="569" y="157">yes</text>
+        <text class="b7cF" x="611" y="157">no</text>
+        <text class="b7cT" x="649" y="157">yes</text>
+        <text class="b7cT" x="689" y="157">yes</text>
+        <text class="b7cT" x="729" y="157">yes</text>
+        <text class="b7cT" x="769" y="157">yes</text>
+        <text class="b7cT" x="809" y="157">yes</text>
+        <text class="b7cS" x="50" y="186">L1</text>
+        <text class="b7cS" x="90" y="186">L2</text>
+        <text class="b7cS" x="130" y="186">L3</text>
+        <text class="b7cS" x="170" y="186">L4</text>
+        <text class="b7cS" x="210" y="186">L5</text>
+        <text class="b7cS" x="250" y="186">L6</text>
+        <text class="b7cS" x="290" y="186">L7</text>
+        <text class="b7cS" x="330" y="186">L8</text>
+        <text class="b7cS" x="370" y="186">L9</text>
+        <text class="b7cS" x="406" y="186">L10</text>
+        <text class="b7cS" x="450" y="186">S1</text>
+        <text class="b7cS" x="490" y="186">S2</text>
+        <text class="b7cS" x="530" y="186">S3</text>
+        <text class="b7cS" x="570" y="186">S4</text>
+        <text class="b7cS" x="610" y="186">S5</text>
+        <text class="b7cS" x="650" y="186">S6</text>
+        <text class="b7cS" x="690" y="186">S7</text>
+        <text class="b7cS" x="730" y="186">S8</text>
+        <text class="b7cS" x="770" y="186">S9</text>
+        <text class="b7cS" x="806" y="186">S10</text>
+
+        <text class="b7cH" x="58" y="252">L4 · FALSE FAIL</text>
+        <text class="b7cL" x="58" y="272">says 1.75 kg, which is correct</text>
+        <text class="b7cS" x="58" y="290">the rubric looks for the string "1750 g"</text>
+        <text class="b7cS" x="58" y="308">right fact, unreadable unit: fix the check</text>
+
+        <text class="b7cR" x="468" y="252">L8 · FALSE PASS</text>
+        <text class="b7cL" x="468" y="272">says it ships from Sao Paulo</text>
+        <text class="b7cS" x="468" y="290">the seller is in Rio de Janeiro state</text>
+        <text class="b7cS" x="468" y="308">origin is never checked: add the fact</text>
+
+        <text class="b7cV" x="40" y="356">18 of 20 agree = 90%</text>
+        <text class="b7cN" x="252" y="356">gate 85% · the gate passes, and the two misses are still the lesson</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - agreement is 90%, and the two disagreements show one fact the rubric cannot read and one it never checks</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The false pass and the false fail<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Of Serai's 20 drafts, the rubric and the golden labels agree on 18: 14 drafts both call fit, 4 both call unfit (L2, L6, S3 and S5). Two disagree, and they disagree in opposite directions.</p>
+        <ul>
+          <li><strong>L4, the false fail.</strong> The draft gives the weight as 1.75 kg. That is correct: the products table holds 1,750 grams. The required-fact check looks for the string "1750 g", does not find it, and fails a draft a reviewer would publish. A false fail costs a seller a good draft and teaches people to ignore the rubric.</li>
+          <li><strong>L8, the false pass.</strong> The draft says the watch ships from Sao Paulo. The listing's seller is in Rio de Janeiro state. The rubric checks category and weight for listings, not origin, so the draft passes with a false claim in it. A false pass is the expensive one: it ships.</li>
+        </ul>
+        <p>The right response to both is to fix the rubric, never the threshold. Normalise units before matching, and add the seller's state to the required facts for listings. Then rerun the golden set to confirm the fixes did not create new disagreements.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why 20 labels is a smoke test, not a measurement<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Each draft is 5 points of agreement. One more disagreement drops Serai from 90% to 85%, exactly on the gate; two more drop it below. That is the same small-number honesty as session 5's model, where one hit of 24 moves lift by 0.41. Twenty labels are enough to find the two kinds of rubric gap on this page. They are not enough to promise a seller a false-pass rate. Grow the golden set as you grow the catalogue, sample it so it covers every category and store size, and keep the labeller blind to the rubric's verdict. How to size and sample a golden set properly is <a href="https://phoebefu6.github.io/learn-ai-evals-with-phoebe/">Learn AI Evals with Phoebe</a>'s territory.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Does scored copy sell more? The evidence disagrees<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A rubric tells you a draft is safe to publish, not that it will sell. On whether AI-written listing copy sells more, the evidence points in different directions, and it is worth reading both sides before anyone promises a seller an uplift.</p>
+        <ul>
+          <li><strong>Randomized platform experiments.</strong> Fang, Yuan, Zhang, Donati and Sarvary ran field experiments on a cross-border e-commerce platform; the abstract (read at source) reports effects "ranging from no detectable impact to 16.3%" depending on gen AI's marginal contribution to the workflow, with gains mainly through conversion. Earlier versions and summaries reported about +2% for AI product descriptions, with the 16.3% belonging to a pre-sale chatbot workflow, not to listing copy; versions differ, and that split is reported, not read in full.</li>
+          <li><strong>Survey experiments on mentioning AI.</strong> Cicek, Gursoy and Lu (2024), reported via a Washington State University press release, found in experimental surveys of more than 1,000 US adults that products described as using artificial intelligence were less popular, more so for high-risk products. That is about MENTIONING AI in the copy, not about copy that AI wrote.</li>
+        </ul>
+        <p>Different questions, settings and outcomes. Neither settles whether Serai's sellers would sell more with scored drafts. The professional move is to measure it on your own catalogue with a controlled test, and to quote no uplift as a forecast until you have.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>NIST has a word for L8.</strong> NIST's Generative AI Profile (AI 600-1) defines confabulation as "the production of confidently stated but erroneous or false content". L8 is a textbook case: a fluent, specific, plausible shipping claim that no row supports. The rubric did not invent it, but the rubric let it through, which is why a golden set reviewed by a person sits on top of every automatic check.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>The rubric in Python, on drafts you write</h2>
+      <span class="tag demo">★ 22 min · everyone builds</span>
+    </div>
+    <p class="lede">One script, five blocks, pandas and the standard library. Every draft, fact and golden label in it is constructed: you write them, so you know the right answer before the rubric gives its own. The printed outputs below are what the script prints as written, on Python 3.9 with pandas 2.1.4. Change a draft and your numbers will differ, which is the point.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 244" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The build-along as a hand-drawn pipeline of five blocks on constructed data. Block 1, the policy: six banned patterns and two length ranges. Block 2, facts from rows: 10 reviewed orders after de-duplication against 11 rows with a re-send. Block 3, score five drafts: 3 of 5 pass. Block 4, check against golden labels: 80 percent agreement with one false pass. Block 5, rerun on the raw rows: 2 of 5 pass and agreement falls to 60 percent.">
+        <defs>
+          <filter id="b7dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="83" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b7dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b7dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b7dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b7dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b7dV { font: 800 14px Inter, sans-serif; fill: #6A4C04; }
+          .b7dX { font: 800 14px Inter, sans-serif; fill: #991B1B; }
+          .b7dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b7dH" x="30" y="26">FIVE BLOCKS, ONE RUBRIC</text>
+        <text class="b7dS" x="210" y="26">constructed drafts and facts · values as the script prints them</text>
+
+        <g filter="url(#b7dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="48" width="146" height="124" rx="10" transform="rotate(-0.6 103 110)" fill="#FFFFFF"/>
+          <path d="M180 110 L192 110" marker-end="url(#b7dAr)"/>
+          <rect x="196" y="48" width="146" height="124" rx="10" transform="rotate(0.5 269 110)" fill="#FFFFFF"/>
+          <path d="M346 110 L358 110" marker-end="url(#b7dAr)"/>
+          <rect x="362" y="48" width="146" height="124" rx="10" transform="rotate(-0.5 435 110)" fill="#FFFFFF"/>
+          <path d="M512 110 L524 110" marker-end="url(#b7dAr)"/>
+          <rect x="528" y="48" width="146" height="124" rx="10" transform="rotate(0.5 601 110)" fill="#A9C4EA"/>
+          <path d="M678 110 L690 110" marker-end="url(#b7dAr)"/>
+          <rect x="694" y="48" width="156" height="124" rx="10" transform="rotate(-0.4 772 110)" fill="#FEF2F2" stroke="#FCA5A5"/>
+        </g>
+
+        <text class="b7dH" x="42" y="72">1 · POLICY</text>
+        <text class="b7dS" x="42" y="92">banned patterns,</text>
+        <text class="b7dS" x="42" y="108">length ranges</text>
+        <text class="b7dV" x="42" y="150">6 + 2 rules</text>
+
+        <text class="b7dH" x="208" y="72">2 · FACTS</text>
+        <text class="b7dS" x="208" y="92">from rows, one</text>
+        <text class="b7dS" x="208" y="108">per order</text>
+        <text class="b7dV" x="208" y="150">10 vs 11</text>
+
+        <text class="b7dH" x="374" y="72">3 · SCORE</text>
+        <text class="b7dS" x="374" y="92">five drafts</text>
+        <text class="b7dS" x="374" y="108">you wrote</text>
+        <text class="b7dV" x="374" y="150">3 of 5 pass</text>
+
+        <text class="b7dH" x="540" y="72">4 · GOLDEN</text>
+        <text class="b7dS" x="540" y="92">your hand labels</text>
+        <text class="b7dS" x="540" y="108">vs the rubric</text>
+        <text class="b7dV" x="540" y="150">80% · 1 FP</text>
+
+        <text class="b7dH" x="706" y="72">5 · RAW ROWS</text>
+        <text class="b7dS" x="706" y="92">same drafts,</text>
+        <text class="b7dS" x="706" y="108">re-send kept</text>
+        <text class="b7dX" x="706" y="150">2 of 5 · 60%</text>
+
+        <text class="b7dN" x="30" y="202">Block 4 is the one people skip. Without golden labels, 3 of 5 passing could mean anything.</text>
+        <text class="b7dN" x="30" y="226">FP = false pass: a draft the rubric passed and you would not publish.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - policy, facts, score, golden, then the same drafts on dirty rows</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Write the policy as data.</strong> Six banned patterns and two length ranges, a subset of Serai's constructed policy. Keep them in one place the rubric reads, so adding a pattern is a one-line change.</p>
+        <div class="prompt-box good"><span class="label">★ Block 1 · the policy</span>import re
+import pandas as pd
+
+BANNED = {
+    "superlative": r"\bbest\b",
+    "guarantee": r"\bguarantee(d|s)?\b",
+    "free shipping": r"\bfree shipping",
+    "authenticity claim": r"\b(original|authentic|genuine)\b",
+    "sentiment scores cannot show": r"\b(love|loves|loved|rave|raves)\b",
+    "absolute claim": r"\b(always|never|everyone)\b",
+}
+LENGTH = {"listing": (25, 70), "summary": (20, 60)}</div>
+      </div>
+      <div class="step">
+        <p><strong>Compute the facts from rows, never type them in.</strong> Ten constructed review scores for one constructed store, then the same frame with one order re-sent. The clean function counts one row per order; the raw one counts every row, the way a rubric does when the data engineering layer is skipped.</p>
+        <div class="prompt-box good"><span class="label">★ Block 2 · facts from rows</span>scores = pd.DataFrame({
+    "order_key": ["o1", "o2", "o3", "o4", "o5", "o6", "o7", "o8", "o9", "o10"],
+    "score":     [5, 4, 5, 1, 4, 5, 3, 2, 5, 4],
+})
+resent = pd.concat([scores, scores[scores.order_key == "o4"]])  # one order re-sent
+
+def store_facts(df):
+    one = df.drop_duplicates("order_key")
+    n = len(one)
+    return {"reviews": f"{n} reviews",
+            "mean": f"{one.score.mean():.1f}",
+            "low": f"{round((one.score &lt;= 2).mean() * 100)}%"}
+
+def raw_facts(df):
+    n = len(df)
+    return {"reviews": f"{n} reviews",
+            "mean": f"{df.score.mean():.1f}",
+            "low": f"{round((df.score &lt;= 2).mean() * 100)}%"}
+
+clean = store_facts(resent)
+dirty = raw_facts(resent)
+print("clean", clean)
+print("dirty", dirty)
+
+# prints: clean {'reviews': '10 reviews', 'mean': '3.8', 'low': '20%'}
+#         dirty {'reviews': '11 reviews', 'mean': '3.5', 'low': '27%'}</div>
+      </div>
+      <div class="step">
+        <p><strong>Write the rubric as one function and five drafts by hand.</strong> D1 and D3 are what you would publish. D2 breaks the banned list, D4 claims sentiment the scores cannot show, and D5 invents a same-day shipping promise the rubric has no fact for. Each draft carries your golden label: True means fit to publish.</p>
+        <div class="prompt-box good"><span class="label">★ Block 3 · the rubric and five constructed drafts</span>def score(text, kind, facts):
+    low = text.lower()
+    missing = [v for v in facts.values() if v.lower() not in low]
+    banned = [k for k, rx in BANNED.items() if re.search(rx, text, re.I)]
+    lo, hi = LENGTH[kind]
+    words = len(text.split())
+    ok = not missing and not banned and lo &lt;= words &lt;= hi
+    return ok, missing, banned, words
+
+listing_facts = {"category": "desk lamps", "weight": "780 g"}  # constructed
+outputs = [  # (id, kind, facts, golden, text)
+    ("D1", "listing", listing_facts, True,
+     "A steady reading light for a small desk. This desk lamps item weighs 780 g, so it stays put when you "
+     "adjust the arm. Check the plug type and cable length in the photos before you order."),
+    ("D2", "listing", listing_facts, False,
+     "The best desk lamp you will ever own, guaranteed. At 780 g it feels solid, and every buyer in the "
+     "desk lamps range says the same thing about the warm light it gives."),
+    ("D3", "summary", "store", True,
+     "Across 10 reviews this store averages 3.8 out of 5. About 20% of scores are one or two stars, so the "
+     "low tail is worth a look before you scale its listings."),
+    ("D4", "summary", "store", False,
+     "Customers love this store. Across 10 reviews it averages 3.8, and 20% of scores are one or two "
+     "stars, which nobody should worry about."),
+    ("D5", "listing", listing_facts, False,
+     "A compact light for late work. This desk lamps item weighs 780 g and ships the same day from our "
+     "own warehouse, so most buyers have it within two days. The photos show the arm reach."),
+]
+
+def run(store):
+    rows = []
+    for oid, kind, facts, golden, text in outputs:
+        f = store if facts == "store" else facts
+        ok, missing, banned, words = score(text, kind, f)
+        rows.append({"id": oid, "rubric": ok, "golden": golden, "words": words,
+                     "missing": missing, "banned": banned})
+    return pd.DataFrame(rows)
+
+res = run(clean)
+print(res.to_string(index=False))
+
+# prints:
+# id  rubric  golden  words missing                         banned
+# D1    True    True     37      []                             []
+# D2   False   False     33      []       [superlative, guarantee]
+# D3    True    True     32      []                             []
+# D4   False   False     24      [] [sentiment scores cannot show]
+# D5    True   False     36      []                             []</div>
+      </div>
+      <div class="step">
+        <p><strong>Check the checker.</strong> Three numbers: agreement, false passes, false fails. D5 is your L8: a plausible claim about delivery that no fact in the rubric covers.</p>
+        <div class="prompt-box good"><span class="label">★ Block 4 · agreement with your golden labels</span>agree = (res.rubric == res.golden).mean()
+false_pass = (res.rubric &amp; ~res.golden).sum()
+false_fail = (~res.rubric &amp; res.golden).sum()
+print(f"pass {res.rubric.sum()} of {len(res)}  agreement {agree:.0%}  false pass {false_pass}  false fail {false_fail}")
+
+# prints: pass 3 of 5  agreement 80%  false pass 1  false fail 0</div>
+      </div>
+      <div class="step">
+        <p><strong>Rerun the same drafts on the raw rows.</strong> Nothing about the copy changes. D3, a draft you would publish, now fails because the facts it is checked against counted the re-send.</p>
+        <div class="prompt-box good"><span class="label">★ Block 5 · the same drafts, dirty facts</span>res2 = run(dirty)
+print(res2[["id", "rubric", "golden", "missing"]].to_string(index=False))
+print(f"pass {res2.rubric.sum()} of {len(res2)}  agreement {(res2.rubric == res2.golden).mean():.0%}")
+
+# prints:
+# id  rubric  golden                missing
+# D1    True    True                     []
+# D2   False   False                     []
+# D3   False    True [11 reviews, 3.5, 27%]
+# D4   False   False [11 reviews, 3.5, 27%]
+# D5    True   False                     []
+# pass 2 of 5  agreement 60%</div>
+      </div>
+      <div class="step">
+        <p><strong>Close the gap you found.</strong> Add a required "ships" fact to <code>listing_facts</code> (for example the seller's state) and a banned pattern for delivery promises such as <code>same day</code>. Rerun blocks 3 and 4 and confirm D5 fails and nothing else moves. That edit, made after reading a disagreement, is the whole loop.</p>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">The rubric that looks finished and checks nothing true</span>
+facts = {"reviews": "155 reviews"}   # typed in from last month's export, never recomputed
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 8</h2>
+      <span class="tag exercise">30 min</span>
+    </div>
+    <ol>
+      <li>Make the rubric unit-aware: normalise "1.75 kg", "1,750 g" and "1750g" to one form before the required-fact match, then write a constructed draft like L4 and confirm it now passes.</li>
+      <li>Write five more constructed drafts, at least one of each failure kind (banned claim, wrong fact, too long, a claim no fact covers), label them before you run the rubric, and report agreement, false passes and false fails.</li>
+      <li>Change <code>store_facts</code> to keep the LAST review per order instead of the first, on a frame where one order has two scores, and count how many of your summaries change verdict.</li>
+      <li>Open session 10, press "Skip the DE layer", and write one paragraph for Serai's product owner explaining why the gen AI pass count fell while the copy stayed the same.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Builder session 7 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · Draft S1 says Store 2 has 153 reviews, mean 3.9, 18% one or two stars. On repaired rows it passes; on raw exports it fails. What changed?</p>
+      <button class="qopt" type="button">A · The rubric's banned list caught a new word</button>
+      <button class="qopt" type="button">B · The draft became too long for the summary range</button>
+      <button class="qopt" type="button">C · The rubric recomputes facts from the rows, and with re-sent orders kept it counts 155 reviews, so the true "153" no longer matches</button>
+      <button class="qopt" type="button">D · The golden label for S1 was changed</button>
+      <p class="qwhy">The copy is identical. Required facts are recomputed from the rows on every run, so a re-sent order inflates the count and a correct summary fails. Across all 20 drafts that takes the pass count from 15 to 7.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · L8 says the watch ships from Sao Paulo; the seller is in Rio de Janeiro state. The rubric passes it. What is the right fix?</p>
+      <button class="qopt" type="button">A · Add the seller's state to the required facts for listings, then rerun the golden set</button>
+      <button class="qopt" type="button">B · Raise the pass gate from 70% to 80%</button>
+      <button class="qopt" type="button">C · Drop the golden set, since the rubric already passes 15 of 20</button>
+      <button class="qopt" type="button">D · Ban the words "Sao Paulo"</button>
+      <p class="qwhy">A false pass means the rubric never checks the fact that was wrong. Fix the rubric, not the threshold: add the missing fact, then confirm against the golden labels that nothing else moved.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">3 · A product owner reads "AI-written listings lift sales" in a headline and asks you to put an uplift in Serai's forecast. What does the evidence support?</p>
+      <button class="qopt" type="button">A · A 16.3% uplift on listing copy, from a randomized field experiment</button>
+      <button class="qopt" type="button">B · A drop in sales, because mentioning AI makes products less popular</button>
+      <button class="qopt" type="button">C · A 2% uplift, since every version of the research agrees on it</button>
+      <button class="qopt" type="button">D · No forecast: field experiments range from no detectable impact to larger effects by workflow, survey work is about mentioning AI, so measure it on your own catalogue</button>
+      <p class="qwhy">Fang et al. report effects from no detectable impact to 16.3% depending on the workflow, and the 16.3% is reported to belong to a chatbot, not listing copy. Cicek et al., reported, is about mentioning AI in copy. Different questions; neither is a forecast for Serai.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The rubric, the golden set, 15 of 20 and 90% agreement</span><span class="note">Serai's 20 drafts and golden verdicts are pre-written and constructed; the scoring is computed live in session 10 on real derived Olist facts</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Facts from rows: Store 2 at 153 and 155 reviews, 7 of 20 with DE skipped</span><span class="note">Recomputed from review SCORES on the repaired and raw frames; no review text is read, under Olist's CC BY-NC-SA 4.0 licence</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Automatic validation of key outputs</span><span class="note">OWASP Top 10 for LLM Applications 2025, LLM09 Misinformation, read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Confabulation</span><span class="note">NIST AI 600-1 (2024), Generative AI Profile, section 2, read at source</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Does AI-written copy sell more</span><span class="note">Fang et al. (2026), arXiv 2510.12049, abstract read at source; earlier figures reported. Cicek, Gursoy and Lu (2024), reported via a press release. Taught as a disagreement</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Eval method in depth</span><span class="note">Golden-set sizing, sampling and model-graded evals belong to Learn AI Evals with Phoebe; applied here, not retaught</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 7 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Three checks</b><span>Required facts present, banned claims absent, length 25-70 (listing) or 20-60 (summary).</span></div>
+      <div class="cheat-item"><b>Facts from rows</b><span>Recompute every required fact on each run; never type a count into the rubric.</span></div>
+      <div class="cheat-item"><b>Dirty rows break good copy</b><span>Skip DE and Serai drops from 15 to 7 of 20; Store 2 reads 155 reviews, not 153.</span></div>
+      <div class="cheat-item"><b>Check the checker</b><span>Golden agreement 90% (18 of 20). L4 false fail, L8 false pass.</span></div>
+      <div class="cheat-item"><b>Fix the rubric, not the gate</b><span>Normalise units; add the fact that was never checked; rerun the golden set.</span></div>
+      <div class="cheat-item"><b>No uplift forecast</b><span>Field experiments and survey work answer different questions. Measure on your own catalogue.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>You can score copy that never acts. Session 8 gives a seller-support agent three narrow tools (order status, refund policy, hand-off) and nothing that writes, then builds the golden questions that check it, including the ones it must refuse.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Builder session 7 of 10 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="b6-the-leakage-hunt.html">← Prev: The leakage hunt</a> &nbsp;·&nbsp; <a href="b8-seller-support-agent-evals.html">Next: A seller-support agent and its evals →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

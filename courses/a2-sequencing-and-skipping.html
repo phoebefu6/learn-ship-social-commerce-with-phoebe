@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Leader session 2 of 6. Build order is a dependency, not a preference: fund each layer of a social-commerce data estate only when the layer below passes its gate. Watch what skipping data engineering does to Serai Commerce: a repeat rate of 4.61% instead of 3.00%, review summaries that fail, and 65% of the product's price held.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="Sequencing and the cost of skipping - learn ship social commerce with phoebe">
+<meta property="og:description" content="Leader session 2 of 6. Skip the bottom layer and the model barely moves, while registry agreement falls to 65.14% and gen AI passes 7 of 20.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/a2-sequencing-and-skipping.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sequencing and the cost of skipping - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Leader session 2 of 6. Why data engineering, analytics, ML, gen AI and product go in that order, and what skipping one costs.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Leader session 2 · Sequencing and the cost of skipping - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Leader session 2 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Leader session 2 of 6</div>
+    <h1>Sequencing and <span class="accent">the cost of skipping</span></h1>
+    <p class="sub">Every roadmap meeting has someone who wants to start with the exciting layer and "clean the data later". Tonight puts a price on later. Serai Commerce, the constructed enabler from session 1, runs its whole estate twice on the same 8,614 real orders: once built in order, once with the bottom layer skipped. The model hardly notices. The repeat rate jumps from 3.00% to 4.61%, good review summaries start failing, and 65% of what the data product can charge is held. You leave with a sequencing sheet: each layer, its gate, the earliest quarter it can go live, and what is held if it slips.</p>
+    <div class="chip-row">
+      <span class="chip level">🟡 Intermediate</span>
+      <span class="chip audience">Commerce and data leaders</span>
+      <span class="chip audience">Anyone ordering a data or AI roadmap</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · Order, cascade, price</span>
+      <span class="a3" style="flex:4">20-40 · Build-along: your sequence</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>From a stack to a schedule</h2>
+    </div>
+    <p class="lede">Session 1 drew the five layers and named what each one consumes. Tonight turns that stack into an order of work. The rule is short: <strong>fund layer N only when layer N minus one passes its gate</strong>. Then we break the rule on purpose and follow the damage upward through Serai's registry, model and gen AI, and finally into the product's price. <strong>Serai Commerce is constructed</strong> for these pages, continued from the <a href="https://phoebefu6.github.io/learn-ship-ecommerce-enabler-with-phoebe/">Social Commerce Enablers course</a>; its orders are real, 8,614 delivered orders from the public Olist dataset, derived and masked. Every number below is printed by the bench in Builder session 10.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A one-page sequencing sheet for your own estate: five rows, each with its gate, the earliest quarter it can go live and the share of value held if it slips. Plus a ready answer for the next "can we skip the data work" conversation: on Serai's rows, skipping it leaves the model standing and takes down the two layers sellers actually read.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers why DE, analytics, ML, gen AI, product in that order</span>
+      <h2>Build order is a dependency, not a preference</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A build order argued from taste ("AI first, it is what the board wants") loses to whoever argues loudest next quarter. A build order argued from dependencies survives, because each step names the thing it needs and the test that proves it has it.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn decision tree with five rows. Fund data engineering, then ask: zero blocking failures after repair? If no, every layer above is held. If yes, fund analytics and ask: registry agreement at least 99.5 percent? If no, the registry's 40 percent share and the facts gen AI quotes are held. If yes, fund the model and ask: month T+1 lift at least 2.0 times? If no, the model's 35 percent share is held. If yes, fund gen AI and ask: pass rate at least 70 percent and golden agreement at least 85 percent? If no, gen AI's 25 percent share is held. If yes, price the product on live layers only.">
+        <defs>
+          <filter id="a2aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="29" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a2aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a2aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a2aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a2aL { font: 600 12px Inter, sans-serif; fill: #1A2232; }
+          .a2aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a2aA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a2aR { font: 700 11px Inter, sans-serif; fill: #991B1B; }
+          .a2aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a2aH" x="30" y="26">FUND LAYER N ONLY IF LAYER N-1 PASSES ITS GATE</text>
+        <text class="a2aS" x="420" y="26">gates are Serai's constructed policy · shares are of the product's price</text>
+
+        <g filter="url(#a2aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="40" y="50" width="210" height="40" rx="9" transform="rotate(-0.6 145 70)" fill="#FFFFFF"/>
+          <rect x="40" y="116" width="210" height="40" rx="9" transform="rotate(0.5 145 136)" fill="#FFFFFF"/>
+          <rect x="40" y="182" width="210" height="40" rx="9" transform="rotate(-0.4 145 202)" fill="#FFFFFF"/>
+          <rect x="40" y="248" width="210" height="40" rx="9" transform="rotate(0.6 145 268)" fill="#FFFFFF"/>
+          <rect x="40" y="314" width="210" height="40" rx="9" transform="rotate(-0.5 145 334)" fill="#FBF5E6"/>
+
+          <rect x="290" y="50" width="300" height="40" rx="20" transform="rotate(0.4 440 70)" fill="#A9C4EA"/>
+          <rect x="290" y="116" width="300" height="40" rx="20" transform="rotate(-0.4 440 136)" fill="#FFFFFF"/>
+          <rect x="290" y="182" width="300" height="40" rx="20" transform="rotate(0.3 440 202)" fill="#FFFFFF"/>
+          <rect x="290" y="248" width="300" height="40" rx="20" transform="rotate(-0.3 440 268)" fill="#FFFFFF"/>
+
+          <rect x="620" y="50" width="240" height="40" rx="8" transform="rotate(0.5 740 70)" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="620" y="116" width="240" height="40" rx="8" transform="rotate(-0.5 740 136)" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="620" y="182" width="240" height="40" rx="8" transform="rotate(0.4 740 202)" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="620" y="248" width="240" height="40" rx="8" transform="rotate(-0.4 740 268)" fill="#FEF2F2" stroke="#991B1B"/>
+
+          <path d="M252 70 L286 70" marker-end="url(#a2aAr)"/>
+          <path d="M252 136 L286 136" marker-end="url(#a2aAr)"/>
+          <path d="M252 202 L286 202" marker-end="url(#a2aAr)"/>
+          <path d="M252 268 L286 268" marker-end="url(#a2aAr)"/>
+          <path d="M592 70 L616 70" marker-end="url(#a2aAr)"/>
+          <path d="M592 136 L616 136" marker-end="url(#a2aAr)"/>
+          <path d="M592 202 L616 202" marker-end="url(#a2aAr)"/>
+          <path d="M592 268 L616 268" marker-end="url(#a2aAr)"/>
+          <path d="M360 92 Q 220 100 150 112" marker-end="url(#a2aAr)"/>
+          <path d="M360 158 Q 220 166 150 178" marker-end="url(#a2aAr)"/>
+          <path d="M360 224 Q 220 232 150 244" marker-end="url(#a2aAr)"/>
+          <path d="M360 290 Q 220 298 150 310" marker-end="url(#a2aAr)"/>
+
+          <path d="M300 334 L300 360 M340 334 L340 360 M300 344 L340 344"/>
+        </g>
+
+        <text class="a2aL" x="56" y="75">1 · fund data engineering</text>
+        <text class="a2aL" x="56" y="141">2 · fund analytics</text>
+        <text class="a2aL" x="56" y="207">3 · fund the model</text>
+        <text class="a2aL" x="56" y="273">4 · fund gen AI</text>
+        <text class="a2aH" x="56" y="339">5 · price the product</text>
+
+        <text class="a2aL" x="306" y="74">0 blocking failures after repair?</text>
+        <text class="a2aL" x="306" y="140">registry agreement &gt;= 99.5%?</text>
+        <text class="a2aL" x="306" y="206">month T+1 lift &gt;= 2.0x?</text>
+        <text class="a2aL" x="306" y="272">pass &gt;= 70%, golden &gt;= 85%?</text>
+
+        <text class="a2aA" x="372" y="108">yes</text>
+        <text class="a2aA" x="372" y="174">yes</text>
+        <text class="a2aA" x="372" y="240">yes</text>
+        <text class="a2aA" x="372" y="306">yes</text>
+        <text class="a2aR" x="596" y="62">no</text>
+        <text class="a2aR" x="596" y="128">no</text>
+        <text class="a2aR" x="596" y="194">no</text>
+        <text class="a2aR" x="596" y="260">no</text>
+
+        <text class="a2aS" x="634" y="74">held: every layer above it</text>
+        <text class="a2aS" x="634" y="140">held: registry 40%, gen AI facts</text>
+        <text class="a2aS" x="634" y="206">held: the model's 35% share</text>
+        <text class="a2aS" x="634" y="272">held: gen AI's 25% share</text>
+        <text class="a2aS" x="356" y="339">only live layers count toward the price</text>
+
+        <text class="a2aN" x="30" y="384">The first gate is the only one every branch passes through. That is why it is funded first.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - each gate decides what gets funded next, and a failed gate names exactly what is held</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The dependency table: who consumes whom<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Layer</th><th>What it needs from below</th><th>Why it cannot go earlier</th><th>Serai's gate (constructed)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1 · Data engineering</strong></td><td>Nothing but the raw exports</td><td>It is the floor; every other layer reads its rows</td><td>0 blocking failures after repair</td></tr>
+            <tr><td><strong>2 · Analytics</strong></td><td>One row per real order</td><td>A definition counts rows; it cannot tell a re-send from a second order</td><td>Registry agreement at least 99.5% with a control total</td></tr>
+            <tr><td><strong>3 · Machine learning</strong></td><td>The registry's definition of a repeat, applied to clean history</td><td>Its label is "another order within 90 days", which is a registry definition</td><td>Month T+1 lift at least 2.0x</td></tr>
+            <tr><td><strong>4 · Gen AI</strong></td><td>True facts per listing and store, computed by the registry</td><td>A summary that says "153 reviews" is a registry number in a sentence</td><td>Pass at least 70% and golden agreement at least 85%</td></tr>
+            <tr><td><strong>5 · Data product</strong></td><td>Every layer above, each with a passed gate</td><td>Its price is the sum of the live layers' shares</td><td>Price counts only live layers</td></tr>
+          </tbody>
+        </table>
+        <p>Read the second column carefully and one link is weaker than the others: gen AI does not consume the model's output. Its real dependencies are the clean rows and the registry's facts. Serai still places the model third for a practical reason: the model is judged by one number on a month it never saw, which builds the evaluation habit that gen AI then needs at a larger scale (a rubric and a golden set, session 4). A team that already runs evaluations well can run layers 3 and 4 side by side once the registry passes. What no team can do is move either of them below layer 2.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The demo-first roadmap, and when it is fine<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A demo-first roadmap builds the copy assistant on a sample, shows it to the board and earns the budget. That is a legitimate move, and often the only way a data team gets funded at all. It goes wrong at one specific moment: when the demo is promoted to production on the same unchecked rows it was demoed on.</p>
+        <p>So the honest version is two sentences. Demo on anything you like, label it a demo, and keep it away from sellers. Production starts at layer 1, and the demo's layer goes live only when every gate below it has passed. A demo with a written expiry date is a pitch; a demo without one becomes the product by default.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Why "parallel teams" do not remove the order<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Large organisations often answer the sequencing question with headcount: one team per layer, all starting on day one. That can be the right call for speed, and it changes nothing about the dependency. The model team can write features on raw rows, but its labels will count re-sends as repeats until the data team's repair lands. The gen AI team can write prompts, but its rubric checks facts that the registry has not yet fixed. Parallel teams shorten the calendar; they do not change which layer's gate decides when the others may ship. Write the gates first, then staff in parallel.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Even a cleaned public dataset needs layer 1.</strong> Olist's published orders are described as real commercial data, anonymised and released for reuse. Inside Serai's 8,614 of them sit 122 orders whose carrier pickup is logged before payment approval and 1 order with no approval time at all. Nobody constructed those; they came with the file. They change no headline metric, but any delivery-time feature or "days to ship" promise built on them would be wrong. A data engineering layer flags them and keeps them, which is a decision someone has to own before any layer above reads the timestamps.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the skip-DE cascade, layer by layer</span>
+      <h2>What skipping DE costs, layer by layer</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">Skipping the bottom layer does not break one thing. It hands the same raw rows to every layer above, and each layer turns them into a different kind of wrong. Follow one constructed defect, an order re-sent under a variant key, through all three.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 370" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn cascade from one re-sent order, 152 of them constructed, into three layers, with the values the bench prints clean and with the data engineering layer skipped. Registry: repeat rate 3.00 percent becomes 4.61 percent, agreement 65.14 percent against a 99.5 percent gate. Model: training positives 60 become 108, month T+1 lift 3.71 times becomes 3.30 times, 9 hits become 8. Gen AI: Store 2 is checked against 155 reviews instead of 153, passes fall from 15 of 20 to 7 of 20, agreement 50 percent.">
+        <defs>
+          <filter id="a2bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="31" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a2bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a2bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a2bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a2bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a2bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a2bV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .a2bR { font: 800 16px Inter, sans-serif; fill: #991B1B; }
+          .a2bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a2bH" x="30" y="26">ONE RE-SENT ORDER, THREE KINDS OF WRONG</text>
+        <text class="a2bS" x="380" y="26">measured on the bench · clean value in amber, DE-skipped value in red</text>
+
+        <g filter="url(#a2bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="110" width="210" height="150" rx="12" transform="rotate(-0.6 135 185)" fill="#A9C4EA"/>
+          <rect x="50" y="178" width="150" height="22" rx="4" transform="rotate(-2 125 189)" fill="#FFFFFF"/>
+          <path d="M62 210 L210 206 L211 228 L63 232 Z" fill="url(#a2bHc)" stroke="#966E08"/>
+
+          <rect x="300" y="50" width="550" height="84" rx="12" transform="rotate(0.3 575 92)" fill="#FFFFFF"/>
+          <rect x="300" y="146" width="550" height="84" rx="12" transform="rotate(-0.3 575 188)" fill="#FFFFFF"/>
+          <rect x="300" y="242" width="550" height="84" rx="12" transform="rotate(0.3 575 284)" fill="#FFFFFF"/>
+
+          <path d="M242 160 Q 270 110 296 94" marker-end="url(#a2bAr)"/>
+          <path d="M244 188 L296 188" marker-end="url(#a2bAr)"/>
+          <path d="M242 216 Q 270 266 296 282" marker-end="url(#a2bAr)"/>
+
+          <path d="M372 94 L398 94" marker-end="url(#a2bAr)"/>
+          <path d="M640 94 L666 94" marker-end="url(#a2bAr)"/>
+          <path d="M372 190 L398 190" marker-end="url(#a2bAr)"/>
+          <path d="M640 190 L666 190" marker-end="url(#a2bAr)"/>
+          <path d="M372 286 L398 286" marker-end="url(#a2bAr)"/>
+          <path d="M640 286 L666 286" marker-end="url(#a2bAr)"/>
+        </g>
+
+        <text class="a2bH" x="46" y="136">A RE-SENT ORDER</text>
+        <text class="a2bL" x="46" y="154">same order, variant key</text>
+        <text class="a2bS" x="58" y="194">order as first sent</text>
+        <text class="a2bL" x="46" y="250">152 of them, constructed</text>
+
+        <text class="a2bH" x="316" y="72">ANALYTICS · THE REGISTRY</text>
+        <text class="a2bS" x="580" y="72">a re-send reads as a second order</text>
+        <text class="a2bV" x="316" y="100">3.00%</text>
+        <text class="a2bR" x="406" y="100">4.61%</text>
+        <text class="a2bR" x="580" y="100">65.14%</text>
+        <text class="a2bS" x="316" y="120">repeat rate</text>
+        <text class="a2bS" x="580" y="120">agreement, gate 99.5%</text>
+
+        <text class="a2bH" x="316" y="168">ML · THE REPEAT MODEL</text>
+        <text class="a2bS" x="580" y="168">duplicates look like same-day repeats</text>
+        <text class="a2bV" x="316" y="196">60</text>
+        <text class="a2bR" x="406" y="196">108</text>
+        <text class="a2bV" x="580" y="196">3.71x</text>
+        <text class="a2bR" x="674" y="196">3.30x</text>
+        <text class="a2bS" x="316" y="216">training positives</text>
+        <text class="a2bS" x="580" y="216">month T+1 lift, 9 hits to 8</text>
+
+        <text class="a2bH" x="316" y="264">GEN AI · REVIEW SUMMARIES</text>
+        <text class="a2bS" x="580" y="264">true summaries fail on dirty facts</text>
+        <text class="a2bV" x="316" y="292">153</text>
+        <text class="a2bR" x="406" y="292">155</text>
+        <text class="a2bV" x="580" y="292">15</text>
+        <text class="a2bR" x="674" y="292">7 of 20</text>
+        <text class="a2bS" x="316" y="312">Store 2 reviews</text>
+        <text class="a2bS" x="580" y="312">rubric passes, agreement 50%</text>
+
+        <text class="a2bN" x="30" y="352">The model lost one hit of 24. The registry and the summaries, the layers sellers read, took the damage.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the same raw rows break a count, barely dent a ranking, and fail true sentences</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Layer by layer: what the re-send does<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Layer</th><th>Built in order</th><th>DE skipped</th><th>Mechanism</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Analytics</strong></td><td>8,614 orders; repeat rate 3.00% (250 of 8,333)</td><td>8,766 orders; repeat rate 4.61% (384 of 8,337); agreement on repeat 65.14%</td><td>A re-sent order gives a one-time buyer a second order, so the buyer becomes a "repeat customer"</td></tr>
+            <tr><td><strong>ML</strong></td><td>Train 2,744 orders, 60 positives; month T+1 lift 3.71x</td><td>Train 2,795 rows, 108 "positives"; month T+1 lift 3.30x</td><td>The label is "another order within 90 days"; a duplicate is another order on the same day</td></tr>
+            <tr><td><strong>Gen AI</strong></td><td>15 of 20 pass; rubric agrees with golden 90%</td><td>7 of 20 pass; agreement 50%; 9 false fails</td><td>Facts are recomputed from rows: Store 2 reads 155 reviews, so a correct "153" summary fails</td></tr>
+          </tbody>
+        </table>
+        <p>Notice the gen AI line. The 20 listing drafts and summaries are pre-written and constructed; nothing about the text changed. The facts they are checked against changed, so a correct sentence now looks wrong. A layer can fail with no change to its own work.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Honest nuance: the model survived<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>It would make a tidier story if skipping data engineering wrecked the model. It did not. Month T+1 lift moved from 3.71x to 3.30x, which is the model's top 58 orders holding 8 of the month's 24 real repeat buyers instead of 9. With only 24 positives, one hit moves lift by 0.41, so this difference is a single customer. Training AUC moved from 0.6248 to 0.6075 and month T+1 AUC from 0.7894 to 0.7707.</p>
+        <p>The reason is the shape of the damage. Re-sends mostly add noise to a ranking: a few extra "positives" in training blur the pattern without reversing it. A count has no such slack. Every re-send lands directly in the numerator of the repeat rate. So the honest leadership sentence is not "dirty data breaks AI". It is "dirty data breaks the layers that print numbers, and a model that survives it can still be sold beside a registry that cannot".</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>In production the gen AI failure runs the other way<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>On the bench the summaries were written from the true facts and then checked against dirty ones, so they fail loudly: 9 false fails at once. A real pipeline with DE skipped is worse. The model writes from the dirty facts, the rubric checks against the same dirty facts, and every summary passes. "155 reviews" goes to the seller with a green tick.</p>
+        <p>NIST's Generative AI Profile calls the output side of this <strong>confabulation</strong>: "the production of confidently stated but erroneous or false content". The rubric cannot catch it, because a rubric is only as good as the facts it checks against. That is the strongest argument for layer 1 a gen AI sponsor will ever hear: without it, the evaluation itself is measuring agreement with the error.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Why a re-send is so easy to believe.</strong> Real customers in the Olist rows do place a second order on the same day. In Serai's sample, 197 orders are followed by another order from the same customer within 90 days, and 83 of those follow-ups are same-day. Some are split baskets, some are genuine second thoughts; the data cannot always tell. A constructed re-send looks exactly like that real pattern, which is why the model's "positives" nearly doubled without anyone noticing, and why only a keys-unique check with a normalised key finds them.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers the live price share and the net range with DE skipped</span>
+      <h2>Pricing the skip</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">A steering committee hears "data quality" as a cost. Translate the skip into the product's price and it becomes a revenue decision. Serai prices its data product so that each layer's share counts only when its gate has passed.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 296" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two hand-drawn panels, as the bench prints them. Left: the product's price split into registry 40 percent, model 35 percent and gen AI 25 percent. With every layer built all three are live, 100 percent. With data engineering skipped the registry and gen AI shares are held and only the model's 35 percent is live. Right: first-year net on an axis from minus USD 320,000 to plus USD 520,000. Every layer built: minus USD 235,200 to plus USD 512,400. DE skipped: minus USD 282,000 to plus USD 75,600.">
+        <defs>
+          <filter id="a2cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="37" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a2cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a2cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a2cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a2cL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a2cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a2cV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .a2cR { font: 800 16px Inter, sans-serif; fill: #991B1B; }
+          .a2cRs { font: 700 11px Inter, sans-serif; fill: #991B1B; }
+          .a2cA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a2cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a2cH" x="30" y="26">LIVE SHARE OF PRICE, AND WHAT IT DOES TO THE YEAR</text>
+        <text class="a2cS" x="440" y="26">measured on the bench · rung 5 · product inputs are assumptions</text>
+
+        <g filter="url(#a2cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="44" width="400" height="200" rx="12" transform="rotate(-0.3 230 144)" fill="#FFFFFF"/>
+          <rect x="450" y="44" width="400" height="200" rx="12" transform="rotate(0.3 650 144)" fill="#FFFFFF"/>
+
+          <rect x="100" y="84" width="120" height="28" rx="4" fill="#E8D29A"/>
+          <rect x="220" y="84" width="105" height="28" rx="4" fill="#E8D29A"/>
+          <rect x="325" y="84" width="75" height="28" rx="4" fill="#E8D29A"/>
+
+          <rect x="100" y="174" width="120" height="28" rx="4" fill="#FFFFFF" stroke="#991B1B" stroke-dasharray="5 4"/>
+          <rect x="220" y="174" width="105" height="28" rx="4" fill="#A9C4EA"/>
+          <rect x="325" y="174" width="75" height="28" rx="4" fill="#FFFFFF" stroke="#991B1B" stroke-dasharray="5 4"/>
+
+          <path d="M607 64 L607 206" stroke="#CDD2DC" stroke-dasharray="4 4"/>
+          <rect x="506" y="84" width="320" height="28" rx="4" fill="#E8D29A"/>
+          <rect x="486" y="174" width="153" height="28" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+        </g>
+
+        <text class="a2cH" x="46" y="74">EVERY LAYER BUILT</text>
+        <text class="a2cV" x="46" y="104">100%</text>
+        <text class="a2cS" x="104" y="128">registry 40%</text>
+        <text class="a2cS" x="224" y="128">model 35%</text>
+        <text class="a2cS" x="329" y="128">gen AI 25%</text>
+
+        <text class="a2cH" x="46" y="164">DE SKIPPED</text>
+        <text class="a2cR" x="46" y="194">35%</text>
+        <text class="a2cRs" x="104" y="218">40% held</text>
+        <text class="a2cL" x="224" y="218">35% live</text>
+        <text class="a2cRs" x="329" y="218">25% held</text>
+
+        <text class="a2cA" x="607" y="58" text-anchor="middle">0</text>
+        <text class="a2cA" x="466" y="74">first-year net, USD</text>
+        <text class="a2cS" x="506" y="128">-235,200</text>
+        <text class="a2cS" x="826" y="128" text-anchor="end">+512,400</text>
+        <text class="a2cRs" x="486" y="218">-282,000</text>
+        <text class="a2cRs" x="648" y="192">+75,600</text>
+        <text class="a2cA" x="466" y="164">same rows, DE skipped</text>
+
+        <text class="a2cN" x="30" y="274">Cost stays USD 159,600 to 307,200 either way. Only the revenue shrinks, so the skip saves nothing here.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - skipping the bottom layer holds 65% of the price and pulls the best case from USD 512,400 to USD 75,600</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Where the two ranges come from<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Every input is an assumption Serai wrote down, not a market fact: 40 to 160 paying sellers, USD 150 to 350 a seller a month, a build of USD 150,000 to 240,000 and a run cost of USD 20 to 35 a seller a month. The price splits into registry 40%, model 35% and gen AI 25%, and a share counts only when its layer's gate passes.</p>
+        <table class="clean">
+          <thead><tr><th></th><th>Live share</th><th>First-year revenue</th><th>First-year cost</th><th>Net</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Every layer built</strong></td><td>100%</td><td>USD 72,000 to 672,000</td><td>USD 159,600 to 307,200</td><td>-USD 235,200 to USD 512,400</td></tr>
+            <tr><td><strong>DE skipped</strong></td><td>35% (model only)</td><td>USD 25,200 to 235,200 (35% of the row above, by arithmetic)</td><td>USD 159,600 to 307,200</td><td>-USD 282,000 to USD 75,600</td></tr>
+          </tbody>
+        </table>
+        <p>The cost row is identical because the build and run costs do not care which gates passed. That is the line to read out in the meeting: skipping data engineering did not save its cost, it gave away most of the upside and kept every dollar of spend.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>A price share is a gate report<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Tying price to gates turns an engineering status into a commercial one. The registry share is held because agreement is 65.14% against a 99.5% gate. The gen AI share is held because the pass rate is 35% against 70% and agreement 50% against 85%. The model share stays live because 3.30x clears 2.0x. Nobody has to argue about whether the data is "good enough"; the gate argued it in advance.</p>
+        <p>The NIST AI Risk Management Framework names four functions, "govern, map, measure, and manage". A held share is "measure" producing a number and "manage" acting on it without a meeting. The thresholds themselves are Serai's constructed policy, not a standard; your own will differ, and they should be written down before the first number comes in, not after.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>The other way to lose share: a leak<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Skipping a layer is one way to switch shares off. Building a layer badly is another. The bench's second break button adds a field known only in hindsight to the model: training AUC jumps to 0.9913, month T+1 lift falls to 1.65x, under the 2.0 gate, and the model's 35% share is held instead (share 65%, net -USD 260,400 to USD 277,200). Do both and nothing is live: share 0%, net -USD 307,200 to -USD 159,600. Session 3 takes the leak apart.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The data under the price has its own terms.</strong> Serai's orders are derived from the Olist public dataset, released under CC BY-NC-SA 4.0, a non-commercial share-alike licence. That is fine for learning and for a bench; it is not a basis for a product sold to sellers. A real company pricing this pack would need its own order data and its own rights to it, which is one more reason the bottom layer belongs at the start of the plan: the question "whose rows, under what terms" is a data engineering question before it is a legal one.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>Your sequencing sheet</h2>
+      <span class="tag demo">★ 20 min · everyone builds</span>
+    </div>
+    <p class="lede">Start from the estate sheet you built in session 1. Tonight each row gains three things: its gate, the earliest quarter it can go live, and what is held if it slips. No estate sheet yet? Use Serai's; the quarters below are a constructed plan, not a benchmark.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The sequencing sheet as a hand-drawn grid of five rows and four columns: layer, gate, earliest quarter, held if it slips. The data engineering row is filled in for Serai: gate zero blocking failures, earliest quarter Q1 in a constructed plan, held if it slips: every layer above. The other rows say their earliest quarter is after the row below passes.">
+        <defs>
+          <filter id="a2dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="41" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a2dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a2dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a2dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a2dL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a2dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a2dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a2dH" x="30" y="26">THE SEQUENCING SHEET · ONE ROW PER LAYER, FILLED FROM THE BOTTOM</text>
+
+        <g filter="url(#a2dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="44" width="820" height="210" rx="12" transform="rotate(-0.2 440 149)" fill="#FFFFFF"/>
+          <path d="M30 78 L850 78"/>
+          <path d="M160 44 L160 254"/>
+          <path d="M400 44 L400 254"/>
+          <path d="M580 44 L580 254"/>
+          <rect x="34" y="214" width="812" height="36" rx="6" fill="#A9C4EA"/>
+          <path d="M20 202 L20 96" marker-end="url(#a2dAr)"/>
+        </g>
+
+        <text class="a2dH" x="44" y="66">LAYER</text>
+        <text class="a2dH" x="174" y="66">GATE</text>
+        <text class="a2dH" x="414" y="66">EARLIEST QUARTER</text>
+        <text class="a2dH" x="594" y="66">HELD IF IT SLIPS</text>
+
+        <text class="a2dS" x="44" y="100">5 · product</text>
+        <text class="a2dS" x="44" y="128">4 · gen AI</text>
+        <text class="a2dS" x="44" y="156">3 · ML</text>
+        <text class="a2dS" x="44" y="184">2 · analytics</text>
+        <text class="a2dS" x="174" y="100">only live layers priced</text>
+        <text class="a2dS" x="174" y="128">pass 70%, golden 85%</text>
+        <text class="a2dS" x="174" y="156">month T+1 lift 2.0x</text>
+        <text class="a2dS" x="174" y="184">registry agreement 99.5%</text>
+        <text class="a2dS" x="414" y="100">after row 4 passes</text>
+        <text class="a2dS" x="414" y="128">after row 2 passes</text>
+        <text class="a2dS" x="414" y="156">after row 2 passes</text>
+        <text class="a2dS" x="414" y="184">after row 1 passes</text>
+        <text class="a2dS" x="594" y="100">the launch date</text>
+        <text class="a2dS" x="594" y="128">gen AI 25% share</text>
+        <text class="a2dS" x="594" y="156">model 35% share</text>
+        <text class="a2dS" x="594" y="184">registry 40%, gen AI facts</text>
+
+        <text class="a2dL" x="44" y="236">1 · DE</text>
+        <text class="a2dL" x="174" y="236">0 blocking failures</text>
+        <text class="a2dL" x="414" y="236">Q1 (constructed)</text>
+        <text class="a2dL" x="594" y="236">every layer above</text>
+
+        <text class="a2dN" x="30" y="280">A quarter is a date only when the row below it has passed. Until then it is a hope with a label.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - each row's earliest quarter is set by the gate of the row beneath it, not by the calendar</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Copy your five layers from the session 1 sheet.</strong> Bottom row first. Keep the owner column; you will need it in step 5.</p>
+        <div class="prompt-box good"><span class="label">★ Serai's rows, from session 1</span>1 DE         Merge three marketplace exports into one schema, with tests
+2 analytics  Orders, GMV, repeat rate for the monthly brand review
+3 ML         Repeat-purchase list for brand CRM teams
+4 gen AI     Listing copy drafts; review summaries per store
+5 product    Seller growth pack (registry numbers + repeat list + copy assistant)</div>
+      </div>
+      <div class="step">
+        <p><strong>Write one gate per row.</strong> A measured number and a threshold someone owns. Borrow Serai's if you have none yet, and mark them as borrowed.</p>
+        <div class="prompt-box good"><span class="label">★ Serai's gates (constructed policy)</span>1 DE         0 blocking failures after repair
+2 analytics  registry agreement &gt;= 99.5% with a control total
+3 ML         month T+1 lift &gt;= 2.0x the base rate
+4 gen AI     rubric pass &gt;= 70% AND golden agreement &gt;= 85%
+5 product    price counts only the layers whose gate passed</div>
+      </div>
+      <div class="step">
+        <p><strong>Set the earliest quarter, bottom up.</strong> A row cannot start its live date before the row it consumes has passed. Where a row depends on a row two below it (gen AI on the registry), say so.</p>
+        <div class="prompt-box good"><span class="label">★ Serai's earliest quarters (a constructed plan)</span>1 DE         Q1
+2 analytics  Q2   (after DE passes)
+3 ML         Q3   (after the registry passes)
+4 gen AI     Q3   (after the registry passes; runs beside ML)
+5 product    Q4   (prices whatever is live by then)</div>
+      </div>
+      <div class="step">
+        <p><strong>Write what is held if each row slips.</strong> Use shares of value if you have a price split; otherwise name the layers above that stop. This is the column a sponsor reads.</p>
+        <div class="prompt-box good"><span class="label">★ What a slip holds, on Serai's split</span>1 DE slips         every layer above; on the bench, 65% of the price
+2 analytics slips  registry 40% share, and the facts gen AI quotes
+3 ML slips         model 35% share
+4 gen AI slips     gen AI 25% share
+5 product slips    the launch date, nothing else</div>
+      </div>
+      <div class="step">
+        <p><strong>Write the sentence for the sponsor who wants to skip a row.</strong> Fill in your own numbers.</p>
+        <div class="prompt-box good"><span class="label">★ The skip conversation</span>If we skip data engineering, the model probably survives: on Serai's rows its
+lift moved from 3.71x to 3.30x, one customer of 24. The registry does not:
+the repeat rate reads 4.61% instead of 3.00%. The summaries do not: 7 of 20 pass.
+We keep every dollar of cost and hold 65% of the price. Which row do you want to fund first?</div>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The sequence that is really a wish list</span>
+Q1: AI copy assistant live for all sellers. Q2: churn model. Q3: dashboards.
+Q4: "data foundation" (stretch goal).
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 3</h2>
+      <span class="tag exercise">25 min</span>
+    </div>
+    <ol>
+      <li>Finish your sequencing sheet: five rows, each with a gate, an earliest quarter set by the row below, and what is held if it slips.</li>
+      <li>Find the layer on your current roadmap with the earliest live date. Check whether every row beneath it has a passed gate on that date. If not, write the date it could honestly go live.</li>
+      <li>Ask your data team one question: "if we stopped de-duplicating orders tomorrow, which reported number would move first?" Write down their answer and whether it is a count or a ranking.</li>
+      <li>Pick one gen AI feature you are funding or being pitched. List the facts it quotes to a user and the table each fact comes from. Mark any table with no data-quality check.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Leader session 2 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · With data engineering skipped, Serai's registry agreement on repeat rate falls to 65.14% while the model's lift only moves from 3.71x to 3.30x. Why did the registry break before the model?</p>
+      <button class="qopt" type="button">A · The registry uses a weaker algorithm than logistic regression</button>
+      <button class="qopt" type="button">B · Every re-send lands directly in a count, while in a ranking it mostly adds noise</button>
+      <button class="qopt" type="button">C · The model was trained on cleaner rows than the registry</button>
+      <button class="qopt" type="button">D · The registry gate is stricter, so the same damage looks bigger</button>
+      <p class="qwhy">Both layers read the same raw rows. A re-sent order puts a buyer straight into the repeat rate's numerator; in the model it adds a few false positives that blur the pattern without reversing it, costing one hit of 24.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">2 · A sponsor wants the review-summary assistant live this quarter and the data engineering work "next year". On the dependency table, which layer do you fund first, and why?</p>
+      <button class="qopt" type="button">A · Gen AI, because it is the layer sellers see</button>
+      <button class="qopt" type="button">B · The model, because it survived the skip on the bench</button>
+      <button class="qopt" type="button">C · Analytics, because the summaries quote registry numbers</button>
+      <button class="qopt" type="button">D · Data engineering, because the registry and the summaries both read its rows, and without it the rubric checks against the error</button>
+      <p class="qwhy">C is half right: the summaries do quote registry numbers, but the registry is only right on rows that have passed the DE checks. Every branch of the decision tree passes through the first gate.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · A scorecard reads: 333 blocking failures, registry agreement 65.14%, lift 3.30x, gen AI pass 35% with 50% agreement. What is live, and what share of the price can Serai charge?</p>
+      <button class="qopt" type="button">A · Only the model, so 35% of the price</button>
+      <button class="qopt" type="button">B · Nothing, because the bottom gate failed, so 0%</button>
+      <button class="qopt" type="button">C · The model and the registry, so 75%</button>
+      <button class="qopt" type="button">D · Everything except gen AI, so 75%</button>
+      <p class="qwhy">Each share is judged by its own gate: 3.30x clears the 2.0x lift gate, while 65.14% misses 99.5% and 35% misses 70%. That leaves the model's 35% live, and a net range of -USD 282,000 to USD 75,600.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Build order as a dependency with gates</span><span class="note">Taught as a method; gate thresholds are Serai's constructed policy, no benchmark claimed</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The skip-DE cascade: registry, model, gen AI</span><span class="note">Every value measured on the bench in Builder session 10 (anti-lever on); re-sends constructed, orders real</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Live price share and the net ranges</span><span class="note">Product inputs are stated assumptions; ranges printed by the bench; the skipped revenue row is arithmetic on them</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Gates as "measure" meeting "manage"; confabulation</span><span class="note">NIST AI RMF 1.0 core functions and NIST AI 600-1 (2024), read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Serai's rows and their real quirks</span><span class="note">Brazilian E-Commerce Public Dataset by Olist, Kaggle, CC BY-NC-SA 4.0, read at source; derived and masked, no review text</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Model evaluation depth and leakage</span><span class="note">Session 3 here; full depth in <a href="https://phoebefu6.github.io/learn-model-evaluation-with-phoebe/">Model Evaluation</a>, linked, not retaught</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 2 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>The rule</b><span>Fund layer N only when layer N-1 passes its gate. Every branch passes the first gate.</span></div>
+      <div class="cheat-item"><b>The weak link</b><span>Gen AI needs the registry's facts, not the model. It may run beside ML, never below analytics.</span></div>
+      <div class="cheat-item"><b>Counts break first</b><span>Skip DE: repeat rate 3.00% to 4.61%, agreement 65.14%. A count has no slack.</span></div>
+      <div class="cheat-item"><b>Rankings bend</b><span>Lift 3.71x to 3.30x: one hit of 24. One hit moves lift by 0.41.</span></div>
+      <div class="cheat-item"><b>True sentences fail</b><span>Store 2 reads 155 reviews, not 153; gen AI passes 7 of 20, agreement 50%.</span></div>
+      <div class="cheat-item"><b>The price of the skip</b><span>Share 35%; net -USD 282,000 to USD 75,600 against -USD 235,200 to USD 512,400. Cost unchanged.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>The model was the layer that survived. Session 3 asks what it is actually worth: a base rate of 4.18%, a lift of 3.71x on a month it never saw, and a field from the future that makes it look perfect in training while it fails the month that counts.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Leader session 2 of 6 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="a1-five-layers-one-estate.html">← Prev: Five layers, one estate</a> &nbsp;·&nbsp; <a href="a3-what-the-model-is-worth.html">Next: What the model is worth →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

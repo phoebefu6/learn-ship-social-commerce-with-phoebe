@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Leader session 3 of 6. What a repeat-purchase model is worth in business words: base rate first, lift at the top decile on a month the model never saw, and why a training AUC of 0.9913 is a warning, not a win. Serai's month T+1 has 24 real repeats, so one hit moves lift by 0.41.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="What the model is worth - learn ship social commerce with phoebe">
+<meta property="og:description" content="Leader session 3 of 6. Base rate 4.18%, top decile 9 of 58, lift 3.71x on a month the model never saw. And the leaked field that makes a model look perfect.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/a3-what-the-model-is-worth.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What the model is worth - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Leader session 3 of 6. Read a model the way a CRM budget does: base rate, lift on the next month, and the 2.0x gate.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Leader session 3 · What the model is worth - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Leader session 3 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Leader session 3 of 6</div>
+    <h1>What the model <span class="accent">is worth</span></h1>
+    <p class="sub">Somebody will show you a model with a big number on the slide. Tonight you learn to ask for three smaller ones. Serai Commerce, the constructed enabler from session 1, built one repeat-purchase model on its real Olist orders: who is likely to order again within 90 days. In the month it never saw, 24 of 574 orders were followed by a repeat. The model's top tenth held 9 of them. That is the whole story of what the model is worth, and also why you should hold it loosely: one hit more or less moves the headline by 0.41. You leave with a one-page "what is this model worth" sheet and the questions that catch a model that looks too good.</p>
+    <div class="chip-row">
+      <span class="chip level">🟡 Intermediate</span>
+      <span class="chip audience">Commerce and data leaders</span>
+      <span class="chip audience">Anyone asked to approve a model</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · Base rate, the next month, the leak</span>
+      <span class="a3" style="flex:4">20-40 · Build-along: the worth sheet</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>The model row on your estate sheet</h2>
+    </div>
+    <p class="lede">Session 1 gave you five layers; session 2 put them in order. Tonight fills in the third row, machine learning, the way a leader has to read it: not "how clever is the model" but <strong>what decision does it change, and by how much, on data it has never seen</strong>. The model is a real logistic regression trained on Serai's orders, which are 8,614 real delivered orders from the public Olist dataset, derived and masked. Serai itself, its gates and its budget are constructed. Every number below is printed by the bench in Builder session 10, and the builder track builds the same model in <a href="b5-model-with-a-time-split.html">Builder session 5</a> and hunts its leak in <a href="b6-the-leakage-hunt.html">Builder session 6</a>.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A one-page worth sheet for any model put in front of you: the base rate, the lift at the top decile on the next month, repeats found per 100 contacts, and a cost per contact that you supply yourself. Plus three questions for the next model review: "what is the base rate", "which month did you score on", and "when was each feature known".</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers base rate, AUC and lift at the top decile</span>
+      <h2>Base rate first</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A model that "finds repeat buyers" is only worth something against what you would find without it. So the first number to ask for is not the model's: it is how many repeat buyers there are anyway. Everything else is a multiple of that.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn gauge from 0 to 20 repeat orders per 100 contacts, on month T+1, February 2018. A thin needle points at 4.18 per 100, the base rate: 24 repeats in 574 orders. A blue needle points at 15.5 per 100: the model's top decile, 9 repeats in 58 orders. The ratio is a lift of 3.71 times. A hatched zone below 8.36 per 100 marks Serai's 2.0 times gate. One hit more or less in the top decile moves lift by 0.41.">
+        <defs>
+          <filter id="a3aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="31" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a3aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a3aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a3aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a3aL { font: 600 12px Inter, sans-serif; fill: #1A2232; }
+          .a3aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a3aB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .a3aV { font: 800 18px Inter, sans-serif; fill: #6A4C04; }
+          .a3aA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a3aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a3aH" x="30" y="26">REPEAT ORDERS PER 100 CONTACTS, MONTH T+1</text>
+        <text class="a3aS" x="380" y="26">measured on the bench · rung 3 · February 2018, never seen in training</text>
+
+        <g filter="url(#a3aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M250 230 L100 230 A150 150 0 0 1 211.7 85 Z" fill="url(#a3aHc)" stroke="#966E08"/>
+          <path d="M100 230 A150 150 0 0 1 400 230"/>
+          <path d="M100 230 L400 230"/>
+          <path d="M214 95 L209 74" stroke-width="3"/>
+          <path d="M250 230 L147 151"/>
+          <path d="M246 224 L349 146 L254 236 Z" fill="#A9C4EA"/>
+          <circle cx="250" cy="230" r="7" fill="#FFFFFF"/>
+          <rect x="470" y="50" width="380" height="230" rx="12" transform="rotate(-0.3 660 165)" fill="#FFFFFF"/>
+          <path d="M486 160 L834 160" stroke="#E6E9EF"/>
+        </g>
+
+        <text class="a3aS" x="92" y="250">0</text>
+        <text class="a3aS" x="396" y="250">20</text>
+        <text class="a3aS" x="243" y="104">10</text>
+        <text class="a3aA" x="118" y="62">2.0x gate: 8.36 per 100</text>
+        <text class="a3aS" x="70" y="276">thin needle: contact everyone, 4.18 per 100</text>
+        <text class="a3aB" x="70" y="294">blue needle: model's top decile, 15.5 per 100</text>
+
+        <text class="a3aH" x="486" y="74">EVERYONE IN MONTH T+1</text>
+        <text class="a3aL" x="486" y="96">574 orders, 24 followed by a repeat</text>
+        <text class="a3aV" x="486" y="128">base rate 4.18%</text>
+        <text class="a3aS" x="486" y="148">what a random list would find</text>
+        <text class="a3aH" x="486" y="184">THE MODEL'S TOP DECILE</text>
+        <text class="a3aL" x="486" y="206">58 orders, 9 followed by a repeat</text>
+        <text class="a3aV" x="486" y="238">lift 3.71x</text>
+        <text class="a3aS" x="486" y="258">15.5% / 4.18%; one hit more or less: 0.41</text>
+
+        <text class="a3aN" x="30" y="318">The gauge is the decision: is the blue needle far enough past the gate that one lucky hit does not explain it?</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - lift is the top decile's hit rate divided by the base rate, read on a month the model never saw</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Three numbers, in business words<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Number</th><th>Serai, month T+1</th><th>The question it answers</th><th>What it does not tell you</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Base rate</strong></td><td>4.18% (24 of 574)</td><td>How many repeat buyers would a random contact list find?</td><td>Anything about the model</td></tr>
+            <tr><td><strong>AUC</strong></td><td>0.7894</td><td>If you pick one repeat buyer and one non-repeat at random, how often does the model rank the repeat buyer higher?</td><td>How many repeats you find in the slice you can afford to contact</td></tr>
+            <tr><td><strong>Lift at the top decile</strong></td><td>3.71x (9 of the top 58)</td><td>If you contact only the top tenth, how many times more repeats do you find than at random?</td><td>Whether the contact caused the repeat</td></tr>
+          </tbody>
+        </table>
+        <p>scikit-learn describes its AUC function plainly: "Compute Area Under the Receiver Operating Characteristic Curve (ROC AUC) from prediction scores." It is a ranking score across the whole list. A CRM team never contacts the whole list; it contacts the top of it. That is why the number on Serai's scorecard is lift at the top decile, and AUC sits beside it as a sanity check.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The decision the model changes<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A model is worth exactly the decision it changes. For Serai the decision is narrow: <strong>which customers a brand's CRM team contacts this month</strong>. Without the model the team contacts at random, or contacts everyone, and about 4 in 100 contacts land on someone who was going to order again. With the model the team contacts the top tenth and about 15 or 16 in 100 do. The top 58 orders hold 9 of the month's 24 repeats, 37.5% of them, from a tenth of the list.</p>
+        <p>Serai's constructed gate for the model row is a month T+1 lift of at least <strong>2.0x</strong>. In this month that means the top 58 must hold at least 4.85 repeats, so in practice 5 hits passes and 4 does not (arithmetic on the bench's 4.18% base rate). If no decision changes when the model goes live, the model is a report, and reports do not carry 35% of a product's price.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Small numbers: one hit is 0.41<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Month T+1 has 574 orders and 24 real repeats. The top decile is 58 orders. Each repeat in those 58 is worth 1 / 58 of hit rate, which divided by the 4.18% base rate is <strong>0.41 of lift</strong>. Nine hits read 3.71x; eight would read 3.30x; ten would read about 4.12x. So the honest way to say the result is "roughly three and a half to four times the base rate, on 24 positives", not "3.71x".</p>
+        <p>This is not a flaw of Serai's model; it is what a single month of a mid-sized enabler looks like. Two habits follow. Never compare two models on the third decimal of lift when the month has two dozen positives. And before you sign, ask for the same lift on a second unseen month: if it holds on fresh data, you believe it more; if it swings by a full point, you have learned the size of the noise.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Not every "repeat" is a second visit.</strong> In Serai's real Olist rows, 197 orders were followed by another order from the same customer within 90 days, and 83 of those repeats were placed on the same day. Some are surely split baskets rather than a customer coming back. The label counts them all as repeats because the data cannot tell them apart. That ambiguity sits inside every lift number on this page, and it is one more reason to read lift as a range rather than a point.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the time split and why only the next month counts</span>
+      <h2>Only the next month counts</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A model is used on next month's customers, so it has to be judged on next month's customers. Anything measured on the months it trained on describes how well it memorised, not how well it will work when the CRM team presses send.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn timeline of the split. Training orders run up to 2017-11-02: 2,744 orders with 60 repeats. A 90-day label window follows and closes on 2018-01-31, the end of month T. Month T+1, February 2018, is scored and never trained on: 574 orders with 24 repeats. Below, training AUC reads 0.6248 in-sample and month T+1 AUC reads 0.7894.">
+        <defs>
+          <filter id="a3bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="37" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a3bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a3bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a3bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a3bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a3bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a3bV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .a3bA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a3bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a3bH" x="30" y="26">TRAIN ON THE PAST, LET THE LABEL CLOSE, SCORE THE NEXT MONTH</text>
+        <text class="a3bS" x="560" y="26">measured on the bench · rung 3</text>
+
+        <text class="a3bH" x="70" y="60">TRAINING ORDERS</text>
+        <text class="a3bH" x="430" y="60">LABEL WINDOW</text>
+        <text class="a3bH" x="650" y="60">MONTH T+1</text>
+
+        <g filter="url(#a3bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="60" y="70" width="360" height="40" rx="8" transform="rotate(-0.4 240 90)" fill="url(#a3bHc)" stroke="#966E08"/>
+          <rect x="420" y="70" width="200" height="40" rx="8" transform="rotate(0.4 520 90)" fill="#FFFFFF"/>
+          <rect x="640" y="70" width="200" height="40" rx="8" transform="rotate(-0.4 740 90)" fill="#A9C4EA"/>
+          <path d="M50 130 L852 130" marker-end="url(#a3bAr)"/>
+          <path d="M420 124 L420 136"/>
+          <path d="M620 124 L620 136"/>
+          <path d="M840 124 L840 136"/>
+          <rect x="60" y="196" width="340" height="66" rx="10" transform="rotate(-0.5 230 229)" fill="#FFFFFF"/>
+          <rect x="480" y="196" width="360" height="66" rx="10" transform="rotate(0.4 660 229)" fill="#FBF5E6"/>
+        </g>
+
+        <text class="a3bS" x="430" y="94">90 days: did they buy again?</text>
+        <text class="a3bL" x="650" y="94">scored, never trained on</text>
+
+        <text class="a3bA" x="420" y="150" text-anchor="middle">2017-11-02</text>
+        <text class="a3bA" x="620" y="150" text-anchor="middle">2018-01-31</text>
+        <text class="a3bA" x="740" y="150" text-anchor="middle">February 2018</text>
+        <text class="a3bS" x="420" y="168" text-anchor="middle">last purchase in training</text>
+        <text class="a3bS" x="604" y="168" text-anchor="middle">window closes, end of month T</text>
+
+        <text class="a3bL" x="76" y="218">2,744 orders, 60 repeats · in-sample</text>
+        <text class="a3bV" x="76" y="248">training AUC 0.6248</text>
+        <text class="a3bL" x="496" y="218">574 orders, 24 repeats · unseen</text>
+        <text class="a3bV" x="496" y="248">month T+1 AUC 0.7894</text>
+
+        <text class="a3bN" x="30" y="288">Higher on the unseen month is small-sample noise in a weak training label, not a sign the model is great.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the label window must close before the cutoff, or the model trains on outcomes it would not have known</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The split, in dates<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The label is "did this customer order again within 90 days". A 90-day label needs 90 days to become true or false. So the last training purchase is 2017-11-02, which lets its window close by 2018-01-31, the end of month T. The model is then scored on February 2018, month T+1, with nothing from that month used in training. If the training orders ran right up to January, their labels would still be open, and the model would be taught "no repeat" for customers who simply had not had time yet.</p>
+        <p>scikit-learn's TimeSeriesSplit names the rule: it "provides train/test indices to split time-ordered data, where other cross-validation methods are inappropriate, as they would lead to training on future data and evaluating on past data." A random split of Serai's orders would mix February customers into training and January customers into the test, and the score would describe a world where the future is known.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Why training AUC below test AUC is not good news<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Usually a model scores higher on the data it was trained on. Serai's does the opposite: 0.6248 in training, 0.7894 on month T+1. It is tempting to read that as "the model generalises brilliantly". The honest reading is duller. The training label is weak and noisy: 60 positives in 2,744 orders, many of them same-day repeats. The test month has 24 positives. With numbers that small, the two AUCs can land in either order by chance. Report both, and say out loud that the ordering is noise here.</p>
+        <p>What would make you worry is the other direction by a wide margin: a training AUC far above the next month's. Part 3 is that case.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The survey arrives after the parcel.</strong> Olist's documentation says its satisfaction survey goes out once the customer receives the product or the estimated delivery date is due. So a review score is not known at the moment of purchase, which is when Serai's model is asked to score. The seven features the model does use (prior orders, recency of the last one, order value, freight share, instalments, voucher use, items in the order) are all known when the order is placed. A feature that arrives after the decision belongs to the next model, not this one.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers leakage and the model that looks perfect</span>
+      <h2>A model that looks perfect</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">The most dangerous model review is the one where the numbers are excellent. Add one innocent-looking warehouse column to Serai's model and training AUC jumps to 0.9913. On the next month the same model finds fewer repeat buyers than the honest one, and falls under the gate.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two hand-drawn panels. Honest features: training AUC 0.6248, month T+1 lift 3.71 times, 9 of 24 repeats in the top 58, above the 2.0 times gate, model row live. With the backfilled field has_later_order: training AUC 0.9913, month T+1 lift 1.65 times, 4 of 24 repeats in the top 58, under the 2.0 times gate, model row held.">
+        <defs>
+          <filter id="a3cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="41" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a3cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a3cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a3cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a3cL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a3cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a3cV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .a3cR { font: 800 16px Inter, sans-serif; fill: #991B1B; }
+          .a3cK { font: 800 11px Inter, sans-serif; fill: #1A2232; }
+          .a3cX { font: 800 11px Inter, sans-serif; fill: #991B1B; }
+          .a3cA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a3cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a3cH" x="30" y="26">SAME MODEL, ONE EXTRA COLUMN</text>
+        <text class="a3cS" x="270" y="26">measured on the bench · rung 3 and the break button · bars scaled per row</text>
+
+        <g filter="url(#a3cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="44" width="390" height="226" rx="12" transform="rotate(-0.3 225 157)" fill="#FFFFFF"/>
+          <rect x="460" y="44" width="390" height="226" rx="12" transform="rotate(0.3 655 157)" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="46" y="100" width="125" height="22" rx="5" fill="#FBF5E6"/>
+          <rect x="46" y="158" width="186" height="22" rx="5" fill="#A9C4EA"/>
+          <path d="M146 152 L146 188" stroke-dasharray="4 4" stroke="#966E08"/>
+          <rect x="476" y="100" width="198" height="22" rx="5" fill="#FBF5E6"/>
+          <rect x="476" y="158" width="83" height="22" rx="5" fill="#FFFFFF" stroke="#991B1B"/>
+          <path d="M576 152 L576 188" stroke-dasharray="4 4" stroke="#966E08"/>
+          <path d="M772 76 C 792 92, 778 108, 750 110" marker-end="url(#a3cAr)"/>
+        </g>
+
+        <text class="a3cH" x="46" y="68">HONEST FEATURES</text>
+        <text class="a3cH" x="476" y="68">WITH has_later_order</text>
+        <text class="a3cX" x="740" y="68">looks perfect</text>
+
+        <text class="a3cL" x="46" y="92">training AUC</text>
+        <text class="a3cV" x="181" y="117">0.6248</text>
+        <text class="a3cL" x="46" y="148">month T+1 lift</text>
+        <text class="a3cV" x="242" y="175">3.71x</text>
+        <text class="a3cA" x="146" y="204" text-anchor="middle">2.0x gate</text>
+        <text class="a3cS" x="46" y="228">9 of 24 repeats in the top 58</text>
+        <text class="a3cK" x="46" y="252">model row live</text>
+
+        <text class="a3cL" x="476" y="92">training AUC</text>
+        <text class="a3cR" x="684" y="117">0.9913</text>
+        <text class="a3cL" x="476" y="148">month T+1 lift</text>
+        <text class="a3cR" x="590" y="175">1.65x</text>
+        <text class="a3cA" x="576" y="204" text-anchor="middle">2.0x gate</text>
+        <text class="a3cS" x="476" y="228">4 of 24 repeats in the top 58</text>
+        <text class="a3cX" x="476" y="252">model row held</text>
+
+        <text class="a3cN" x="30" y="294">The field is filled in with hindsight. At scoring no later order exists yet, so it is 0 for every row.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the leaked field raises the training score and lowers what the model finds on the month that matters</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>What a leak is, in one sentence<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Kaufman, Rosset, Perlich and Stitelman define leakage as "the introduction of information about the data mining target that should not be legitimately available to mine from". The column <code>has_later_order</code> is the target wearing a different name: it is 1 for every training order that was followed by another, because a nightly reporting job filled it in after the fact. In training it answers the question for the model. At scoring, in February 2018, no later order has happened yet, so the column is 0 for every row and carries nothing.</p>
+        <p>The cost is worse than "the training number was inflated". With the answer on the table, the model learns to lean on that one column and lets the honest signals drift. When the column goes blank, what is left ranks worse than the model that never saw it: 4 of 24 repeats in the top 58 instead of 9, lift 1.65x against a 2.0x gate. Kaufman and colleagues propose a "learn-predict separation": every input stamped with the time it became known, and nothing used that was known only after the moment of prediction.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Three questions for any model that looks too good<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <ul>
+          <li><strong>Which month was it scored on?</strong> If the answer is "a random 20% of the rows", the score mixes past and future. Ask for the next unseen month.</li>
+          <li><strong>When was each feature known?</strong> For every column, the time it becomes known against the time the model is asked. Any column nobody can date waits.</li>
+          <li><strong>How far apart are training and next-month results?</strong> Serai's leaked model reads 0.9913 in training and 1.65x lift on the next month, under its gate. A gap like that is a leak until proven otherwise.</li>
+        </ul>
+        <p>Combine the leak with skipped data engineering and month T+1 AUC falls to 0.4922, worse than ranking at random. Two shortcuts that each look survivable compound into a model that is worse than no model.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The column was right there in the warehouse.</strong> Fields like "has a later order", "lifetime orders" or "churned flag" are usually built for reporting dashboards, where hindsight is exactly what you want. The first person to build a model finds them already joined and well populated, and they make the model look superb. The leak is not carelessness with the algorithm; it is a reporting column crossing into a prediction table without anyone asking when its values became known.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>The worth sheet</h2>
+      <span class="tag demo">★ 20 min · everyone builds</span>
+    </div>
+    <p class="lede">You need one model your organisation runs or is being pitched, and the person who built it. No model to hand? Fill the sheet for Serai with the numbers on this page. The cost and value lines are yours to supply: nobody can hand you those, and a sheet that invents them is worth less than a blank.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn number line of repeat buyers found in the top 58 orders of month T+1, from 0 to 10 hits. Four hits gives lift 1.65 times, the leaked model. The 2.0 times gate needs 4.85 hits. Eight hits gives 3.30 times, the model with data engineering skipped. Nine hits gives 3.71 times, every layer built. Each hit is worth 0.41 of lift.">
+        <defs>
+          <filter id="a3dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="43" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a3dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a3dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a3dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a3dL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a3dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a3dB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .a3dA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a3dX { font: 700 11px Inter, sans-serif; fill: #991B1B; }
+          .a3dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a3dH" x="30" y="26">HITS IN THE TOP 58, AND WHAT EACH ONE IS WORTH</text>
+        <text class="a3dS" x="400" y="26">month T+1 · 24 repeats in 574 orders · bench values, gate is arithmetic</text>
+
+        <g filter="url(#a3dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="80" y="144" width="349" height="12" rx="4" fill="url(#a3dHc)" stroke="#966E08"/>
+          <path d="M70 150 L820 150" marker-end="url(#a3dAr)"/>
+          <path d="M80 144 L80 156"/>
+          <path d="M440 144 L440 156"/>
+          <path d="M800 144 L800 156"/>
+          <path d="M429 138 L429 162" stroke-dasharray="4 4" stroke="#966E08"/>
+          <circle cx="368" cy="150" r="7" fill="#FEF2F2" stroke="#991B1B"/>
+          <circle cx="656" cy="150" r="7" fill="#FFFFFF"/>
+          <circle cx="728" cy="150" r="9" fill="#A9C4EA"/>
+          <path d="M368 140 L368 134"/>
+          <path d="M728 138 L728 134"/>
+          <path d="M656 160 L656 182"/>
+        </g>
+
+        <text class="a3dX" x="368" y="126" text-anchor="middle">4 hits · 1.65x · leaked field</text>
+        <text class="a3dB" x="728" y="126" text-anchor="middle">9 hits · 3.71x · every layer</text>
+        <text class="a3dS" x="80" y="174" text-anchor="middle">0</text>
+        <text class="a3dS" x="440" y="174" text-anchor="middle">5</text>
+        <text class="a3dS" x="800" y="174" text-anchor="middle">10</text>
+        <text class="a3dA" x="429" y="196" text-anchor="middle">2.0x gate needs 4.85 hits</text>
+        <text class="a3dL" x="656" y="196" text-anchor="middle">8 hits · 3.30x · DE skipped</text>
+        <text class="a3dS" x="200" y="196" text-anchor="middle">under the gate: held</text>
+
+        <text class="a3dN" x="30" y="240">Each hit in the top 58 is worth 0.41 of lift. The honest model clears the gate by four hits, not by a decimal.</text>
+        <text class="a3dN" x="30" y="262">Per 100 contacts: everyone finds 4.18 repeats, the top decile 15.5. The cost of a contact is your number.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - count the hits, not the decimals: the gate sits between 4 and 5 repeat buyers in the top 58</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Write the decision first.</strong> One sentence: who acts on the model's output, what they do differently, and how often. If you cannot write it, stop here; the model has no worth yet, however good its scores.</p>
+        <div class="prompt-box good"><span class="label">★ Serai's decision line</span>Decision:   each month, brand CRM teams contact the top tenth of last month's buyers
+Instead of: contacting everyone, or a random sample
+Owner:      CRM lead per brand; model owner on Serai's data team</div>
+      </div>
+      <div class="step">
+        <p><strong>Get the base rate and the lift, on the next unseen month.</strong> Ask for the counts, not just the ratios, so you can do the small-number check yourself.</p>
+        <div class="prompt-box good"><span class="label">★ The counts behind the ratios</span>Scoring month:      February 2018 (month T+1), never used in training
+Orders scored:      574          Repeats among them:  24
+Base rate:          24 / 574  = 4.18%
+Top decile:         58 orders    Repeats in it:        9
+Top-decile rate:    9 / 58    = 15.5%
+Lift:               15.5% / 4.18% = 3.71x
+One hit is worth:   (1 / 58) / 4.18% = 0.41 of lift</div>
+      </div>
+      <div class="step">
+        <p><strong>Translate into repeats found per 100 contacts.</strong> This is the line a budget owner reads.</p>
+        <div class="prompt-box good"><span class="label">★ Per 100 contacts (arithmetic on the counts above)</span>Contact at random:      about 4.18 repeat buyers per 100 contacts
+Contact the top decile: about 15.5 repeat buyers per 100 contacts
+Difference:             about 11.3 more per 100 contacts
+Share of all repeats reached from 10% of the list: 9 of 24 = 37.5%</div>
+      </div>
+      <div class="step">
+        <p><strong>Add the cost per contact and the value per repeat as YOUR assumptions.</strong> Write them as ranges, and label them as assumptions on the sheet. Then write the break-even in words.</p>
+        <div class="prompt-box good"><span class="label">★ Your assumptions, not ours</span>Cost per contact:        USD ____ to ____   (assumption: message, voucher, staff time)
+Value per repeat order:  USD ____ to ____   (assumption: margin, not GMV)
+Break-even:  the top decile pays when 15.5 x value per repeat &gt; 100 x cost per contact
+Caveat:      the model finds people likely to repeat; it does not prove the contact
+             caused the repeat. Only a held-out control group can measure that.</div>
+      </div>
+      <div class="step">
+        <p><strong>Check the gate and the leak questions, then write the verdict.</strong></p>
+        <div class="prompt-box good"><span class="label">★ The verdict line</span>Gate:      lift &gt;= 2.0x on month T+1          Measured: 3.71x (9 of 24 hits)  -&gt; live
+Leak check: every feature known at purchase?  Yes, seven features; review score excluded
+Gap check: training vs next month             0.6248 vs 0.7894 AUC; ordering is noise
+Verdict:   live, read as "roughly 3.5x to 4x on 24 positives"; re-check on a second month</div>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The model review that approves nothing it can defend</span>
+Our churn model achieves 99% AUC on the validation set and is ready for launch.
+Expected uplift: 3.7x more conversions across all brands.
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 4</h2>
+      <span class="tag exercise">25 min</span>
+    </div>
+    <ol>
+      <li>Finish the worth sheet for one model in your organisation, including the count of positives in its scoring month. If nobody can tell you the count, write that down: it is a finding.</li>
+      <li>Ask the model's owner which month it was scored on and whether any row from that month was used in training.</li>
+      <li>Pick the three most predictive features of that model and find out, for each, when its value becomes known relative to the moment the model is asked.</li>
+      <li>Fill the machine learning row of your estate sheet from session 1: what it consumes, its test (lift on the next month), its gate, its owner.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Leader session 3 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · In month T+1, 24 of 574 orders were followed by a repeat, and the model's top 58 held 9 of them. What does that tell a CRM lead?</p>
+      <button class="qopt" type="button">A · The model is right 79% of the time, because AUC is 0.7894</button>
+      <button class="qopt" type="button">B · Contacting the top tenth finds about 15.5 repeat buyers per 100 contacts, against about 4.18 at random</button>
+      <button class="qopt" type="button">C · Contacting the top tenth will cause 3.71 times more repeat orders</button>
+      <button class="qopt" type="button">D · The model finds 9 of every 10 repeat buyers</button>
+      <p class="qwhy">Lift is the top decile's hit rate over the base rate: 15.5% against 4.18%, so 3.71x. It measures who the model ranks high, not what a contact causes (C), and AUC is a ranking score, not an accuracy (A).</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">2 · A new column lifts training AUC from 0.6248 to 0.9913. What should you ask first?</p>
+      <button class="qopt" type="button">A · How soon it can go live, since it clears every threshold</button>
+      <button class="qopt" type="button">B · Whether a bigger model would push it even higher</button>
+      <button class="qopt" type="button">C · Whether the training set should be made smaller</button>
+      <button class="qopt" type="button">D · When that column's values become known, and what the next unseen month's lift is</button>
+      <p class="qwhy">On Serai's model the column was <code>has_later_order</code>, filled in with hindsight. Next-month lift fell to 1.65x, under the 2.0x gate. A leap in training score is a leak until the time each value was known says otherwise.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · With the data engineering layer skipped, lift reads 3.30x instead of 3.71x. A team proposes choosing between two model versions on that kind of gap. What is the honest response?</p>
+      <button class="qopt" type="button">A · With 24 positives one hit moves lift by 0.41, so 8 hits against 9 is within the noise; check a second unseen month</button>
+      <button class="qopt" type="button">B · Pick 3.71x, because a higher number is always better</button>
+      <button class="qopt" type="button">C · Average the two and report 3.505x</button>
+      <button class="qopt" type="button">D · Switch to training AUC, because it uses more rows</button>
+      <p class="qwhy">3.71x and 3.30x are 9 and 8 hits in the top 58. A single repeat buyer separates them. Training AUC (D) describes memorisation, not next month.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Base rate, AUC and top-decile lift on month T+1</span><span class="note">Every model number is printed by the bench in Builder session 10: logistic regression on Serai's derived Olist rows, cross-checked by an independent Python reference</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Time-ordered splits and ROC AUC</span><span class="note">scikit-learn developers, TimeSeriesSplit and roc_auc_score documentation, read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Leakage and learn-predict separation</span><span class="note">Kaufman, Rosset, Perlich and Stitelman (2012), ACM TKDD 6(4), article 15; abstract read at source, only the abstract quoted</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Survey timing and same-day repeats</span><span class="note">Brazilian E-Commerce Public Dataset by Olist, Kaggle, CC BY-NC-SA 4.0, read at source; 83 of 197 same-day repeats counted in Serai's sample</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">The 2.0x gate, the CRM decision and the cost per contact</span><span class="note">Gate is Serai's constructed policy; cost and value per contact are the reader's own assumptions; no benchmark claimed</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Model evaluation depth: calibration, uplift testing, monitoring</span><span class="note">Owned by the <a href="https://phoebefu6.github.io/learn-model-evaluation-with-phoebe/">model evaluation course</a> and the <a href="https://phoebefu6.github.io/learn-ml-production-with-phoebe/">ML production course</a>; linked, not retaught</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 3 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Base rate first</b><span>Serai month T+1: 24 repeats in 574 orders, 4.18%. Every lift is a multiple of this.</span></div>
+      <div class="cheat-item"><b>Lift beats AUC for budgets</b><span>Top 58 hold 9 of 24: 15.5 per 100 contacts against 4.18, lift 3.71x.</span></div>
+      <div class="cheat-item"><b>One hit is 0.41</b><span>With 24 positives, read 3.71x as "about 3.5x to 4x". Never compare third decimals.</span></div>
+      <div class="cheat-item"><b>Only the next month counts</b><span>Train to 2017-11-02, label closes 2018-01-31, score February 2018.</span></div>
+      <div class="cheat-item"><b>Too good is a leak</b><span>Training AUC 0.9913 with a hindsight column; next-month lift 1.65x, under the 2.0x gate.</span></div>
+      <div class="cheat-item"><b>Worth is a decision</b><span>Name who acts differently; supply your own cost per contact; prediction is not causation.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>You can now price a ranking. Session 4 moves up a layer to words a seller reads: listing copy and review summaries checked by a rubric, the rubric checked by a human golden set, and the honest disagreement about whether AI-written copy sells more.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Leader session 3 of 6 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="a2-sequencing-and-skipping.html">← Prev: Sequencing and the cost of skipping</a> &nbsp;·&nbsp; <a href="a4-gen-ai-a-seller-can-trust.html">Next: Gen AI a seller can trust →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

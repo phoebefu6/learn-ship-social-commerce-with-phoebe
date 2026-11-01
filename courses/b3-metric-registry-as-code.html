@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Builder session 3 of 10. Orders, GMV and repeat rate, each defined once as a tested Python function. Compare the registry, a naive sum and an independent reference on 8,614 real Olist orders: 100.00% agreement against 85.04% for naive GMV, and see why no definition can rescue a dirty row.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="Building the metric registry - learn ship social commerce with phoebe">
+<meta property="og:description" content="Builder session 3 of 10. Three metrics, one definition each, a test for every definition, and 100.00% agreement with the reference.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/b3-metric-registry-as-code.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Building the metric registry - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Builder session 3 of 10. Define orders, GMV and repeat rate once, in code, with tests.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Builder session 3 · Building the metric registry - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Builder session 3 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Builder session 3 of 10</div>
+    <h1>Building the <span class="accent">metric registry</span></h1>
+    <p class="sub">Three people asked for "GMV" and got three numbers. That is not a reporting problem, it is a definitions problem, and it has a cheap fix: write each metric once, as a function, with a test, and make every report import it. Tonight you build that registry for Serai Commerce, the constructed enabler whose exports hold 8,614 real Olist orders. You compare it against a naive sum and an independent reference, watch it agree to 100.00% where the naive GMV reaches 85.04%, and then feed it dirty rows to see what a definition cannot do.</p>
+    <div class="chip-row">
+      <span class="chip level">🟡 Intermediate</span>
+      <span class="chip audience">Analytics engineers</span>
+      <span class="chip audience">Analysts who own the headline numbers</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · Definitions, three-way, dirty rows</span>
+      <span class="a3" style="flex:4">20-42 · Build-along: the registry</span>
+      <span class="a4" style="flex:1">42-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Where the registry sits</h2>
+    </div>
+    <p class="lede">Session 1 gave you a schema with declared grains; session 2 gave it tests that fail loudly and repaired the 333 blocking rows. The registry is the first layer that prints numbers people act on, so it is the first place a quiet disagreement turns into a meeting. Which metrics belong in a registry, who owns each one and how the registry earns trust before a board or an investor reads it are design questions, and they are answered in Social Commerce Enablers: <a href="https://phoebefu6.github.io/learn-ship-ecommerce-enabler-with-phoebe/courses/b7-registry-as-code.html">Analyst session 7, Building the metric registry</a>, and <a href="https://phoebefu6.github.io/learn-ship-ecommerce-enabler-with-phoebe/courses/a6-metric-registry-before-ipo.html">Leader session 6 there</a>. This session takes that design as given and builds three of its definitions in Python, with tests, on the merged schema.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A small Python registry with three functions (orders, GMV, repeat rate), three tests on hand-built frames that fail if anyone changes a definition by accident, and the habit of checking every metric against an independent reference before it ships. On the full public Olist file it prints 96,478 orders, BRL 13,221,498.11 and a 3.00% repeat rate.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers orders, GMV and repeat rate as written definitions</span>
+      <h2>One definition each</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A metric definition has three parts: what is counted, what is left out on purpose, and the grain it counts at. Write all three down. The part people skip is the second one, and it is where most disagreements live: freight in or out, re-sends counted once or twice, a person or a per-order id.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 322" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn registry card holding three definitions with the values printed on Serai's repaired frame. Orders: distinct normalised order keys, a re-send is still one order, not rows in the file; 8,614. GMV: sum of item price in BRL, freight stays out; BRL 1,197,842.24. Repeat rate: customers with two or more orders divided by all customers, not export-local customer keys; 3.00 percent, 250 of 8,333. Each definition lives once, as a function with a test.">
+        <defs>
+          <filter id="b3aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="43" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b3aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b3aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b3aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b3aL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b3aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b3aB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .b3aV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b3aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b3aH" x="30" y="26">THREE METRICS, ONE DEFINITION EACH</text>
+        <text class="b3aS" x="300" y="26">Serai's repaired frame, 8,614 orders · values as session 10 prints them</text>
+
+        <g filter="url(#b3aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="20" y="44" width="840" height="236" rx="14" transform="rotate(0.3 440 162)" fill="#FBF5E6"/>
+          <circle cx="440" cy="47" r="7" fill="#FFFFFF"/>
+          <path d="M440 54 L440 62"/>
+          <rect x="40" y="70" width="250" height="146" rx="10" transform="rotate(-1.2 165 143)" fill="#FFFFFF"/>
+          <rect x="310" y="70" width="250" height="146" rx="10" transform="rotate(0.8 435 143)" fill="#FFFFFF"/>
+          <rect x="580" y="70" width="250" height="146" rx="10" transform="rotate(-0.9 705 143)" fill="#FFFFFF"/>
+          <rect x="40" y="232" width="790" height="34" rx="8" transform="rotate(-0.2 435 249)" fill="#A9C4EA"/>
+        </g>
+
+        <text class="b3aH" x="56" y="96">ORDERS</text>
+        <text class="b3aS" x="56" y="116">distinct normalised order keys</text>
+        <text class="b3aS" x="56" y="132">a re-send is still one order</text>
+        <text class="b3aL" x="56" y="154">Not: rows in the file</text>
+        <text class="b3aV" x="56" y="196">8,614</text>
+
+        <text class="b3aH" x="326" y="96">GMV</text>
+        <text class="b3aS" x="326" y="116">sum of item price, in BRL</text>
+        <text class="b3aS" x="326" y="132">freight stays out</text>
+        <text class="b3aL" x="326" y="154">Not: price + freight</text>
+        <text class="b3aV" x="326" y="196">BRL 1,197,842.24</text>
+
+        <text class="b3aH" x="596" y="96">REPEAT RATE</text>
+        <text class="b3aS" x="596" y="116">customers with 2+ orders</text>
+        <text class="b3aS" x="596" y="132">divided by all customers</text>
+        <text class="b3aL" x="596" y="154">Not: export-local customer keys</text>
+        <text class="b3aV" x="596" y="196">3.00%</text>
+        <text class="b3aS" x="656" y="196">250 / 8,333</text>
+
+        <text class="b3aB" x="56" y="253">Each definition lives once, as a function with a test; every report imports it and nobody retypes it.</text>
+
+        <text class="b3aN" x="30" y="304">The names come from the registry design in Social Commerce Enablers, Analyst session 7; the code is new here.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - every definition says what it counts, what it leaves out, and at which grain</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The three definitions, with what each leaves out<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Metric</th><th>Counts</th><th>Leaves out, on purpose</th><th>Grain</th><th>Serai, repaired</th></tr></thead>
+          <tbody>
+            <tr><td><strong>orders</strong></td><td>distinct normalised order keys</td><td>re-sent rows of an order already counted</td><td>order</td><td>8,614</td></tr>
+            <tr><td><strong>GMV</strong></td><td>sum of item price, BRL</td><td>freight; refunds sit in a separate adjustments table after session 2's quarantine</td><td>line, summed</td><td>BRL 1,197,842.24</td></tr>
+            <tr><td><strong>repeat rate</strong></td><td>customers with 2 or more distinct orders, divided by all customers</td><td>per-export customer keys; the resolved person key is the only one used</td><td>resolved person</td><td>3.00% (250 / 8,333)</td></tr>
+          </tbody>
+        </table>
+        <p>None of these choices is the only correct one. Plenty of teams report GMV with freight, and that is a fine metric if it is called something else and defined once. What breaks trust is two definitions sharing one name. Store GMV in integer cents behind the function (119,784,224 cents for Serai) so "agrees to the cent" is an equality test, not a tolerance.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why a function, not a SQL snippet in a wiki<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A definition written in prose drifts the first time someone retypes it. A definition written as a function can be imported, tested and versioned: a change shows up in review, and a test fails if the change was an accident. The registry is small on purpose. Three functions with docstrings and tests are worth more than forty metrics nobody owns.</p>
+        <div class="prompt-box good"><span class="label">★ The shape of one registry entry</span>def repeat_rate(o):
+    """Repeat rate: customers with 2+ distinct orders / customers.
+    Grain: resolved person (customer_key from the identity gate).
+    Leaves out: per-export customer keys."""
+    ...</div>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The repeat rate that reads zero.</strong> Olist ships two customer columns: a <code>customer_id</code> that is new on every order, and a <code>customer_unique_id</code> for the person behind it. Key the repeat-rate definition on the first and the full public file reports 0.00% repeat customers, because no per-order id ever orders twice. Key it on the second and it reports 3.00%. Same rows, same formula, a different grain written in one argument. That is why the grain belongs in the docstring.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the registry against a naive sum and an independent reference</span>
+      <h2>Registry, naive, reference</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A registry earns trust by agreeing with something it did not compute. Serai's reference totals come from the data builder, in pandas, straight from the source rows: a separate code path. The registry runs on the repaired exports. The naive sum is what someone gets by adding up the raw files. Put all three side by side and the definitions do the talking.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 410" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hand-drawn bars comparing the registry, the naive sum of the raw exports and the reference for three metrics. Orders: registry 8,614, naive 8,766, reference 8,614; naive agreement 98.27 percent. GMV: registry BRL 1,197,842.24, naive BRL 1,408,548.98, reference BRL 1,197,842.24; naive agreement 85.04 percent. Repeat rate: registry 3.00 percent, naive 2.90 percent, reference 3.00 percent; naive agreement 96.79 percent. The registry agrees with the reference at 100.00 percent on all three.">
+        <defs>
+          <filter id="b3bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="47" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b3bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b3bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b3bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b3bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b3bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b3bA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b3bR { font: 700 11px Inter, sans-serif; fill: #991B1B; }
+          .b3bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b3bH" x="30" y="26">THE SAME THREE METRICS, THREE WAYS</text>
+        <text class="b3bS" x="300" y="26">bar length relative to the largest in each group · values as session 10 prints them</text>
+        <text class="b3bA" x="690" y="50">AGREEMENT WITH REFERENCE</text>
+
+        <g filter="url(#b3bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="150" y="74" width="324" height="18" rx="4" fill="#A9C4EA"/>
+          <rect x="150" y="98" width="330" height="18" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="150" y="122" width="324" height="18" rx="4" fill="url(#b3bHc)"/>
+
+          <rect x="150" y="184" width="281" height="18" rx="4" fill="#A9C4EA"/>
+          <rect x="150" y="208" width="330" height="18" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="150" y="232" width="281" height="18" rx="4" fill="url(#b3bHc)"/>
+
+          <rect x="150" y="294" width="330" height="18" rx="4" fill="#A9C4EA"/>
+          <rect x="150" y="318" width="319" height="18" rx="4" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="150" y="342" width="330" height="18" rx="4" fill="url(#b3bHc)"/>
+        </g>
+
+        <text class="b3bH" x="40" y="64">ORDERS</text>
+        <text class="b3bL" x="40" y="87">Registry</text>
+        <text class="b3bL" x="40" y="111">Naive sum</text>
+        <text class="b3bL" x="40" y="135">Reference</text>
+        <text class="b3bL" x="486" y="87">8,614</text>
+        <text class="b3bR" x="490" y="111">8,766</text>
+        <text class="b3bL" x="486" y="135">8,614</text>
+        <text class="b3bA" x="690" y="87">100.00%</text>
+        <text class="b3bR" x="690" y="111">98.27%</text>
+
+        <text class="b3bH" x="40" y="174">GMV</text>
+        <text class="b3bL" x="40" y="197">Registry</text>
+        <text class="b3bL" x="40" y="221">Naive sum</text>
+        <text class="b3bL" x="40" y="245">Reference</text>
+        <text class="b3bL" x="443" y="197">BRL 1,197,842.24</text>
+        <text class="b3bR" x="490" y="221">BRL 1,408,548.98</text>
+        <text class="b3bL" x="443" y="245">BRL 1,197,842.24</text>
+        <text class="b3bA" x="690" y="197">100.00%</text>
+        <text class="b3bR" x="690" y="221">85.04%</text>
+
+        <text class="b3bH" x="40" y="284">REPEAT RATE</text>
+        <text class="b3bL" x="40" y="307">Registry</text>
+        <text class="b3bL" x="40" y="331">Naive sum</text>
+        <text class="b3bL" x="40" y="355">Reference</text>
+        <text class="b3bL" x="490" y="307">3.00%</text>
+        <text class="b3bR" x="480" y="331">2.90%</text>
+        <text class="b3bL" x="490" y="355">3.00%</text>
+        <text class="b3bA" x="690" y="307">100.00%</text>
+        <text class="b3bR" x="690" y="331">96.79%</text>
+
+        <text class="b3bN" x="30" y="384">Naive GMV adds freight and refund lines; naive orders keep 152 re-sent rows.</text>
+        <text class="b3bN" x="30" y="402">Naive repeat counts customers per export, so a buyer seen in two exports looks like two one-timers.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the naive sum is wrong in a different direction on every metric, which is why one tolerance never catches it</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Reading the three-way table<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Metric</th><th>Registry</th><th>Naive sum of the raw files</th><th>Reference</th><th>Naive agreement</th></tr></thead>
+          <tbody>
+            <tr><td><strong>orders</strong></td><td>8,614</td><td>8,766</td><td>8,614</td><td>98.27%</td></tr>
+            <tr><td><strong>GMV</strong></td><td>BRL 1,197,842.24</td><td>BRL 1,408,548.98</td><td>BRL 1,197,842.24</td><td>85.04%</td></tr>
+            <tr><td><strong>repeat rate</strong></td><td>3.00%</td><td>2.90% (247 / 8,506)</td><td>3.00%</td><td>96.79%</td></tr>
+          </tbody>
+        </table>
+        <p>Agreement here is the smaller value divided by the larger, so 100.00% means identical and the measure is the same whichever side is high. Notice the directions: naive orders read high (re-sends), naive GMV reads high (freight and refund lines), naive repeat reads low (8,506 export-local customer keys instead of 8,333 people, so cross-export repeat buyers vanish). A single "within 2%" check would pass orders and miss GMV. Check each metric on its own.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Why 100.00% is a measurement, not a tautology<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>It is tempting to read the registry's 100.00% as "it agrees with itself". It does not. The reference was computed by the data builder from the source rows, before the constructed defects were added; the registry runs on the exports after session 2's repair. Agreement to the cent says the repair restored the source exactly and the definitions match the reference's. Miss one repair rule and this number drops, which is the point of keeping a second code path. Serai's constructed gate asks for 99.5% agreement on every metric before the registry goes live; session 10 shows the gate switching the registry off.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Freight lives on the line.</strong> In the Olist files freight is charged per item, beside the item price, and one order can hold items from several sellers. Add price and freight across the full public delivered set and you get BRL 15,419,773.75 against BRL 13,221,498.11 of item price: 85.74% agreement before a single dirty row is involved. A definition gap alone moves GMV by double digits.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers the registry run on unrepaired rows</span>
+      <h2>The registry on dirty rows</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">Now skip session 2. Run the same registry, unchanged, on the raw exports. Two numbers barely move and one breaks: the repeat rate reads 4.61% instead of 3.00%, and the registry's agreement falls to 65.14%. The definition did nothing wrong. It counted exactly what it was given.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 352" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn mechanism. Two raw export rows for the same customer, one the original order and one a re-send under a variant key, pass through the unchanged repeat-rate function, which sees two orders and counts the customer as a repeat buyer. The registry on raw rows reads a repeat rate of 4.61 percent, 384 of 8,337, against the reference 3.00 percent, 250 of 8,333. Agreement: orders 98.27 percent, GMV 99.03 percent, repeat 65.14 percent, so the minimum is 65.14 percent against Serai's 99.5 percent gate.">
+        <defs>
+          <filter id="b3cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="53" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b3cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b3cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b3cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b3cR { font: 800 12px Inter, sans-serif; fill: #991B1B; }
+          .b3cL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b3cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b3cB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .b3cV { font: 800 18px Inter, sans-serif; fill: #6A4C04; }
+          .b3cX { font: 800 18px Inter, sans-serif; fill: #991B1B; }
+          .b3cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b3cH" x="30" y="26">A RE-SEND BECOMES A REPEAT CUSTOMER</text>
+        <text class="b3cS" x="320" y="26">row keys are illustrative; the re-sends are constructed, the orders real</text>
+
+        <g filter="url(#b3cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="52" width="300" height="160" rx="12" transform="rotate(-0.4 180 132)" fill="url(#b3cHc)"/>
+          <rect x="46" y="84" width="260" height="34" rx="6" transform="rotate(-1.5 176 101)" fill="#FFFFFF"/>
+          <rect x="52" y="136" width="260" height="34" rx="6" transform="rotate(1.8 182 153)" fill="#FFFFFF"/>
+          <path d="M334 110 L372 124" marker-end="url(#b3cAr)"/>
+          <path d="M334 154 L372 140" marker-end="url(#b3cAr)"/>
+          <rect x="378" y="72" width="200" height="120" rx="12" transform="rotate(0.5 478 132)" fill="#A9C4EA"/>
+          <path d="M582 132 L614 132" marker-end="url(#b3cAr)"/>
+          <rect x="620" y="52" width="230" height="160" rx="12" transform="rotate(-0.4 735 132)" fill="#FEF2F2" stroke="#FCA5A5"/>
+          <rect x="30" y="238" width="250" height="44" rx="8" transform="rotate(-0.8 155 260)" fill="#FFFFFF"/>
+          <rect x="300" y="238" width="250" height="44" rx="8" transform="rotate(0.7 425 260)" fill="#FFFFFF"/>
+          <rect x="570" y="238" width="280" height="44" rx="8" transform="rotate(-0.6 710 260)" fill="#FEF2F2" stroke="#991B1B"/>
+        </g>
+
+        <text class="b3cH" x="46" y="74">RAW EXPORT ROWS</text>
+        <text class="b3cL" x="60" y="106">key K-4417 · customer 0291</text>
+        <text class="b3cL" x="66" y="158">key K4417B · customer 0291</text>
+        <text class="b3cS" x="46" y="196">the second row is a re-send</text>
+
+        <text class="b3cH" x="394" y="98">repeat_rate()</text>
+        <text class="b3cB" x="394" y="120">unchanged definition</text>
+        <text class="b3cB" x="394" y="138">sees 2 distinct keys</text>
+        <text class="b3cB" x="394" y="156">so 0291 is a repeater</text>
+        <text class="b3cB" x="394" y="174">384 repeaters, not 250</text>
+
+        <text class="b3cR" x="636" y="78">✗ REGISTRY ON RAW ROWS</text>
+        <text class="b3cX" x="636" y="112">4.61%</text>
+        <text class="b3cS" x="706" y="112">384 / 8,337</text>
+        <text class="b3cH" x="636" y="148">REFERENCE</text>
+        <text class="b3cV" x="636" y="180">3.00%</text>
+        <text class="b3cS" x="706" y="180">250 / 8,333</text>
+
+        <text class="b3cL" x="46" y="257">orders agreement</text>
+        <text class="b3cH" x="46" y="273">98.27%</text>
+        <text class="b3cL" x="316" y="257">GMV agreement</text>
+        <text class="b3cH" x="316" y="273">99.03%</text>
+        <text class="b3cR" x="586" y="257">repeat agreement 65.14%</text>
+        <text class="b3cS" x="586" y="273">the minimum, against a 99.5% gate</text>
+
+        <text class="b3cN" x="30" y="312">A count of people is fragile: one extra row turns a one-time buyer into a repeat buyer.</text>
+        <text class="b3cN" x="30" y="334">GMV on raw rows reads BRL 1,209,566.40; the definition kept freight out, the re-sends crept in.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the definition counted correctly; the rows were wrong, so only a test on the rows can fix it</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why a definition cannot fix a bad row<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A re-send arrives under a variant key that normalisation cannot recognise, for the same customer, on the same day. To the registry it is a second order, so the customer becomes a repeater: 384 repeat customers instead of 250, a 4.61% repeat rate on 8,337 keys. You could try to patch the definition ("ignore a second order on the same day") but Olist has real same-day repeat orders, 83 of the 197 orders in the sample followed by another within 90 days, so that patch would delete real behaviour to hide a pipeline fault. The right fix sits one layer down: session 2's key test catches the re-send and drops it before any metric sees it.</p>
+        <p>The other two metrics look healthy on dirty rows (orders 98.27%, GMV 99.03%), which is the trap. Report the minimum agreement across metrics, not the average: averaging would put this registry around 87% and hide that one number is more than half again too high.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Which layer owns which fault<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Fault</th><th>Owner</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>Freight counted as GMV</td><td>Registry</td><td>The definition says item price only, and a test pins it</td></tr>
+            <tr><td>Per-order id used as the customer</td><td>Registry</td><td>The grain is in the docstring; a test builds a two-order person</td></tr>
+            <tr><td>Re-sent order under a variant key</td><td>Data-quality tests (session 2)</td><td>Key uniqueness check, re-send dropped</td></tr>
+            <tr><td>Customer key the customer table has never seen</td><td>Data-quality tests, identity gate</td><td>Resolved through the crosswalk</td></tr>
+            <tr><td>Refund posted as a negative line</td><td>Data-quality tests</td><td>Quarantined to adjustments, out of GMV</td></tr>
+          </tbody>
+        </table>
+        <p>The split matters for ownership: if the registry team starts absorbing pipeline faults into definitions, the definitions stop meaning what their names say.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Same-day repeats are real in Olist.</strong> Of the 197 orders in Serai's sample followed by another order within 90 days, 83 happened on the same day. Some are split checkouts, some are genuine second purchases, and the data does not say which. A re-send looks exactly like them. Session 4 takes up that ambiguity; tonight the lesson is that the registry should not guess.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>Three functions, three tests, one run</h2>
+      <span class="tag demo">★ 22 min · everyone builds</span>
+    </div>
+    <p class="lede">Download the public dataset with <code>kagglehub.dataset_download("olistbr/brazilian-ecommerce")</code> (no login needed) and work in a scratch folder. The registry and its tests come first, on frames small enough to check by eye; only then does it touch the real file. The printed outputs below are what the code prints on the full public file.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The build-along as a hand-drawn pipeline of four steps: define three registry functions; test them on three tiny hand-built frames, all three pass; run them on the 96,478 delivered Olist orders, giving a 3.00 percent repeat rate and BRL 13,221,498.11; compare against price plus freight, 85.74 percent agreement.">
+        <defs>
+          <filter id="b3dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="59" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b3dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b3dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b3dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b3dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b3dV { font: 800 14px Inter, sans-serif; fill: #6A4C04; }
+          .b3dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b3dH" x="30" y="26">DEFINE, TEST, RUN, COMPARE</text>
+
+        <g filter="url(#b3dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="50" width="180" height="120" rx="10" transform="rotate(-0.6 120 110)" fill="#FFFFFF"/>
+          <path d="M214 110 L236 110" marker-end="url(#b3dAr)"/>
+          <rect x="242" y="50" width="180" height="120" rx="10" transform="rotate(0.5 332 110)" fill="#A9C4EA"/>
+          <path d="M426 110 L448 110" marker-end="url(#b3dAr)"/>
+          <rect x="454" y="50" width="180" height="120" rx="10" transform="rotate(-0.5 544 110)" fill="#FFFFFF"/>
+          <path d="M638 110 L660 110" marker-end="url(#b3dAr)"/>
+          <rect x="666" y="50" width="184" height="120" rx="10" transform="rotate(0.5 758 110)" fill="#FFFFFF"/>
+        </g>
+
+        <text class="b3dH" x="44" y="74">1 · DEFINE</text>
+        <text class="b3dS" x="44" y="94">orders, gmv,</text>
+        <text class="b3dS" x="44" y="110">repeat_rate, docstrings</text>
+        <text class="b3dV" x="44" y="148">3 functions</text>
+
+        <text class="b3dH" x="256" y="74">2 · TEST</text>
+        <text class="b3dS" x="256" y="94">tiny hand-built frames</text>
+        <text class="b3dS" x="256" y="110">answers known by eye</text>
+        <text class="b3dV" x="256" y="148">3 tests pass</text>
+
+        <text class="b3dH" x="468" y="74">3 · RUN</text>
+        <text class="b3dS" x="468" y="94">96,478 delivered orders</text>
+        <text class="b3dS" x="468" y="110">BRL 13,221,498.11</text>
+        <text class="b3dV" x="468" y="148">3.00% repeat</text>
+
+        <text class="b3dH" x="680" y="74">4 · COMPARE</text>
+        <text class="b3dS" x="680" y="94">price + freight</text>
+        <text class="b3dS" x="680" y="110">against item price</text>
+        <text class="b3dV" x="680" y="148">85.74% agree</text>
+
+        <text class="b3dN" x="30" y="200">Step 2 is the one people skip. A test on a five-row frame is the only check where you know the answer first.</text>
+        <text class="b3dN" x="30" y="224">The full-file numbers differ from Serai's 8,614-order sample; the definitions are the same.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - tests come before the real data, so a wrong definition fails where you can see why</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Write the registry: three functions, each with its definition in the docstring.</strong> Save it as <code>registry.py</code>. Every report imports from here.</p>
+        <div class="prompt-box good"><span class="label">★ Block 1 · registry.py</span>import pandas as pd
+
+def orders(o):
+    """Orders: distinct normalised order keys."""
+    return o["order_key"].str.strip().str.lower().nunique()
+
+def gmv(li):
+    """GMV: sum of item price, freight excluded, in BRL."""
+    return round(li["price"].sum(), 2)
+
+def repeat_rate(o):
+    """Repeat rate: customers with 2+ distinct orders / customers.
+    Grain: the resolved person key, never a per-order id."""
+    per = o.assign(k=o["order_key"].str.strip().str.lower()).groupby("customer_key")["k"].nunique()
+    return (per &gt;= 2).sum() / len(per)</div>
+      </div>
+      <div class="step">
+        <p><strong>Pin each definition with a test on a frame small enough to check by eye.</strong> These are plain asserts in <code>test_</code> functions, so any Python test runner collects them; the loop at the bottom runs them without one. The frames are constructed.</p>
+        <div class="prompt-box good"><span class="label">★ Block 2 · tests (constructed frames)</span>def test_resend_counts_once():
+    o = pd.DataFrame({"order_key": ["A1", "a1 ", "B2"], "customer_key": ["c1", "c1", "c2"]})
+    assert orders(o) == 2
+
+def test_gmv_excludes_freight():
+    li = pd.DataFrame({"price": [10.0, 5.5], "freight_value": [3.0, 2.0]})
+    assert gmv(li) == 15.5
+
+def test_resend_is_not_a_repeat():
+    o = pd.DataFrame({"order_key": ["A1", "a1 ", "B2", "C3"], "customer_key": ["c1", "c1", "c2", "c2"]})
+    assert repeat_rate(o) == 0.5
+
+for t in [test_resend_counts_once, test_gmv_excludes_freight, test_resend_is_not_a_repeat]:
+    t()
+print("3 tests passed")
+
+# prints: 3 tests passed</div>
+      </div>
+      <div class="step">
+        <p><strong>Run the registry on the delivered orders, with the person key as the customer.</strong> Rename the Olist columns to the schema names from session 1 so the functions never learn a source's spelling.</p>
+        <div class="prompt-box good"><span class="label">★ Block 3 · the real file</span>d = "path/to/olist/"
+od = pd.read_csv(d + "olist_orders_dataset.csv")
+cu = pd.read_csv(d + "olist_customers_dataset.csv")
+it = pd.read_csv(d + "olist_order_items_dataset.csv")
+o = od[od.order_status == "delivered"].merge(cu[["customer_id", "customer_unique_id"]], on="customer_id")
+o = o.rename(columns={"order_id": "order_key", "customer_unique_id": "customer_key"})
+li = it[it.order_id.isin(o.order_key)]
+print("orders", orders(o), f"GMV {gmv(li):,.2f}", f"repeat rate {repeat_rate(o):.2%}")
+
+# prints: orders 96478 GMV 13,221,498.11 repeat rate 3.00%</div>
+      </div>
+      <div class="step">
+        <p><strong>Compare against the naive definition, on purpose.</strong> Agreement is the smaller over the larger, the same measure session 10 prints.</p>
+        <div class="prompt-box good"><span class="label">★ Block 4 · the naive GMV</span>naive = round((li.price + li.freight_value).sum(), 2)
+print(f"naive price + freight {naive:,.2f}  agreement {gmv(li) / naive:.2%}")
+
+# prints: naive price + freight 15,419,773.75  agreement 85.74%</div>
+      </div>
+      <div class="step">
+        <p><strong>Break the grain once, to feel it.</strong> Group by the per-order customer id instead of the person and the repeat rate collapses.</p>
+        <div class="prompt-box good"><span class="label">★ Block 5 · the wrong customer key</span>per_order = o.groupby("customer_id").size()
+print("per-order customer id repeat rate", f"{(per_order &gt;= 2).sum() / len(per_order):.2%}")
+
+# prints: per-order customer id repeat rate 0.00%</div>
+      </div>
+      <div class="step">
+        <p><strong>Add one more test from block 5.</strong> Build a two-order person with two different per-order ids and assert the repeat rate is 1.0. Then the wrong grain can never come back unnoticed.</p>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The metric that lives in four dashboards and agrees with none</span>
+SELECT SUM(price + freight_value) AS gmv FROM order_items  -- retyped by hand, no test, no owner
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 4</h2>
+      <span class="tag exercise">30 min</span>
+    </div>
+    <ol>
+      <li>Add an average order value function to the registry, defined as GMV over orders, with a docstring and one test on a constructed frame.</li>
+      <li>Write the test from step 6 (a two-order person with two per-order ids) and confirm it fails if you swap <code>customer_key</code> for <code>customer_id</code>.</li>
+      <li>Duplicate ten order rows in your loaded frame under a variant key, rerun the registry and record which metric moves most and by how much. Your numbers will differ from Serai's.</li>
+      <li>Pick one metric your team reports today and write its registry entry: what it counts, what it leaves out, its grain, and the independent reference you would check it against.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Builder session 3 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · The naive GMV of Serai's raw exports reads BRL 1,408,548.98 against a reference of BRL 1,197,842.24. What is the main cause?</p>
+      <button class="qopt" type="button">A · The reference rounds to whole reais</button>
+      <button class="qopt" type="button">B · The naive sum drops multi-seller orders</button>
+      <button class="qopt" type="button">C · The naive sum adds freight and refund lines that the registry's GMV definition leaves out</button>
+      <button class="qopt" type="button">D · The registry counts only one export</button>
+      <p class="qwhy">GMV in the registry is item price only. Freight is charged per item beside the price, so adding it inflates the total; on the full public file that alone gives 85.74% agreement. Re-sends add a little more, but the gap is mainly a definition gap.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · Run unchanged on the raw exports, the registry's repeat rate reads 4.61% instead of 3.00%. Where should the fix go?</p>
+      <button class="qopt" type="button">A · In the data-quality tests, which catch the re-sent orders before any metric sees them</button>
+      <button class="qopt" type="button">B · In the repeat-rate definition, by ignoring a second order on the same day</button>
+      <button class="qopt" type="button">C · In the dashboard, by scaling the rate down by a fixed factor</button>
+      <button class="qopt" type="button">D · Nowhere: 65.14% agreement is close enough</button>
+      <p class="qwhy">The definition counted correctly; the rows held re-sends. Patching the definition would also delete Olist's real same-day repeat orders, 83 of 197 in the sample. Session 2's key test drops the re-send, and the registry returns to 100.00% agreement.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">3 · Why does the registry report the minimum agreement across its metrics rather than the average?</p>
+      <button class="qopt" type="button">A · The minimum is faster to compute</button>
+      <button class="qopt" type="button">B · Averages cannot be expressed as percentages</button>
+      <button class="qopt" type="button">C · The minimum is always the GMV figure</button>
+      <button class="qopt" type="button">D · One broken metric is enough to mislead; on raw rows orders and GMV look healthy while repeat agreement is 65.14%</button>
+      <p class="qwhy">On dirty rows orders agree at 98.27% and GMV at 99.03%, so an average would hide that the repeat rate is more than half again too high. The weakest metric decides whether the registry can be trusted.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Orders, GMV and repeat rate as tested definitions</span><span class="note">Taught as a method; Serai's values (8,614; BRL 1,197,842.24; 3.00%) are the registry run on the repaired frame, checked against the data builder's reference</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Registry, naive sum and reference agreement</span><span class="note">Values as session 10 computes them on the constructed exports; reference from an independent pandas path</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The registry on unrepaired rows</span><span class="note">Repeat rate 4.61%, minimum agreement 65.14%, from the same computation with the data-quality layer skipped; the re-sends are constructed</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Olist structure: per-order and person customer ids, freight per item</span><span class="note">Olist (2018). Brazilian E-Commerce Public Dataset by Olist. Kaggle, CC BY-NC-SA 4.0; build-along run on the full public file, every printed number is what it prints</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">The registry design: which metrics, ownership, trust before an IPO</span><span class="note">Owned by Social Commerce Enablers, Analyst session 7 and Leader session 6; linked, not retaught</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Semantic layers and metric stores at scale</span><span class="note">Not covered; the pattern here is the minimal version of the same idea</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 3 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Three parts per definition</b><span>What it counts, what it leaves out, the grain. The second is where fights start.</span></div>
+      <div class="cheat-item"><b>Function, docstring, test</b><span>Written once, imported everywhere, pinned by a test on a frame you can check by eye.</span></div>
+      <div class="cheat-item"><b>GMV is item price</b><span>Price plus freight agrees only 85.74% on the full Olist file. Name it something else.</span></div>
+      <div class="cheat-item"><b>Grain in one argument</b><span>Repeat rate on a per-order id reads 0.00%; on the person, 3.00%.</span></div>
+      <div class="cheat-item"><b>Check against a second path</b><span>Registry 100.00% vs reference; the naive GMV reaches 85.04%.</span></div>
+      <div class="cheat-item"><b>Bad rows are not a definition bug</b><span>Raw rows push repeat to 4.61%, agreement 65.14%. Fix it in the tests below.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>The registry says 3.00% of people bought twice. Session 4 asks when: monthly cohorts, repeat purchase within 90 days, and the same-day repeats that might be split checkouts or real second purchases.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Builder session 3 of 10 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="b2-tests-that-fail-loudly.html">← Prev: Data-quality tests that fail loudly</a> &nbsp;·&nbsp; <a href="b4-cohorts-and-repeat-purchase.html">Next: Cohorts and repeat purchase →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

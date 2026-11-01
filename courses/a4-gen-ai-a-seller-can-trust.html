@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Leader session 4 of 6. Gen AI a seller can trust: a rubric that checks every draft listing and review summary against facts read from the rows, a hand-labelled golden set that checks the rubric, the false pass and the false fail, and the contested evidence on whether AI-written copy sells more.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="Gen AI a seller can trust - learn ship social commerce with phoebe">
+<meta property="og:description" content="Leader session 4 of 6. 15 of 20 drafts pass the rubric; the rubric agrees with a human on 18. The two it gets wrong are the whole lesson.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/a4-gen-ai-a-seller-can-trust.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gen AI a seller can trust - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Leader session 4 of 6. A rubric, a golden set, a false pass, a false fail, and why nobody can promise you an uplift.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Leader session 4 · Gen AI a seller can trust - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Leader session 4 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Leader session 4 of 6</div>
+    <h1>Gen AI a seller <span class="accent">can trust</span></h1>
+    <p class="sub">A draft listing that reads well and a draft listing that is true are two different products, and only one of them can go in front of a buyer. Serai Commerce, the constructed enabler from session 1, wants three gen AI jobs: listing copy, review summaries per store, and later a seller-support agent. Tonight is how a leader knows any of them is safe to ship: a rubric that checks every draft against facts read from the rows, a golden set that checks the rubric, and an honest answer to the question every pitch deck skips, "will it sell more?"</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Advanced-practical</span>
+      <span class="chip audience">Commerce and data leaders</span>
+      <span class="chip audience">Anyone approving gen AI for sellers</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-23 · Rubric, golden set, evidence</span>
+      <span class="a3" style="flex:4">23-43 · Build-along: your rubric</span>
+      <span class="a4" style="flex:1">43-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Where gen AI sits on the estate</h2>
+    </div>
+    <p class="lede">Gen AI is layer 4 of the five, and it consumes <strong>facts that are true</strong>: a listing's category, weight and ships-from state, a store's review count, mean score and share of low scores. Sessions 1 to 3 built the rows, the registry and the model underneath. Tonight fills in the gen AI row of your one-page roadmap: what it produces, the two checks that prove it, and its gate. The twenty drafts on this page are <strong>pre-written and constructed</strong>, because a static page cannot run a language model; the facts they talk about are real, recomputed from Serai's 8,614 derived Olist orders. Builder session 7 builds the rubric in Python; Builder session 8 builds the support agent and its evals.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A one-page rubric for one listing type in your own catalogue (required facts, banned claims, length), five golden verdicts you labelled by hand before the rubric ran, and the gen AI row of your roadmap with two numbers on it: the pass rate and how often the rubric agrees with a human. Plus one sentence you can say when someone promises an uplift.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the rubric and the golden set</span>
+      <h2>A rubric and a golden set</h2>
+      <span class="tag concept">7 min live</span>
+    </div>
+    <p class="lede">One check is not enough, because the check itself can be wrong. The working pattern has two layers: an automatic rubric reads every draft, and a small set of human verdicts reads the rubric. You need both numbers before you can say a gen AI layer is live.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn two-layer check. Twenty pre-written constructed drafts go into an automatic rubric with three checks: required facts read from the rows, banned claims, and length of 25 to 70 words for a listing or 20 to 60 for a summary. The rubric passes 15 of 20, which is 75 percent against a 70 percent gate. Underneath, a hand-labelled golden set gives a verdict on the same 20 drafts, and the rubric agrees with it on 18 of 20, which is 90 percent against an 85 percent gate. The two disagreements are L8, a false pass, and L4, a false fail.">
+        <defs>
+          <filter id="a4aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="41" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a4aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a4aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a4aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a4aL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a4aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a4aV { font: 800 18px Inter, sans-serif; fill: #6A4C04; }
+          .a4aK { font: 800 18px Inter, sans-serif; fill: #1A2232; }
+          .a4aA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a4aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a4aH" x="30" y="26">TWO LAYERS OF CHECKING</text>
+        <text class="a4aS" x="230" y="26">the rubric checks the drafts · the golden set checks the rubric</text>
+
+        <g filter="url(#a4aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="50" width="180" height="100" rx="10" transform="rotate(-0.6 120 100)" fill="#FFFFFF"/>
+          <rect x="44" y="96" width="152" height="40" rx="5" fill="url(#a4aHc)" stroke="#966E08"/>
+          <path d="M214 100 L264 100" marker-end="url(#a4aAr)"/>
+          <rect x="270" y="50" width="280" height="100" rx="10" transform="rotate(0.4 410 100)" fill="#FBF5E6"/>
+          <path d="M554 100 L604 100" marker-end="url(#a4aAr)"/>
+          <rect x="610" y="50" width="240" height="100" rx="10" transform="rotate(-0.4 730 100)" fill="#FFFFFF"/>
+          <path d="M730 154 L730 186" marker-end="url(#a4aAr)"/>
+          <rect x="30" y="192" width="260" height="90" rx="10" transform="rotate(0.5 160 237)" fill="#FFFFFF"/>
+          <path d="M244 254 L254 266 L276 240" stroke="#966E08"/>
+          <path d="M294 237 L326 237" marker-end="url(#a4aAr)"/>
+          <rect x="330" y="192" width="520" height="90" rx="10" transform="rotate(-0.3 590 237)" fill="#A9C4EA"/>
+        </g>
+
+        <text class="a4aH" x="46" y="72">20 DRAFTS</text>
+        <text class="a4aS" x="46" y="88">10 listings, 10 summaries</text>
+        <text class="a4aA" x="46" y="165">pre-written, constructed</text>
+
+        <text class="a4aH" x="286" y="72">RUBRIC, AUTOMATIC</text>
+        <text class="a4aL" x="286" y="94">1 · required facts, read from the rows</text>
+        <text class="a4aL" x="286" y="112">2 · banned claims: best, guaranteed, love</text>
+        <text class="a4aL" x="286" y="130">3 · length 25-70 words (summary 20-60)</text>
+
+        <text class="a4aH" x="626" y="72">RUBRIC VERDICT</text>
+        <text class="a4aV" x="626" y="108">15 of 20 pass</text>
+        <text class="a4aS" x="626" y="130">75% · Serai's gate is 70%</text>
+
+        <text class="a4aH" x="46" y="214">GOLDEN SET, BY HAND</text>
+        <text class="a4aS" x="46" y="234">a careful reviewer labels</text>
+        <text class="a4aS" x="46" y="250">the same 20: fit to publish?</text>
+
+        <text class="a4aH" x="348" y="214">RUBRIC AGAINST GOLDEN</text>
+        <text class="a4aK" x="348" y="242">18 of 20 agree · 90%</text>
+        <text class="a4aL" x="348" y="264">gate 85% · the 2 misses: L8 false pass, L4 false fail</text>
+
+        <text class="a4aN" x="30" y="312">A pass rate alone says how strict the rubric is. Agreement with a human says whether it is right.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - you need both numbers: how many drafts pass, and how often the rubric agrees with a person</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Three checks, all automatic<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Check</th><th>What it reads</th><th>What it catches on Serai's drafts</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Required facts</strong></td><td>The listing's category and weight; the store's review count, mean score and share of one- or two-star scores, all recomputed from the rows at check time</td><td>A summary whose numbers do not match the store (S5)</td></tr>
+            <tr><td><strong>Banned claims</strong></td><td>Ten patterns: "best", "guaranteed", "number one", "100 percent", "lowest price", "free shipping", authenticity, certification, feelings a score cannot show ("love", "rave"), absolutes ("always", "never")</td><td>L2 ("best", "free shipping"), L6 ("authentic", "guaranteed"), S3 ("love")</td></tr>
+            <tr><td><strong>Length</strong></td><td>Words: 25 to 70 for a listing, 20 to 60 for a summary</td><td>Nothing tonight; every draft is in range</td></tr>
+          </tbody>
+        </table>
+        <p>The rubric passes 15 of 20, 75%, over Serai's constructed gate of 70%. The important word in the first row is <strong>recomputed</strong>. The rubric does not hold a copy of the facts; it reads them from the same registry the analytics layer serves. That is what makes gen AI depend on the layers below it, and Part 2 shows what happens when those rows are dirty.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Who checks the checker: the golden set<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A golden set is a small batch of drafts a careful person has labelled by hand: fit to publish, or not. You run the rubric over the same drafts and count how often it agrees. On Serai's twenty, the golden verdict marks 15 fit and 5 unfit, and the rubric agrees on 18 of 20, 90%, over the 85% gate.</p>
+        <p>Two rules keep a golden set honest. Label it <strong>before</strong> you see the rubric's verdicts, or you will grade the rubric by itself. And keep it small enough that someone actually reads it: twenty is plenty to find the rubric's blind spots, far too few to quote agreement to a decimal place. One disagreement moves the agreement rate by five points.</p>
+        <p>Eval method in depth, from sampling a golden set to judging with a second model, belongs to <a href="https://phoebefu6.github.io/learn-ai-evals-with-phoebe/">Learn AI Evals with Phoebe</a>. Tonight takes the leader's slice: the two numbers and what they let you sign.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Three gen AI jobs, three different risks<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p><strong>Listing copy</strong> speaks to buyers, so its risk is a false claim in public. <strong>Review summaries</strong> speak to sellers and brand teams, so their risk is a wrong number that steers a decision. A <strong>seller-support agent</strong> is a different class: it does not just write, it looks things up and hands off, and the risk moves from what it says to what it is allowed to do. OWASP's Top 10 for LLM applications lists that as LLM06, excessive agency, with three root causes: excessive functionality, excessive permissions, excessive autonomy. Its prevention list starts with minimising what the agent can reach and requiring user approval for high-impact actions.</p>
+        <p>Serai's agent gets three narrow tools (order status, refund policy, hand-off to a person) and nothing that writes. Builder session 8 builds it with golden questions; the assistant pattern itself belongs to <a href="https://phoebefu6.github.io/learn-ship-internal-ai-assistant-with-phoebe/">Learn Ship Internal AI Assistant with Phoebe</a>. For the leader the order matters: ship the two writing jobs with a rubric first, and only then let anything act.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>"153 reviews" is a counting rule, not a fact.</strong> In the Olist data the satisfaction survey goes out once the customer receives the product or the estimated delivery date is due, and some orders carry more than one review: in Serai's sample, 39 orders have more than one and 68 have none. So a summary's review count depends on whether you count review rows or reviewed orders. The rubric settles it once, in the registry, and every summary is checked against that one number. Serai's summaries work from review scores only; no review text is used.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers false passes, false fails and dirty facts</span>
+      <h2>False pass, false fail</h2>
+      <span class="tag concept">7 min live</span>
+    </div>
+    <p class="lede">The two drafts where the rubric and the human disagree are the cheapest lesson on the page. One is a draft that should never ship and passes anyway; the other is a correct draft the rubric rejects. They cost very different things.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn two by two grid of rubric verdict against golden verdict for Serai's 20 constructed drafts. Rubric pass and golden fit: 14 true passes. Rubric pass and golden not fit: 1 false pass, L8, which says the watch ships from Sao Paulo while the seller is in Rio de Janeiro state, a fact the rubric never checks. Rubric fail and golden fit: 1 false fail, L4, which gives the weight correctly as 1.75 kg in a unit the rubric cannot read. Rubric fail and golden not fit: 4 true fails, L2, L6, S3 and S5.">
+        <defs>
+          <filter id="a4bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="43" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a4bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a4bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a4bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a4bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a4bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a4bV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .a4bR { font: 800 16px Inter, sans-serif; fill: #991B1B; }
+          .a4bK { font: 800 16px Inter, sans-serif; fill: #1A2232; }
+          .a4bA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a4bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a4bH" x="30" y="26">RUBRIC VERDICT AGAINST THE HUMAN VERDICT</text>
+        <text class="a4bS" x="350" y="26">Serai's 20 constructed drafts · the diagonal agrees, the corners teach</text>
+
+        <text class="a4bH" x="220" y="60">GOLDEN: FIT TO PUBLISH</text>
+        <text class="a4bH" x="540" y="60">GOLDEN: NOT FIT</text>
+        <text class="a4bL" x="186" y="134" text-anchor="end">RUBRIC PASS</text>
+        <text class="a4bL" x="186" y="254" text-anchor="end">RUBRIC FAIL</text>
+
+        <g filter="url(#a4bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="200" y="72" width="310" height="110" rx="10" transform="rotate(-0.4 355 127)" fill="#FFFFFF"/>
+          <rect x="520" y="72" width="330" height="110" rx="10" transform="rotate(0.4 685 127)" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="200" y="192" width="310" height="110" rx="10" transform="rotate(0.3 355 247)" fill="#A9C4EA"/>
+          <rect x="520" y="192" width="330" height="110" rx="10" transform="rotate(-0.3 685 247)" fill="#FFFFFF"/>
+          <path d="M818 84 L832 108 L804 108 Z" stroke="#991B1B"/>
+          <path d="M818 92 L818 100" stroke="#991B1B"/>
+        </g>
+
+        <text class="a4bV" x="218" y="104">14 true passes</text>
+        <text class="a4bS" x="218" y="126">facts match the rows, no banned claim,</text>
+        <text class="a4bS" x="218" y="142">length in range, and a person agrees</text>
+        <text class="a4bA" x="218" y="166">ship them</text>
+
+        <text class="a4bR" x="538" y="104">1 false pass · L8</text>
+        <text class="a4bS" x="538" y="126">says the watch ships from Sao Paulo;</text>
+        <text class="a4bS" x="538" y="142">the seller is in Rio de Janeiro state</text>
+        <text class="a4bL" x="538" y="166">the rubric never checks origin</text>
+
+        <text class="a4bK" x="218" y="224">1 false fail · L4</text>
+        <text class="a4bL" x="218" y="246">weight written as 1.75 kg: correct,</text>
+        <text class="a4bL" x="218" y="262">in a unit the rubric cannot read</text>
+        <text class="a4bL" x="218" y="286">the rubric expects grams</text>
+
+        <text class="a4bV" x="538" y="224">4 true fails</text>
+        <text class="a4bS" x="538" y="246">L2 and L6: banned claims in the copy</text>
+        <text class="a4bS" x="538" y="262">S3: says customers "love" the store</text>
+        <text class="a4bS" x="538" y="286">S5: numbers that do not match the rows</text>
+
+        <text class="a4bA" x="218" y="326">costs an editor a few minutes</text>
+        <text class="a4bA" x="538" y="326">costs a buyer's trust, in public</text>
+
+        <text class="a4bN" x="30" y="358">Fix the rubric, not the threshold: add an origin check for L8, read kilograms for L4.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a false pass reaches a buyer; a false fail only reaches an editor</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The false pass: fluent, plausible, wrong<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>L8 is a gift-box watch listing. It has the right category, the right weight, no banned word and a sensible length, so all three checks pass. It also says the watch ships from Sao Paulo, and the seller row says Rio de Janeiro state. Nobody wrote a check for origin, so the rubric cannot see it. A buyer who orders expecting a short delivery can.</p>
+        <p>NIST's Generative AI Profile has a name for the underlying behaviour, <strong>confabulation</strong>: "the production of confidently stated but erroneous or false content". OWASP's Top 10 for LLM applications files the consequence under LLM09, misinformation, which "occurs when LLMs produce false or misleading information that appears credible", and names the human half of the failure: <strong>overreliance</strong>, when users "place excessive trust in LLM-generated content, failing to verify its accuracy". Its prevention list includes automatic validation of key outputs, which is what a rubric is. The lesson of L8 is that validation only covers the facts someone listed.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The false fail: right, in the wrong format<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>L4 says the tool comes in at 1.75 kg. The catalogue says 1,750 g. The draft is correct; the rubric looks for grams and fails it. A false fail is annoying rather than dangerous: an editor reads it, shrugs, and approves it. But a rubric with many false fails trains editors to approve everything it flags, and then the true fails go through with them. Count false fails as a cost, just a smaller one.</p>
+        <p>The right response to both corners is the same: change the rubric (add an origin check, read kilograms), not the gate. Lowering the 85% agreement gate to make a number look better throws away the one signal that told you where the rubric is blind.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Dirty rows break good copy: 15 of 20 becomes 7<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Run the same twenty drafts with the data engineering layer skipped, so the facts are recomputed from the raw exports that still hold the constructed re-sent orders. Store 2 now has 155 reviewed orders instead of 153. A correct summary that says 153 fails its required-fact check. Across the twenty, the pass rate falls to <strong>7 of 20 (35%)</strong> and agreement with the golden verdict falls to <strong>50%</strong>: nine good summaries fail at once. Both gen AI gates are missed and the layer is held, which is the single biggest reason session 2's skipped-layer roadmap keeps only 35% of the product's price.</p>
+        <p>In production the failure tends to run the other way, and it is worse. The language model writes from the dirty facts, the rubric checks against the same dirty facts, and everything passes. A rubric is only as true as the rows it reads. That is why gen AI sits on layer 4 and not layer 1.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Multi-seller orders make "ships from" a real trap.</strong> In the Olist data one order can hold several items, each fulfilled by a different seller, so the seller's state belongs to the item, not to the order or the store. A draft that takes "ships from" from the wrong level reads perfectly and is wrong for some buyers. L8's mistake is constructed; the reason it is easy to make is in the real rows.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers the contested evidence on AI copy and sales</span>
+      <h2>Does AI-written copy sell more?</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">Every gen AI pitch for sellers ends on an uplift. The honest answer is that two lines of research point in different directions because they ask different questions, and neither one tells you what Serai's sellers would see. A leader's job here is to hold the disagreement open, not to pick the number she likes.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two hand-drawn panels side by side. Left: Fang et al., randomized field experiments on one cross-border e-commerce platform, read at source, asking whether gen AI in a seller workflow raises sales; effects range from no detectable impact to 16.3 percent depending on the workflow, with gains mostly through conversion; about 2 percent for product descriptions is reported from an earlier version, and versions differ. Right: Cicek, Gursoy and Lu, reported via a press release, survey experiments with more than 1,000 US adults asking whether mentioning AI in a product description changes purchase intent; products described as using AI were less popular, more so for high-risk products. Both feed a box saying neither answers whether Serai's sellers will sell more; test it on your own catalogue.">
+        <defs>
+          <filter id="a4cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="47" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a4cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a4cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a4cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a4cL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a4cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a4cB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .a4cA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .a4cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a4cH" x="30" y="26">TWO STUDIES, TWO QUESTIONS</text>
+        <text class="a4cS" x="250" y="26">read the question each one asked before reading its number</text>
+
+        <g filter="url(#a4cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="44" width="400" height="196" rx="12" transform="rotate(-0.4 230 142)" fill="#FFFFFF"/>
+          <rect x="450" y="44" width="400" height="196" rx="12" transform="rotate(0.4 650 142)" fill="#FFFFFF"/>
+          <path d="M60 144 L400 144"/>
+          <path d="M60 136 L60 152"/>
+          <path d="M400 136 L400 152"/>
+          <path d="M102 138 L102 150" stroke="#966E08"/>
+          <rect x="62" y="139" width="336" height="10" rx="3" fill="url(#a4cHc)" stroke="none"/>
+          <path d="M230 244 L330 270" marker-end="url(#a4cAr)"/>
+          <path d="M650 244 L552 270" marker-end="url(#a4cAr)"/>
+          <rect x="200" y="274" width="480" height="56" rx="10" transform="rotate(-0.3 440 302)" fill="#A9C4EA"/>
+          <path d="M80 300 L150 300"/>
+          <path d="M115 300 L115 330"/>
+          <path d="M100 330 L130 330"/>
+          <path d="M80 300 Q86 314 92 300"/>
+          <path d="M138 300 Q144 314 150 300"/>
+        </g>
+
+        <text class="a4cH" x="46" y="66">RANDOMIZED FIELD EXPERIMENTS</text>
+        <text class="a4cS" x="46" y="84">Fang et al. · a cross-border platform · read at source</text>
+        <text class="a4cL" x="46" y="106">asked: does GenAI in a seller workflow raise sales?</text>
+        <text class="a4cA" x="96" y="130">~2% for descriptions, reported, versions differ</text>
+        <text class="a4cS" x="60" y="168">no detectable impact</text>
+        <text class="a4cA" x="400" y="168" text-anchor="end">16.3%</text>
+        <text class="a4cS" x="46" y="192">the size depends on the workflow; the 16.3% is a</text>
+        <text class="a4cS" x="46" y="208">pre-sale chatbot, not listing copy (reported)</text>
+        <text class="a4cS" x="46" y="226">gains came mostly through conversion, not cart size</text>
+
+        <text class="a4cH" x="466" y="66">SURVEY EXPERIMENTS</text>
+        <text class="a4cS" x="466" y="84">Cicek, Gursoy and Lu 2024 · reported via a press release</text>
+        <text class="a4cL" x="466" y="106">asked: does MENTIONING AI change purchase intent?</text>
+        <text class="a4cS" x="466" y="132">more than 1,000 US adults, in survey experiments</text>
+        <text class="a4cS" x="466" y="150">products described as using AI were less popular</text>
+        <text class="a4cS" x="466" y="168">the drop was larger for high-risk products</text>
+        <text class="a4cB" x="466" y="200">about the label on the product, not about</text>
+        <text class="a4cB" x="466" y="216">who wrote the copy</text>
+
+        <text class="a4cH" x="218" y="296">NEITHER ANSWERS SERAI'S QUESTION</text>
+        <text class="a4cL" x="218" y="316">will these sellers sell more with AI-written copy? test it</text>
+
+        <text class="a4cN" x="30" y="350">Different settings, questions and outcomes. Teach both; forecast neither.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - one study varies who writes, the other varies what the buyer is told; neither is a forecast for you</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>What the field experiments found<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Fang, Yuan, Zhang, Donati and Sarvary ran randomized field experiments on a cross-border e-commerce platform. Their abstract (version 6, read at source) reports effects "ranging from no detectable impact to 16.3%", depending on how much gen AI actually added to each workflow, with gains coming primarily through higher conversion rather than larger carts.</p>
+        <p>Two things a pitch deck will leave out. First, the top of that range belongs to a pre-sale chatbot, not to listing copy; for product descriptions an earlier version reported an effect of about 2%. That figure is <strong>reported</strong>, and the versions of the paper differ, so it is not a number to plan with. Second, it is one platform, in one setting, with that platform's buyers. It is evidence that the effect is real somewhere and varies a lot, not a forecast for Serai.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>What the survey experiments found<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Cicek, Gursoy and Lu (2024) ran experimental surveys with more than 1,000 US adults. As <strong>reported</strong> in a Washington State University press release (the paper itself was not read for these pages), products described as using artificial intelligence were less popular, and more so for high-risk products.</p>
+        <p>Read the question carefully. This is about <strong>mentioning AI</strong> in product copy, telling the buyer the product uses AI. It says nothing directly about whether copy a model drafted sells better or worse than copy a person wrote. It does carry a quieter lesson for Serai: if a listing ever advertises "AI-powered" as a feature, test that line on its own before anyone assumes it helps.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>How to say it in a steering meeting<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The professional norm is simple: never quote a published uplift as a forecast for your own catalogue. The field experiments measured one platform's buyers; the surveys measured stated intent, not purchases. Different settings, questions and outcomes. Neither settles whether Serai's sellers would sell more with AI-written copy, and nothing on these pages resolves it.</p>
+        <p>What a leader can promise is a <strong>trust case</strong>, not a sales case: drafts that pass a rubric, a rubric that agrees with a human, and a held-out test on your own listings if anyone wants a sales number. The trust case is why the gen AI layer earns 25% of the data product's price in session 5's constructed assumptions; the sales case is something you measure after launch, not before.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The same word, two experiments.</strong> "AI listings" in the field experiments means a model helped write or answer; "AI" in the surveys means the product was described as using AI. A headline that merges them ("AI copy lowers sales" or "AI copy lifts sales 16%") is wrong both ways. When someone forwards you one of those headlines, ask which question was asked and who the buyers were.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>Your rubric and five golden verdicts</h2>
+      <span class="tag demo">★ 20 min · everyone builds</span>
+    </div>
+    <p class="lede">Pick one listing type from your own catalogue: a category you sell a lot of, or one where a wrong claim would hurt. No catalogue to hand? Use Serai's garden tools listings with the facts on this page. You will write the rubric, then label five drafts by hand before running it in your head. Your rubric will differ from Serai's, which is the point.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The rubric worksheet as a hand-drawn card with three columns: required facts, read from the rows, such as category, weight in the unit you check, and ships-from state from the seller row; banned claims such as superlatives, guarantees and free shipping, and feelings a score cannot show; and length, 25 to 70 words for a listing and 20 to 60 for a summary. Below, five boxes for five golden verdicts labelled by hand before the rubric runs, the fifth highlighted as the hard one.">
+        <defs>
+          <filter id="a4dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="53" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="a4dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="a4dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .a4dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .a4dL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .a4dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .a4dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="a4dH" x="30" y="26">THE RUBRIC WORKSHEET · ONE LISTING TYPE</text>
+
+        <g filter="url(#a4dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="44" width="820" height="130" rx="12" transform="rotate(-0.2 440 109)" fill="#FFFFFF"/>
+          <path d="M30 76 L850 76"/>
+          <path d="M303 44 L303 174"/>
+          <path d="M576 44 L576 174"/>
+          <rect x="30" y="214" width="148" height="50" rx="8" transform="rotate(-2 104 239)" fill="#FFFFFF"/>
+          <rect x="194" y="214" width="148" height="50" rx="8" transform="rotate(1.5 268 239)" fill="#FFFFFF"/>
+          <rect x="358" y="214" width="148" height="50" rx="8" transform="rotate(-1 432 239)" fill="#FFFFFF"/>
+          <rect x="522" y="214" width="148" height="50" rx="8" transform="rotate(2 596 239)" fill="#FFFFFF"/>
+          <rect x="686" y="214" width="148" height="50" rx="8" transform="rotate(-1.5 760 239)" fill="#A9C4EA"/>
+          <path d="M818 14 L846 6 L842 18 Z" stroke="#966E08"/>
+          <path d="M818 14 L790 22" stroke="#966E08"/>
+        </g>
+
+        <text class="a4dH" x="44" y="66">REQUIRED FACTS</text>
+        <text class="a4dH" x="317" y="66">BANNED CLAIMS</text>
+        <text class="a4dH" x="590" y="66">LENGTH</text>
+
+        <text class="a4dS" x="44" y="100">category, from the catalogue</text>
+        <text class="a4dS" x="44" y="120">weight, in the unit you check</text>
+        <text class="a4dS" x="44" y="140">ships-from state, from the seller row</text>
+        <text class="a4dS" x="317" y="100">superlatives: best, number one</text>
+        <text class="a4dS" x="317" y="120">guarantees, free shipping</text>
+        <text class="a4dS" x="317" y="140">feelings a score cannot show</text>
+        <text class="a4dS" x="590" y="100">listing 25-70 words</text>
+        <text class="a4dS" x="590" y="120">summary 20-60 words</text>
+        <text class="a4dS" x="590" y="140">your own limits may differ</text>
+
+        <text class="a4dH" x="30" y="200">FIVE GOLDEN VERDICTS, BY HAND, BEFORE THE RUBRIC RUNS</text>
+        <text class="a4dL" x="44" y="236">draft 1</text>
+        <text class="a4dS" x="44" y="252">fit or not, why</text>
+        <text class="a4dL" x="208" y="236">draft 2</text>
+        <text class="a4dS" x="208" y="252">fit or not, why</text>
+        <text class="a4dL" x="372" y="236">draft 3</text>
+        <text class="a4dS" x="372" y="252">fit or not, why</text>
+        <text class="a4dL" x="536" y="236">draft 4</text>
+        <text class="a4dS" x="536" y="252">fit or not, why</text>
+        <text class="a4dL" x="700" y="236">draft 5</text>
+        <text class="a4dL" x="700" y="252">the hard one</text>
+
+        <text class="a4dN" x="30" y="290">Label the five before you see the rubric's verdicts, or you will grade the rubric by itself.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - three columns of checks, then five verdicts a person gives first</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Name the listing type and its required facts.</strong> Three to five facts a buyer relies on and that live in a row somewhere: category, weight, size, ships-from, material. For each, write which table holds it. A fact with no row is a fact the rubric cannot check, so it does not go in the copy.</p>
+        <div class="prompt-box good"><span class="label">★ Serai's garden tools listing, required facts</span>Listing type:  garden tools
+Required facts (and where they live):
+  category      product catalogue, category name
+  weight        product catalogue, grams  (accept kg too: see L4)
+  ships-from    seller row, state         (missing from Serai's rubric: see L8)
+Each fact is recomputed from the rows at check time, never pasted into the rubric.</div>
+      </div>
+      <div class="step">
+        <p><strong>Write the banned claims.</strong> The things your legal, brand or marketplace rules already forbid, plus anything your data cannot prove. If you summarise review scores, a score cannot tell you that customers "love" anything.</p>
+        <div class="prompt-box good"><span class="label">★ Banned claims, starter list</span>Superlatives:      best, number one, #1
+Promises:          guaranteed, 100 percent, lowest price, free shipping
+Unprovable:        original, authentic, genuine, certified
+Feelings:          love, loves, rave   (scores say how buyers rated, not why)
+Absolutes:         always, never, everyone</div>
+      </div>
+      <div class="step">
+        <p><strong>Set the length.</strong> A minimum stops a draft that says nothing; a maximum stops a draft that buries the facts. Serai uses 25 to 70 words for a listing and 20 to 60 for a summary; set your own from the listings that already sell.</p>
+      </div>
+      <div class="step">
+        <p><strong>Write or pick five drafts and label them by hand, now.</strong> Fit to publish or not, with one line of reason each. Make at least one of them hard: correct but oddly formatted, or fluent with one fact you cannot check. Label all five before you apply the rubric.</p>
+        <div class="prompt-box good"><span class="label">★ Golden verdicts, constructed example</span>Draft 1  fit      facts match, plain claims, 41 words
+Draft 2  not fit  "free shipping" (banned), and we do not offer it
+Draft 3  fit      weight given as 1.75 kg: correct, just not in grams
+Draft 4  not fit  ships-from state does not match the seller row
+Draft 5  fit?     hard one: says "sturdy"; is that a claim we can prove?
+(constructed for the exercise; your drafts and verdicts will differ)</div>
+      </div>
+      <div class="step">
+        <p><strong>Run the rubric in your head and fill the gen AI row.</strong> Count passes and count agreements with your five verdicts. Every disagreement is a line you add to the rubric, not a reason to move the gate. Then write the row for your roadmap.</p>
+        <div class="prompt-box good"><span class="label">★ The gen AI row of the roadmap</span>Layer 4, gen AI: listing copy and review summaries for sellers.
+Consumes:  facts recomputed from the registry (layer 2), never pasted in.
+Test:      rubric pass rate, and rubric agreement with a hand-labelled golden set.
+Gate:      pass &gt;= 70% AND agreement &gt;= 85% (Serai's constructed policy; set your own).
+Owner:     the content lead labels the golden set; the data lead owns the facts.
+Promise:   a trust case, not an uplift. Sales effect measured on our own listings.</div>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The gen AI row that sounds finished and checks nothing</span>
+Layer 4: deploy AI copywriter across all categories. Expected +16% conversion
+(an industry figure). Human review where needed.
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 5</h2>
+      <span class="tag exercise">25 min</span>
+    </div>
+    <ol>
+      <li>Finish your rubric and your five golden verdicts. Ask a colleague to label the same five without seeing yours, and count how often you agree with each other before you count the rubric.</li>
+      <li>Find one live listing in your catalogue with a claim nobody could check from the data ("authentic", "best", a delivery promise). Write which row would have to exist for it to be checkable.</li>
+      <li>Ask your data team how a store's review count is defined today: review rows or reviewed orders. If nobody knows, that is the first line of your rubric.</li>
+      <li>Find the last gen AI pitch or vendor deck you saw with an uplift number in it. Write down which question that number answered, on which buyers, and whether it was read at source or reported.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Leader session 4 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · Serai's rubric passes 15 of 20 drafts and agrees with the golden verdict on 18 of 20. Which of the two disagreements matters more before launch?</p>
+      <button class="qopt" type="button">A · L4, because the rubric rejected a correct draft</button>
+      <button class="qopt" type="button">B · L8, because a wrong ships-from claim passed every check and would reach a buyer</button>
+      <button class="qopt" type="button">C · Neither, because both gates pass</button>
+      <button class="qopt" type="button">D · Both equally, so lower the agreement gate to 80%</button>
+      <p class="qwhy">A false pass reaches a buyer; a false fail reaches an editor. Both gates pass, but L8 shows a fact the rubric never checks. Fix the rubric with an origin check; never move the gate to hide the gap.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">2 · A vendor cites a 16.3% sales effect for gen AI, and a colleague cites a study where AI products were less popular. What is the honest reading?</p>
+      <button class="qopt" type="button">A · The field experiment is randomized, so 16.3% is the forecast for Serai</button>
+      <button class="qopt" type="button">B · The survey is more recent, so AI copy lowers sales</button>
+      <button class="qopt" type="button">C · Average them and plan for about 8%</button>
+      <button class="qopt" type="button">D · They ask different questions: one varies the workflow on one platform, the other varies whether buyers are told about AI, so test on your own listings</button>
+      <p class="qwhy">The 16.3% is the top of a range that starts at no detectable impact and belongs to a chatbot workflow (reported); the survey result, also reported, is about mentioning AI. Neither is a forecast for your catalogue.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · With the data engineering layer skipped, the same drafts pass 7 of 20 and agree with the golden verdict only 50% of the time. Why?</p>
+      <button class="qopt" type="button">A · The facts are recomputed from rows that hold re-sent orders, so correct summaries now quote a different count (Store 2: 153 versus 155)</button>
+      <button class="qopt" type="button">B · The language model got worse on raw data</button>
+      <button class="qopt" type="button">C · The golden set was relabelled</button>
+      <button class="qopt" type="button">D · The banned-claim list is longer on raw data</button>
+      <p class="qwhy">The drafts and verdicts did not change; the facts under them did. Nine good summaries fail at once. In production it usually runs the other way: drafts and rubric both read dirty facts and everything passes.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The rubric and the golden set</span><span class="note">Taught as a method; 15 of 20 pass, 90% agreement, L8 and L4, and the skipped-layer 7 of 20 and 50% are computed live in Builder session 10</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Confabulation, misinformation and overreliance</span><span class="note">NIST AI 600-1 (2024) and OWASP Top 10 for LLM Applications 2025, LLM09, read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Excessive agency for a support agent</span><span class="note">OWASP Top 10 for LLM Applications 2025, LLM06, read at source; the agent is built in Builder session 8</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Gen AI and sales in field experiments</span><span class="note">Fang, Yuan, Zhang, Donati and Sarvary (2026), arXiv 2510.12049, abstract read at source; the ~2% for descriptions is reported and versions differ</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Mentioning AI and purchase intent</span><span class="note">Cicek, Gursoy and Lu (2024), reported via a Washington State University press release; paper not read</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">The twenty drafts, golden verdicts and gates</span><span class="note">Constructed for Serai Commerce; facts recomputed from derived Olist rows (CC BY-NC-SA 4.0), scores only; eval method owned by Learn AI Evals with Phoebe</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 4 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Two layers of checking</b><span>A rubric checks the drafts; a hand-labelled golden set checks the rubric.</span></div>
+      <div class="cheat-item"><b>Two numbers</b><span>Serai: 15 of 20 pass (gate 70%), 90% agreement with golden (gate 85%).</span></div>
+      <div class="cheat-item"><b>False pass beats false fail</b><span>L8 reaches a buyer with a wrong origin; L4 costs an editor a minute.</span></div>
+      <div class="cheat-item"><b>Fix the rubric, not the gate</b><span>Every disagreement is a missing check or a format the rubric cannot read.</span></div>
+      <div class="cheat-item"><b>Facts come from rows</b><span>Skip data engineering and good copy fails: 7 of 20, agreement 50%.</span></div>
+      <div class="cheat-item"><b>No uplift forecast</b><span>Field experiments: no detectable impact to 16.3%. Surveys: mentioning AI lowered intent. Test your own.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>You now have four layers with a test and a gate each. Session 5 packages them into a data product and prices it as a range: each layer's share of the price counts only when its gate passes, so the rubric you wrote tonight is worth a quarter of what Serai can charge.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Leader session 4 of 6 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="a3-what-the-model-is-worth.html">← Prev: What the model is worth</a> &nbsp;·&nbsp; <a href="a5-the-data-product-and-its-price.html">Next: The data product and its price →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Builder session 10 of 10. The five-layer value bench: data-quality checks, a metric registry, a repeat-purchase model, gen AI scoring and a data product range, computed live in your browser on 8,614 real Olist orders under the constructed Serai Commerce. Skip a layer or leak a field and watch which numbers move.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="The five-layer value bench - learn ship social commerce with phoebe">
+<meta property="og:description" content="Builder session 10 of 10. All five layers on one bench, computed in your browser, with an anti-lever and a break button.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/b10-the-five-layer-value-bench.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The five-layer value bench - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Builder session 10 of 10. The whole estate on one bench, computed in your browser.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Builder session 10 · The five-layer value bench - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Builder session 10 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Builder session 10 of 10</div>
+    <h1>The <span class="accent">five-layer value bench</span></h1>
+    <p class="sub">Every build step of the track, on one screen and computed in your browser. Serai Commerce, the constructed enabler, has three marketplace exports holding 8,614 real Olist orders. The bench checks the exports, repairs them, computes the registry's metrics, trains a repeat-purchase model on months up to T and scores the month after, scores twenty pre-written listings and summaries against a rubric, and prices the data product from stated assumptions. Then it hands you two ways to break it: skip the bottom layer, or leak a field from the future.</p>
+    <div class="chip-row">
+      <span class="chip level">🔴 Advanced</span>
+      <span class="chip audience">Data, ML and analytics engineers</span>
+      <span class="chip audience">Leads signing off a data product</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:3">3-14 · What the bench computes</span>
+      <span class="a3" style="flex:6">14-40 · Build-along: the ladder</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>One bench, five layers, two ways to fool it</h2>
+    </div>
+    <p class="lede">Sessions 1 to 9 each built one layer. Tonight they run together, in order, on the same rows, and you watch each layer consume the one below. The bench is honest about what it is: every row is a real Olist order, derived and masked; every computation is real and happens in your browser on each click; the export split, the defects, the gen AI text, Serai's gates and the product assumptions are constructed and labelled where they appear. The data is licensed CC BY-NC-SA 4.0, which is why no review text appears anywhere: the summaries are scored against review scores only.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A scorecard you have watched being computed from rows, and two specific stories for your next review: skipping the data engineering layer turns a 3.00% repeat rate into 4.61% and fails every good review summary, while a backfilled field lifts training AUC to 0.9913 and drops next-month lift to 1.65x. Both look like progress until the layer above reads them.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers what each rung of the bench computes</span>
+      <h2>Six rungs, each consuming the last</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">The ladder is the five layers plus the raw files they start from. Each rung keeps everything the rung below produced and adds one layer's computation. Read the headline number on each rung before you click the next.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn ladder of six rungs, as the bench prints them with every layer built. Rung 0, raw exports: 8,766 rows, naive GMV agreement 85.04 percent. Rung 1, data-quality checks: 333 blocking failures found and repaired. Rung 2, registry: 8,614 orders, repeat rate 3.00 percent, 100.00 percent agreement with the reference. Rung 3, model: month T+1 AUC 0.7894, top-decile lift 3.71 times. Rung 4, gen AI scoring: 15 of 20 outputs pass, 90 percent agreement with the golden verdict. Rung 5, scorecard: all layers live, first-year net minus USD 235,200 to USD 512,400.">
+        <defs>
+          <filter id="b10aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="43" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b10aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+        </defs>
+        <style>
+          .b10aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b10aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b10aV { font: 800 13px Inter, sans-serif; fill: #6A4C04; }
+          .b10aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b10aH" x="30" y="26">THE LADDER, BOTTOM TO TOP</text>
+        <text class="b10aS" x="250" y="26">measured on the bench · every layer built · nothing random, so your numbers will match</text>
+
+        <g filter="url(#b10aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M60 372 L60 44"/>
+          <path d="M820 372 L820 44"/>
+          <rect x="70" y="50" width="740" height="44" rx="8" transform="rotate(-0.3 440 72)" fill="#A9C4EA"/>
+          <rect x="70" y="104" width="740" height="44" rx="8" transform="rotate(0.3 440 126)" fill="#FFFFFF"/>
+          <rect x="70" y="158" width="740" height="44" rx="8" transform="rotate(-0.3 440 180)" fill="#FFFFFF"/>
+          <rect x="70" y="212" width="740" height="44" rx="8" transform="rotate(0.3 440 234)" fill="#FFFFFF"/>
+          <rect x="70" y="266" width="740" height="44" rx="8" transform="rotate(-0.3 440 288)" fill="#FBF5E6"/>
+          <rect x="70" y="320" width="740" height="44" rx="8" transform="rotate(0.3 440 342)" fill="url(#b10aHc)"/>
+        </g>
+
+        <text class="b10aH" x="86" y="70">5 · SCORECARD</text>
+        <text class="b10aS" x="86" y="86">gates read, product priced from assumptions</text>
+        <text class="b10aV" x="480" y="77">all live · net -USD 235,200 to USD 512,400</text>
+        <text class="b10aH" x="86" y="124">4 · + GEN AI SCORING</text>
+        <text class="b10aS" x="86" y="140">rubric over 20 pre-written outputs, vs golden</text>
+        <text class="b10aV" x="480" y="131">15 of 20 pass · 90% agree with golden</text>
+        <text class="b10aH" x="86" y="178">3 · + MODEL</text>
+        <text class="b10aS" x="86" y="194">trained to month T, scored on month T+1</text>
+        <text class="b10aV" x="480" y="185">AUC 0.7894 · top-decile lift 3.71x</text>
+        <text class="b10aH" x="86" y="232">2 · + REGISTRY</text>
+        <text class="b10aS" x="86" y="248">orders, GMV, repeat rate, one definition each</text>
+        <text class="b10aV" x="480" y="239">8,614 orders · 3.00% repeat · 100.00%</text>
+        <text class="b10aH" x="86" y="286">1 · + DE CHECKS</text>
+        <text class="b10aS" x="86" y="302">four checks per export, then the repair</text>
+        <text class="b10aV" x="480" y="293">333 blocking failures, 0 after repair</text>
+        <text class="b10aH" x="86" y="340">0 · RAW EXPORTS</text>
+        <rect x="474" y="328" width="248" height="22" rx="4" fill="#FFFFFF"/>
+        <text class="b10aV" x="480" y="344">8,766 rows · naive GMV 85.04%</text>
+
+        <text class="b10aN" x="30" y="392">The top rung is only as true as the bottom one. The anti-lever below proves it by removing rung 1.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - six rungs, each adding one layer's computation to everything below it</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Exactly what the bench computes, per layer<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Layer</th><th>Computed live</th><th>Constructed or assumed</th></tr></thead>
+          <tbody>
+            <tr><td><strong>DE</strong></td><td>Four checks per export (keys unique after normalising, customer key resolves, purchase before approval before carrier before delivery, amounts not negative) and the repair</td><td>The 152 re-sends, 113 orphan keys and 64 refund lines; the 122 timestamp inversions are real</td></tr>
+            <tr><td><strong>Analytics</strong></td><td>Orders, GMV as item price, repeat rate; the registry, the naive sum and their agreement with the builder's reference totals</td><td>Nothing</td></tr>
+            <tr><td><strong>ML</strong></td><td>Logistic regression by full-batch gradient descent, weights from zero, learning rate 1.0, 1,000 steps, L2 0.001; AUC with averaged ties; lift in the top decile</td><td>Nothing; seven stated features as of purchase</td></tr>
+            <tr><td><strong>Gen AI</strong></td><td>Required facts recomputed from the rows, banned claims, length; agreement with the golden verdict</td><td>The 20 outputs and their golden verdicts</td></tr>
+            <tr><td><strong>Product</strong></td><td>Which layers pass their gate, and the share of price they carry</td><td>Every price, cost and buyer count; the gates themselves</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why a browser bench, and how it was checked<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A bench that runs in the page cannot hide a step in a notebook. The same engine file runs under node, and an independent pure-Python reference with the same definitions, the same starting weights and the same optimiser steps agrees with it on all 454 numbers of the ladder, normal, skipped, leaked and both, to a relative tolerance of one part in a billion. The comparison itself was tested: a planted 0.1% fault on one number is caught. On load, the bench also checks ten properties of its own, for example that the repaired frame reproduces the reference GMV to the cent and that the leak raises training AUC, then plants a fault (one re-send slipped past the repair) and confirms that three properties fail. A self-test that cannot fail measures nothing.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>The model's seven features, and the one left out<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Prior orders by this customer (log), recency of the prior order, order value in BRL (log), freight as a share of the order, instalments, whether a voucher paid part of it, and items in the order. All are known at the moment of purchase. Review score is left out on purpose: the survey goes out once the customer receives the product or the estimated date is due, and 83 of the sample's 197 repeat orders within 90 days were placed on the same day as the order before them, before any review could exist. Using it would score the model on information it would not have had. Session 6 treats this as a timing leak.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="bench">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · the bench</span>
+      <h2>Climb the ladder, then break it twice</h2>
+      <span class="tag demo">★ 26 min · everyone builds</span>
+    </div>
+    <p class="lede">Click the rungs in order and say out loud what you expect before the numbers appear. Nothing here is random: the rows, the defects, the outputs and the optimiser are fixed, so your numbers will match the ones in the steps.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn cascade showing what a re-sent order does when the data engineering layer is skipped, with the numbers the bench prints. The registry's repeat rate reads 4.61 percent instead of 3.00 percent. The model's training set holds 108 labelled repeats instead of 60. Store 2's review summary is checked against 155 reviews instead of 153 and fails. The product's live share of price falls from 100 percent to 35 percent.">
+        <defs>
+          <filter id="b10bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="47" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <marker id="b10bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b10bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b10bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b10bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b10bR { font: 800 13px Inter, sans-serif; fill: #991B1B; }
+          .b10bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b10bH" x="30" y="26">ONE RE-SENT ROW, FOUR LAYERS UP</text>
+        <text class="b10bS" x="270" y="26">anti-lever on · measured on the bench · clean value in grey, skipped value in red</text>
+
+        <g filter="url(#b10bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="110" width="140" height="80" rx="10" transform="rotate(-1.5 100 150)" fill="#A9C4EA"/>
+          <path d="M174 122 L184 124 L184 204 L48 204 L44 194"/>
+          <path d="M190 150 L226 82" marker-end="url(#b10bAr)"/>
+          <path d="M190 158 L226 158" marker-end="url(#b10bAr)"/>
+          <path d="M190 166 L226 234" marker-end="url(#b10bAr)"/>
+          <rect x="232" y="50" width="200" height="64" rx="10" transform="rotate(-0.5 332 82)" fill="#FFFFFF"/>
+          <rect x="232" y="126" width="200" height="64" rx="10" transform="rotate(0.5 332 158)" fill="#FFFFFF"/>
+          <rect x="232" y="202" width="200" height="64" rx="10" transform="rotate(-0.5 332 234)" fill="#FFFFFF"/>
+          <path d="M436 82 L606 140" marker-end="url(#b10bAr)"/>
+          <path d="M436 158 L606 158" marker-end="url(#b10bAr)"/>
+          <path d="M436 234 L606 176" marker-end="url(#b10bAr)"/>
+          <rect x="612" y="110" width="238" height="96" rx="12" transform="rotate(0.4 731 158)" fill="#FEF2F2" stroke="#991B1B"/>
+        </g>
+
+        <text class="b10bH" x="58" y="150">RE-SENT ORDER</text>
+        <text class="b10bS" x="58" y="168">variant key, same</text>
+        <text class="b10bS" x="58" y="184">customer, same day</text>
+
+        <text class="b10bH" x="246" y="74">REGISTRY</text>
+        <text class="b10bS" x="246" y="92">repeat rate 3.00% becomes</text>
+        <text class="b10bR" x="246" y="108">4.61%</text>
+        <text class="b10bH" x="246" y="150">MODEL LABELS</text>
+        <text class="b10bS" x="246" y="168">60 training repeats become</text>
+        <text class="b10bR" x="246" y="184">108</text>
+        <text class="b10bH" x="246" y="226">GEN AI FACTS</text>
+        <text class="b10bS" x="246" y="244">Store 2: 153 reviews become</text>
+        <text class="b10bR" x="246" y="260">155, summary fails</text>
+
+        <text class="b10bH" x="628" y="138">PRODUCT</text>
+        <text class="b10bL" x="628" y="158">live share of price</text>
+        <text class="b10bR" x="628" y="180">100% becomes 35%</text>
+        <text class="b10bS" x="628" y="198">only the model still passes</text>
+
+        <text class="b10bN" x="30" y="290">The re-sent row is the same order twice; every layer above reads it as a returning customer.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a duplicate is a fake repeat customer, and three layers believe it</figcaption>
+    </figure>
+
+    <div id="ssc-bench"></div>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Rung 0, the raw exports.</strong> 8,766 order rows for 8,614 real orders. The naive GMV sums price, freight and refund lines and agrees 85.04% with the reference item value; the naive repeat rate is 2.90% against 3.00%, because a person on two marketplaces counts twice.</p>
+      </div>
+      <div class="step">
+        <p><strong>Rung 1, the checks.</strong> Read the table by export. Export C, the smallest, is the dirtiest: 96.93% of its keys unique and 94.73% of its customer keys resolving. Export B alone carries refund lines, so its amounts pass at 98.16%. The repair drops 152 re-sends, resolves 113 keys and quarantines 64 lines; the timestamp flags stay, because they are real rows and move no metric.</p>
+      </div>
+      <div class="step">
+        <p><strong>Rung 2, the registry.</strong> 8,614 orders, BRL 1,197,842.24, 3.00% repeat, each at 100.00% agreement with the builder's reference. That agreement is a measured property: the reference was computed from the source rows on a separate code path, so a missed repair would show up here.</p>
+      </div>
+      <div class="step">
+        <p><strong>Rung 3, the model.</strong> Training AUC 0.6248 on 2,744 orders, month T+1 AUC 0.7894 on 574 orders with 24 real repeats, and lift 3.71x: 9 of those 24 in the top 58. One hit moves lift by 0.41, so read the third decimal as noise.</p>
+      </div>
+      <div class="step">
+        <p><strong>Rung 4, gen AI.</strong> 15 of 20 pass the rubric, and the rubric agrees with the golden verdict on 18. Find the false pass (L8 claims the watch ships from Sao Paulo; the seller is in Rio de Janeiro state, and the rubric does not check origin) and the false fail (L4 gives the weight as 1.75 kg, correct, in a unit the rubric cannot read).</p>
+      </div>
+      <div class="step">
+        <p><strong>Rung 5, then press "Skip the DE layer".</strong> The registry's repeat rate jumps to 4.61% and its agreement falls to 65.14%. Gen AI drops to 7 of 20 with 50% agreement: every good review summary now fails, because the facts are recomputed from rows that hold re-sends. The model survives at 3.30x. The live share of price falls to 35% and the net range to minus USD 282,000 to USD 75,600.</p>
+      </div>
+      <div class="step">
+        <p><strong>Restore the layer and press the break button.</strong> Training AUC jumps to 0.9913; month T+1 lift falls to 1.65x, under Serai's 2.0x gate, and the model row is held. Press both together and month T+1 AUC is 0.4922, worse than a coin, with nothing live.</p>
+        <div class="prompt-box good"><span class="label">★ Read the bench from the console</span>SSC_LIVE.setRung(5); SSC_LIVE.setSkip(true);
+var r = SSC_LIVE.current();
+[r.registry.repeatRate, r.registryAgree.min, r.ml.lift, r.genai.pass, r.product.share]
+// [0.0460597..., 0.6513541..., 3.2988505..., 7, 0.35]</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the anti-lever and what it proves about order</span>
+      <h2>Skip a layer and the price says so</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">The anti-lever never improves the scorecard. That is its job: a bench must be able to print a worse number, or it measures nothing. Here it also shows where the damage lands, which is not where most people guess.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hand-drawn range bars of Serai's first-year net under four settings, as the bench prints them, on an axis from minus USD 320,000 to plus USD 520,000 with zero marked. Every layer built: minus 235,200 to plus 512,400, share 100 percent. Leaked field: minus 260,400 to plus 277,200, share 65 percent. DE skipped: minus 282,000 to plus 75,600, share 35 percent. Both: minus 307,200 to minus 159,600, share 0 percent.">
+        <defs>
+          <filter id="b10cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="53" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <style>
+          .b10cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b10cL { font: 600 12px Inter, sans-serif; fill: #1A2232; }
+          .b10cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b10cA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b10cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b10cH" x="30" y="26">FIRST-YEAR NET, FOUR WAYS</text>
+        <text class="b10cS" x="230" y="26">rung 5 on the bench · every input an ASSUMPTION · bar = low to high net, USD</text>
+
+        <g filter="url(#b10cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M240 260 L820 260"/>
+          <path d="M461 52 L461 212" stroke-dasharray="6 5"/>
+          <path d="M461 254 L461 266"/>
+          <rect x="299" y="66" width="515" height="28" rx="5" fill="#A9C4EA"/>
+          <rect x="281" y="118" width="371" height="28" rx="5" fill="#FBF5E6"/>
+          <rect x="266" y="170" width="247" height="28" rx="5" fill="#FBF5E6"/>
+          <rect x="249" y="222" width="102" height="28" rx="5" fill="#FEF2F2" stroke="#991B1B"/>
+        </g>
+
+        <text class="b10cL" x="220" y="85" text-anchor="end">every layer built</text>
+        <text class="b10cS" x="220" y="100" text-anchor="end">share 100%</text>
+        <text class="b10cL" x="220" y="137" text-anchor="end">leaked field</text>
+        <text class="b10cS" x="220" y="152" text-anchor="end">share 65%</text>
+        <text class="b10cL" x="220" y="189" text-anchor="end">DE skipped</text>
+        <text class="b10cS" x="220" y="204" text-anchor="end">share 35%</text>
+        <text class="b10cL" x="220" y="241" text-anchor="end">both</text>
+        <text class="b10cS" x="220" y="256" text-anchor="end">share 0%</text>
+
+        <text class="b10cL" x="472" y="85">-235,200 to 512,400</text>
+        <text class="b10cL" x="472" y="137">-260,400 to 277,200</text>
+        <text class="b10cL" x="524" y="189">-282,000 to 75,600</text>
+        <text class="b10cL" x="362" y="241">-307,200 to -159,600</text>
+
+        <text class="b10cA" x="461" y="48" text-anchor="middle">break-even</text>
+        <text class="b10cS" x="240" y="280">-320k</text>
+        <text class="b10cS" x="790" y="280">+520k</text>
+
+        <text class="b10cN" x="30" y="312">Cost does not care which layers are live; only revenue shrinks. Skipping work is not saving money here.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - every broken layer removes its share of the price while the cost stays put</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why the model survived and the registry did not<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A re-sent order lands on the same day as its original, for the same customer, so on the registry it turns a one-time buyer into a repeat buyer: 384 repeat customers instead of 250. On the model it adds 48 positive labels that look like same-day repeats, which are real in Olist (83 of 197 in the sample), so the model is fed plausible noise rather than a systematic lie. Its month T+1 ranking loses one hit of 24. The honest summary is not "duplicates do not matter for ML". It is that a count is fragile in a way a ranking is not, and the layers that print counts to sellers fail first.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why the gen AI layer failed hardest<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The summaries were written from the true facts. When the facts are recomputed on rows that hold re-sends, Store 2 has 155 reviewed orders instead of 153, and a correct summary now fails its required-fact check. On the bench, 9 good summaries fail at once. In production the failure runs the other way and is worse: the model writes from the dirty facts, the rubric checks against the same dirty facts, and everything passes. OWASP's Top 10 for LLM applications calls the user side of this overreliance, when users "place excessive trust in LLM-generated content, failing to verify its accuracy". A rubric is only as good as the facts it checks against.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers the break button and the leak it plants</span>
+      <h2>A field from the future</h2>
+      <span class="tag concept">4 min live</span>
+    </div>
+    <p class="lede">The break button adds one column: whether the customer has any later order in the warehouse. A backfill job fills it with hindsight for every historical row. At scoring time the next order has not happened, so the column is 0 for everyone. Training sees the answer; scoring does not.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn timeline. On the left, history up to month T, where the backfilled field has_later_order is filled in with hindsight, so it is 1 for every order that was followed by another; training AUC reads 0.9913. On the right, month T+1 at scoring time, where no later order exists yet, so the field is 0 for every row; top-decile lift reads 1.65 times against 3.71 times without the field.">
+        <defs>
+          <filter id="b10dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="59" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b10dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b10dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b10dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b10dL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b10dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b10dV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b10dR { font: 800 16px Inter, sans-serif; fill: #991B1B; }
+          .b10dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b10dH" x="30" y="26">THE SAME COLUMN, KNOWN AT TWO DIFFERENT TIMES</text>
+        <text class="b10dS" x="400" y="26">measured on the bench · break button on</text>
+
+        <g filter="url(#b10dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M40 150 L836 150" marker-end="url(#b10dAr)"/>
+          <path d="M560 60 L560 236" stroke-dasharray="6 5"/>
+          <rect x="50" y="62" width="480" height="72" rx="10" transform="rotate(-0.3 290 98)" fill="url(#b10dHc)"/>
+          <rect x="584" y="62" width="250" height="72" rx="10" transform="rotate(0.4 709 98)" fill="#A9C4EA"/>
+          <rect x="50" y="170" width="480" height="66" rx="10" transform="rotate(0.3 290 203)" fill="#FFFFFF"/>
+          <rect x="584" y="170" width="250" height="66" rx="10" transform="rotate(-0.4 709 203)" fill="#FEF2F2" stroke="#991B1B"/>
+        </g>
+
+        <rect x="64" y="74" width="300" height="48" rx="6" fill="#FFFFFF"/>
+        <text class="b10dH" x="74" y="94">HISTORY, BACKFILLED WITH HINDSIGHT</text>
+        <text class="b10dL" x="74" y="112">has_later_order = 1 wherever one came</text>
+        <text class="b10dH" x="600" y="94">MONTH T+1, AT SCORING</text>
+        <text class="b10dL" x="600" y="112">no later order yet: field is 0</text>
+
+        <text class="b10dS" x="66" y="192">training AUC</text>
+        <text class="b10dV" x="66" y="220">0.9913</text>
+        <text class="b10dS" x="170" y="192">without the field</text>
+        <text class="b10dS" x="170" y="212">0.6248</text>
+        <text class="b10dS" x="600" y="192">top-decile lift</text>
+        <text class="b10dR" x="600" y="220">1.65x</text>
+        <text class="b10dS" x="680" y="192">without it</text>
+        <text class="b10dS" x="680" y="212">3.71x</text>
+        <text class="b10dS" x="566" y="66">month T ends</text>
+
+        <text class="b10dN" x="30" y="268">The model learned to read the answer column. Take the answer away and what it learned is worth less than nothing.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a field that exists only in hindsight makes training look perfect and scoring fall apart</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Leakage, as the literature defines it<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Kaufman, Rosset, Perlich and Stitelman's 2012 paper in ACM Transactions on Knowledge Discovery from Data defines leakage as "the introduction of information about the data mining target that should not be legitimately available to mine from", and proposes a "learn-predict separation": build every training row only from what would have been known at the moment of prediction. The scikit-learn documentation makes the same point about splits: shuffled cross-validation on time-ordered data "would lead to training on future data and evaluating on past data". The bench's time split already obeys that rule; the break button shows that a split cannot save you from a column that was built with hindsight.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Why the leaked model does worse than no field at all<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>With the field present, gradient descent puts most of the weight on it (1.389 on the standardised column, against at most 0.255 on any other) and lets the honest features drift, because they barely help once the answer is on the table. At scoring the field is a constant, so the ranking is left to the drifted weights: 4 of 24 real repeats in the top 58 instead of 9. With the anti-lever on as well, month T+1 AUC falls to 0.4922. A leak does not just inflate a number; it trains the model to ignore the signals that would have worked.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The backfill job nobody thinks of as a feature.</strong> Columns like "has a later order", "lifetime orders" or "churned flag" are usually built by a nightly job for reporting, then picked up by whoever builds the first model because they are right there in the warehouse. Ask of every feature: at what time was this value known, and would it have been known at the moment the model is asked? If nobody can answer, the column waits.</p>
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>After the track</h2>
+      <span class="tag exercise">40 min</span>
+    </div>
+    <ol>
+      <li>With every layer built, write down the five scorecard rows. Then press the anti-lever and the break button separately and write down which rows change and by how much.</li>
+      <li>Find the product assumption that moves the low end of the net range the most when pushed to its other end, and check whether any single one flips it above zero (with the stated assumptions none does; paying sellers comes closest). Write it as the first thing to test with real sellers.</li>
+      <li>Open the gen AI table and rewrite L4 so the rubric passes it without changing what it says. Then add one check to the rubric that would have caught L8.</li>
+      <li>List every column in one of your own feature tables and mark when each value becomes known relative to the moment of prediction.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Builder session 10 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · With the DE layer skipped, the bench's repeat rate reads 4.61% instead of 3.00%. What did that?</p>
+      <button class="qopt" type="button">A · Orphan customer keys merged two people into one</button>
+      <button class="qopt" type="button">B · Re-sent orders made one-time buyers look like customers with two orders</button>
+      <button class="qopt" type="button">C · Refund lines removed some customers</button>
+      <button class="qopt" type="button">D · The naive sum counted customers per export</button>
+      <p class="qwhy">A re-send carries a variant key for the same customer, so the registry sees two orders: 384 repeat customers instead of 250. Orphan keys push the other way, splitting one person into two. D describes the naive sum, which reads 2.90%.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">2 · The break button lifts training AUC to 0.9913 and drops month T+1 lift to 1.65x. Which description of the leak is right?</p>
+      <button class="qopt" type="button">A · The test set was shuffled into the training set</button>
+      <button class="qopt" type="button">B · The model has too many features for 2,744 rows</button>
+      <button class="qopt" type="button">C · The label window was longer than 90 days</button>
+      <button class="qopt" type="button">D · A column was filled in with hindsight for history, but is unknown at the moment of scoring</button>
+      <p class="qwhy">The split is a clean time split; the problem is a column, not the rows. has_later_order is 1 in history wherever a later order came, and 0 for every row at scoring. That breaks Kaufman et al.'s learn-predict separation.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · With every layer built, the rubric passes 15 of 20 outputs but agrees with the golden verdict on 18. What is the right next step?</p>
+      <button class="qopt" type="button">A · Read the two disagreements: one shows a fact the rubric does not check, the other a format it cannot read</button>
+      <button class="qopt" type="button">B · Ship, because 90% agreement clears the gate</button>
+      <button class="qopt" type="button">C · Drop the golden set, since the rubric is automatic</button>
+      <button class="qopt" type="button">D · Raise the pass threshold until the agreement is 100%</button>
+      <p class="qwhy">The gate passes, but the disagreements are the cheapest lesson on the board: L8 invents an origin the rubric never checks, L4 is right in kilograms. Fix the rubric, not the threshold.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The five layers computed live on real rows</span><span class="note">Brazilian E-Commerce Public Dataset by Olist, Kaggle, CC BY-NC-SA 4.0; derived and masked, no review text; python reference and node agree on 454 values</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Logistic regression, time-ordered splits and ROC AUC</span><span class="note">scikit-learn documentation, read at source; the bench mirrors the method with its own gradient descent</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Leakage and the learn-predict separation</span><span class="note">Kaufman, Rosset, Perlich and Stitelman (2012), ACM TKDD; abstract read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Overreliance on generated content</span><span class="note">OWASP Top 10 for LLM Applications 2025, LLM09, read at source</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Gen AI outputs, defects, gates and product figures</span><span class="note">Constructed for Serai Commerce and labelled on the bench; no benchmark claimed</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Model depth: calibration, tuning, monitoring</span><span class="note">Owned by the ML production, model evaluation and feature engineering courses</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 10 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Six rungs</b><span>Raw, DE checks, registry, model, gen AI scoring, scorecard. Each keeps the one below.</span></div>
+      <div class="cheat-item"><b>Repair restores the source</b><span>8,614 orders, BRL 1,197,842.24, 3.00% repeat: 100.00% agreement, measured.</span></div>
+      <div class="cheat-item"><b>Skip DE</b><span>Repeat 4.61%, gen AI 7 of 20, model 3.30x, price share 35%.</span></div>
+      <div class="cheat-item"><b>Leak a field</b><span>Training AUC 0.9913, month T+1 lift 1.65x, under the 2.0x gate.</span></div>
+      <div class="cheat-item"><b>Counts break before rankings</b><span>The layers that print numbers to sellers fail first.</span></div>
+      <div class="cheat-item"><b>A bench can print worse</b><span>An anti-lever and a break button, or it measures nothing.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Track complete</span>
+    <p>That is the builder track: one schema, its tests, a registry, a cohort view, a model and its leak hunt, scored gen AI, an agent with evals, a packaged product and the bench that runs them in order. Take the scorecard to the leader track's session 6 and turn it into a 12-month roadmap.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Builder session 10 of 10 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="b9-packaging-the-data-product.html">← Prev: Packaging the data product</a> &nbsp;·&nbsp; <a href="../index.html">Course home</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/ssc-data.js?v=1"></script>
+<script src="../assets/ssc-live.js?v=1"></script>
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

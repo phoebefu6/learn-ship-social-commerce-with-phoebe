@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Builder session 1 of 10. The bottom layer of a social-commerce data estate: one merged schema for orders, lines, payments, review scores and customers, each table with a declared grain. Build it in pandas on the public Olist dataset and catch the join that quietly inflates item value by 4.48%.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="The merged schema - learn ship social commerce with phoebe">
+<meta property="og:description" content="Builder session 1 of 10. Five tables, five grains, and the join that inflates item value by 4.48% without an error.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/b1-the-merged-schema.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The merged schema - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Builder session 1 of 10. Declare the grain of every table before you join anything.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Builder session 1 · The merged schema - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Builder session 1 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Builder session 1 of 10</div>
+    <h1>The <span class="accent">merged schema</span></h1>
+    <p class="sub">Every layer above this one reads the same tables, so this is the session where mistakes are cheapest to fix and most expensive to leave. Serai Commerce, the constructed enabler from the Enablers course, gets three marketplace exports a day. Tonight you turn the public Olist files into the schema Serai's other four layers consume: five tables, each with a declared grain, and one order-level fact table that adds up to the cent. Along the way you meet the join that inflates item value by 4.48% and raises no error.</p>
+    <div class="chip-row">
+      <span class="chip level">🟢 Foundational</span>
+      <span class="chip audience">Data and analytics engineers</span>
+      <span class="chip audience">Analysts who write the joins</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · Grain, exports, keys</span>
+      <span class="a3" style="flex:4">20-40 · Build-along: the fact table</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>How the builder track works</h2>
+    </div>
+    <p class="lede">Ten sessions, Python with pandas and scikit-learn, all on the public Olist dataset. You build the five layers in order. Sessions 1 to 2 are data engineering: the schema tonight, the tests that guard it next. Sessions 3 to 4 are analytics: Building the metric registry, then cohorts and repeat purchase. Sessions 5 to 6 are machine learning: one repeat-purchase model with a time split, then the hunt for its leak. Sessions 7 to 8 are gen AI: scoring listing copy and review summaries, then a seller-support agent and its evals. Session 9 packages the data product. Session 10 is the bench that runs all five layers live on Serai's 8,614 orders. Serai's business model, its identity gate and the design of its metric registry belong to the <a href="https://phoebefu6.github.io/learn-ship-ecommerce-enabler-with-phoebe/">Social Commerce Enablers course</a>; this track builds on them and links back rather than reteaching.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A pandas script that turns the Olist files into five tables with declared grains and one order-level fact table, plus three assertions that fail if a join ever fans out: one row per delivered order, item value equal to the sum of the line prices, and every order key unique.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers tables, grain and what each table is for</span>
+      <h2>Declare the grain before the columns</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">The grain is the sentence "one row per ___". Write it at the top of every table before choosing a single column. Most silent errors in commerce data are two tables of different grain joined as if they were the same.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn schema of Serai's five tables with their grain and row counts from the 8,614-order sample. Customers, one row per resolved person, 8,333 rows. Orders, one row per order, 8,614 rows. Lines, one row per item, 9,843 rows. Payments, one row per payment, 8,991 rows. Review scores, one row per review, 8,585 rows covering 8,546 orders. Arrows run from lines, payments and review scores into orders, and from orders to customers.">
+        <defs>
+          <filter id="b1aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="29" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <marker id="b1aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b1aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b1aL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b1aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b1aV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b1aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b1aH" x="30" y="26">FIVE TABLES, FIVE GRAINS</text>
+        <text class="b1aS" x="230" y="26">Serai's 8,614-order sample · row counts from the data builder · arrows point at the parent key</text>
+
+        <g filter="url(#b1aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="48" width="230" height="78" rx="10" transform="rotate(-0.6 145 87)" fill="#FFFFFF"/>
+          <rect x="30" y="140" width="230" height="78" rx="10" transform="rotate(0.5 145 179)" fill="#FFFFFF"/>
+          <rect x="30" y="232" width="230" height="78" rx="10" transform="rotate(-0.4 145 271)" fill="#FFFFFF"/>
+          <rect x="340" y="132" width="230" height="94" rx="12" transform="rotate(0.3 455 179)" fill="#A9C4EA"/>
+          <rect x="640" y="140" width="210" height="78" rx="10" transform="rotate(-0.5 745 179)" fill="#FBF5E6"/>
+          <path d="M264 92 L334 158" marker-end="url(#b1aAr)"/>
+          <path d="M264 179 L334 179" marker-end="url(#b1aAr)"/>
+          <path d="M264 266 L334 200" marker-end="url(#b1aAr)"/>
+          <path d="M574 179 L634 179" marker-end="url(#b1aAr)"/>
+        </g>
+
+        <text class="b1aH" x="46" y="72">LINES</text>
+        <text class="b1aS" x="46" y="90">one row per item: price, freight, store</text>
+        <text class="b1aV" x="46" y="114">9,843</text>
+        <text class="b1aH" x="46" y="164">PAYMENTS</text>
+        <text class="b1aS" x="46" y="182">one row per payment: type, instalments</text>
+        <text class="b1aV" x="46" y="206">8,991</text>
+        <text class="b1aH" x="46" y="256">REVIEW SCORES</text>
+        <text class="b1aS" x="46" y="274">one row per review: score 1 to 5</text>
+        <text class="b1aV" x="46" y="298">8,585</text>
+        <text class="b1aS" x="110" y="298">for 8,546 orders</text>
+
+        <text class="b1aH" x="356" y="158">ORDERS</text>
+        <text class="b1aL" x="356" y="176">one row per order: export, timestamps</text>
+        <text class="b1aL" x="356" y="194">the grain every metric counts</text>
+        <text class="b1aV" x="356" y="216">8,614</text>
+
+        <text class="b1aH" x="656" y="164">CUSTOMERS</text>
+        <text class="b1aS" x="656" y="182">one row per resolved person</text>
+        <text class="b1aV" x="656" y="206">8,333</text>
+
+        <text class="b1aN" x="30" y="330">Three child tables have more rows than orders. Join any of them to another before rolling up and the totals inflate.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - three tables hang off orders at a finer grain, and that is where joins go wrong</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The five tables, their grain and their key<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Table</th><th>Grain: one row per</th><th>Key</th><th>Serai sample rows</th></tr></thead>
+          <tbody>
+            <tr><td><strong>orders</strong></td><td>order</td><td>order_key (normalised), source_export</td><td>8,614</td></tr>
+            <tr><td><strong>lines</strong></td><td>item in an order</td><td>order_key + line number</td><td>9,843</td></tr>
+            <tr><td><strong>payments</strong></td><td>payment against an order</td><td>order_key + payment sequence</td><td>8,991</td></tr>
+            <tr><td><strong>review_scores</strong></td><td>review of an order</td><td>review id; order_key as parent</td><td>8,585 for 8,546 orders</td></tr>
+            <tr><td><strong>customers</strong></td><td>resolved person</td><td>customer_key from the identity gate</td><td>8,333</td></tr>
+          </tbody>
+        </table>
+        <p>Olist's own documentation warns that an order may have multiple items and each item may be fulfilled by a distinct seller. That is why store lives on lines, not on orders: an order does not have one store. In Serai's sample 39 orders carry more than one review, and 68 carry none. The schema keeps every review row; the order-level fact table keeps the first by answer time and says so.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>What goes in the schema, and what stays out<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>In: order status and timestamps, the export each row came from, prices and freight in the smallest currency unit, payment type and instalments, review scores, store and product keys. Out: anything the later layers do not consume and the licence does not allow you to ship. Olist's review text is CC BY-NC-SA licensed, so Serai's shipped data carries scores only. Masking is a schema decision, not a later clean-up: the builder renumbers customers by first appearance and stores by frequency, so no source id leaves the script.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>A dataset that documents its own traps.</strong> The Olist dataset description lists, in its "Attention" notes, that an order might have multiple items and that each item might be fulfilled by a distinct seller. Most commerce sources say nothing of the kind, and the first sign of a multi-seller order is a GMV figure that looks too high. Write the grain down even when the source does not.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers three exports mapped into one shape</span>
+      <h2>Three exports, one shape, one column of provenance</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">Each marketplace export has its own column names and its own habits. The merged schema maps every export to the same tables, normalises the order key, and keeps a column saying which export each row came from, so the tests in session 2 can report a pass rate per source.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three hand-drawn export files on the left, Export A with 3,972 rows, Export B with 2,971 rows and Export C with 1,823 rows, 8,766 rows in total. Each passes through a mapping step that renames columns, normalises the order key and stamps the source export, into one orders table. The data engineering checks then remove 152 re-sent rows, leaving 8,614 orders.">
+        <defs>
+          <filter id="b1bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="31" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b1bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b1bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b1bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b1bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b1bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b1bV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b1bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b1bH" x="30" y="26">MAP, NORMALISE, STAMP</text>
+        <text class="b1bS" x="210" y="26">rows as the bench prints them · the export split is constructed, the orders are real</text>
+
+        <g filter="url(#b1bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="50" width="170" height="56" rx="8" transform="rotate(-1.5 115 78)" fill="url(#b1bHc)"/>
+          <rect x="30" y="122" width="170" height="56" rx="8" transform="rotate(1.2 115 150)" fill="url(#b1bHc)"/>
+          <rect x="30" y="194" width="170" height="56" rx="8" transform="rotate(-1 115 222)" fill="url(#b1bHc)"/>
+          <path d="M204 78 L262 132" marker-end="url(#b1bAr)"/>
+          <path d="M204 150 L262 150" marker-end="url(#b1bAr)"/>
+          <path d="M204 222 L262 168" marker-end="url(#b1bAr)"/>
+          <rect x="268" y="96" width="250" height="108" rx="12" transform="rotate(0.4 393 150)" fill="#A9C4EA"/>
+          <path d="M522 150 L584 150" marker-end="url(#b1bAr)"/>
+          <rect x="590" y="96" width="260" height="108" rx="12" transform="rotate(-0.4 720 150)" fill="#FFFFFF"/>
+        </g>
+
+        <text class="b1bL" x="44" y="76">Export A</text>
+        <text class="b1bS" x="44" y="94">3,972 rows</text>
+        <text class="b1bL" x="44" y="148">Export B</text>
+        <text class="b1bS" x="44" y="166">2,971 rows</text>
+        <text class="b1bL" x="44" y="220">Export C</text>
+        <text class="b1bS" x="44" y="238">1,823 rows</text>
+
+        <text class="b1bH" x="284" y="122">THE MAPPING STEP</text>
+        <text class="b1bL" x="284" y="142">rename to schema columns</text>
+        <text class="b1bL" x="284" y="160">trim and lower-case the order key</text>
+        <text class="b1bL" x="284" y="178">stamp source_export, load time</text>
+
+        <text class="b1bH" x="606" y="122">ORDERS, ONE SHAPE</text>
+        <text class="b1bS" x="606" y="142">8,766 rows land</text>
+        <text class="b1bS" x="606" y="160">152 re-sends caught next session</text>
+        <text class="b1bV" x="606" y="188">8,614 orders</text>
+
+        <text class="b1bN" x="30" y="282">Keep source_export on every row: a pass rate you cannot split by source tells you there is a problem, not where.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the mapping step is where the key gets normalised and every row learns where it came from</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The mapping contract, one block per export<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Write the mapping as data, not as code scattered through a notebook: for each export, which source column feeds which schema column, the unit it arrives in, and the key normalisation rule. The Enablers course designs the three-export schema and the masking rules each export applies (<a href="https://phoebefu6.github.io/learn-ship-ecommerce-enabler-with-phoebe/courses/b2-three-exports-one-schema.html">Analyst session 2 there</a>); this session takes that design as given and builds it.</p>
+        <div class="prompt-box good"><span class="label">★ A mapping contract, as data</span>EXPORT_MAP = {
+  "Export A": {"order_key": "order_id",    "price_cents": ("item_price", 100), "ts_purchase": "created_at"},
+  "Export B": {"order_key": "OrderNo",     "price_cents": ("price_brl", 100),  "ts_purchase": "order_time"},
+  "Export C": {"order_key": "order_ref",   "price_cents": ("amount", 100),     "ts_purchase": "placed"},
+}
+KEY_RULE = "strip whitespace, lower-case, drop a trailing '-r' re-send suffix"</div>
+        <p>The column names above are illustrative; every marketplace names them differently, and the point is that the contract lives in one place the tests can read.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Money in the smallest unit, time in one zone<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Store money as integer cents. Floats add rounding noise that turns "agrees to the cent" into "agrees to within 0.0000001", and the registry in session 3 depends on exact agreement. The Serai builder stores every price and freight in cents and checks that the integer total, 119,784,224 cents, matches the float total from the source within one cent. Store timestamps in one zone and keep the raw value beside any derived day: the 122 real Olist orders whose carrier pickup precedes payment approval are only visible if both timestamps survive.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers the fan-out join and the order-level fact table</span>
+      <h2>Roll up first, then join</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">Join lines to payments on the order key and every line is repeated once per payment. Sum the price and you have counted some items twice. Nothing fails: the join is valid SQL and valid pandas. The fix is a rule, not a trick: roll every child table up to the order grain, then join.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two hand-drawn panels on the full public Olist delivered orders. Wrong: lines joined to payments before rolling up, an order with two lines and two payments becomes four rows, and item value reads BRL 13,813,828.71, 4.48 percent too high. Right: lines and payments each rolled up to one row per order, then joined, and item value reads BRL 13,221,498.11, equal to the sum of line prices.">
+        <defs>
+          <filter id="b1cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="37" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+        </defs>
+        <style>
+          .b1cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b1cR { font: 800 12px Inter, sans-serif; fill: #991B1B; }
+          .b1cL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b1cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b1cV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b1cX { font: 800 16px Inter, sans-serif; fill: #991B1B; }
+          .b1cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b1cH" x="30" y="26">THE SAME JOIN, TWO ORDERS OF OPERATION</text>
+        <text class="b1cS" x="330" y="26">full public Olist file, 96,478 delivered orders · printed by the build-along</text>
+
+        <g filter="url(#b1cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="40" y="50" width="390" height="190" rx="12" transform="rotate(-0.3 235 145)" fill="#FEF2F2" stroke="#FCA5A5"/>
+          <rect x="450" y="50" width="390" height="190" rx="12" transform="rotate(0.3 645 145)" fill="#FBF5E6" stroke="#966E08"/>
+          <rect x="62" y="104" width="62" height="22" rx="4" fill="#FFFFFF"/>
+          <rect x="62" y="130" width="62" height="22" rx="4" fill="#FFFFFF"/>
+          <rect x="62" y="156" width="62" height="22" rx="4" fill="#FFFFFF"/>
+          <rect x="62" y="182" width="62" height="22" rx="4" fill="#FFFFFF"/>
+          <rect x="472" y="118" width="72" height="22" rx="4" fill="#FFFFFF"/>
+          <rect x="472" y="148" width="72" height="22" rx="4" fill="#A9C4EA"/>
+        </g>
+
+        <text class="b1cR" x="58" y="78">✗ JOIN LINES TO PAYMENTS, THEN SUM</text>
+        <text class="b1cS" x="72" y="119">L1 · P1</text>
+        <text class="b1cS" x="72" y="145">L1 · P2</text>
+        <text class="b1cS" x="72" y="171">L2 · P1</text>
+        <text class="b1cS" x="72" y="197">L2 · P2</text>
+        <text class="b1cL" x="140" y="124">2 lines x 2 payments = 4 rows</text>
+        <text class="b1cL" x="140" y="144">each price counted twice</text>
+        <text class="b1cX" x="140" y="178">BRL 13,813,828.71</text>
+        <text class="b1cS" x="140" y="198">4.48% too high, no error raised</text>
+
+        <text class="b1cH" x="468" y="78">✓ ROLL UP EACH TABLE, THEN JOIN</text>
+        <text class="b1cS" x="480" y="133">lines: 1 row</text>
+        <text class="b1cS" x="480" y="163">pays: 1 row</text>
+        <text class="b1cL" x="552" y="124">one row per order per table</text>
+        <text class="b1cL" x="552" y="144">then a one-to-one join</text>
+        <text class="b1cV" x="552" y="178">BRL 13,221,498.11</text>
+        <text class="b1cS" x="552" y="198">equals the sum of line prices</text>
+
+        <text class="b1cN" x="30" y="268">2,875 delivered orders have more than one payment row; every one of them fans out on the wrong path.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - roll each child table up to order grain before any join, and the total stops moving</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Three assertions that make a fan-out impossible to miss<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>After building the fact table, assert three things and let the script stop if any fails: the row count equals the number of distinct delivered order keys; the order key is unique; the summed item value equals the sum of the line prices before any join. The third one is the fan-out detector. It costs one line and it catches every join that multiplies rows, including the ones added by a colleague six months later.</p>
+        <div class="prompt-box good"><span class="label">★ The three assertions</span>assert len(fact) == o.order_id.nunique()
+assert fact.index.is_unique
+assert round(fact.price.sum(), 2) == round(li.price.sum(), 2)</div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Where the customer key comes from<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Olist ships a per-order customer id and a <code>customer_unique_id</code> for the person behind it; 96,478 delivered orders belong to 93,358 unique people. Serai's real exports carry three masked keys that do not match each other, and the Enablers course builds the identity gate that resolves them (<a href="https://phoebefu6.github.io/learn-ship-ecommerce-enabler-with-phoebe/courses/b3-the-identity-gate.html">Analyst session 3 there</a>). This track takes the gate's output as the customer key. When an export sends a key the customer table has never seen, as 113 rows on Serai's bench do, the merged schema resolves it through the gate's crosswalk; session 2 turns that into a test.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>The order-level fact table, in pandas</h2>
+      <span class="tag demo">★ 22 min · everyone builds</span>
+    </div>
+    <p class="lede">Download the public dataset with <code>kagglehub.dataset_download("olistbr/brazilian-ecommerce")</code> (no login needed) and run each block from a scratch folder. The outputs below are what the script prints on the full file; Serai's bench uses a seeded 8,614-order sample of the same rows.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The build-along as a hand-drawn pipeline of four steps: load and keep delivered orders, 96,478; count child rows per order before joining; roll lines, payments and reviews up to order grain; join and assert, giving 96,478 fact rows and item value BRL 13,221,498.11.">
+        <defs>
+          <filter id="b1dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="41" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <marker id="b1dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b1dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b1dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b1dV { font: 800 14px Inter, sans-serif; fill: #6A4C04; }
+          .b1dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b1dH" x="30" y="26">FOUR BLOCKS, ONE FACT TABLE</text>
+
+        <g filter="url(#b1dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="50" width="180" height="120" rx="10" transform="rotate(-0.6 120 110)" fill="#FFFFFF"/>
+          <path d="M214 110 L236 110" marker-end="url(#b1dAr)"/>
+          <rect x="242" y="50" width="180" height="120" rx="10" transform="rotate(0.5 332 110)" fill="#FFFFFF"/>
+          <path d="M426 110 L448 110" marker-end="url(#b1dAr)"/>
+          <rect x="454" y="50" width="180" height="120" rx="10" transform="rotate(-0.5 544 110)" fill="#FFFFFF"/>
+          <path d="M638 110 L660 110" marker-end="url(#b1dAr)"/>
+          <rect x="666" y="50" width="184" height="120" rx="10" transform="rotate(0.5 758 110)" fill="#A9C4EA"/>
+        </g>
+
+        <text class="b1dH" x="44" y="74">1 · LOAD</text>
+        <text class="b1dS" x="44" y="94">delivered orders</text>
+        <text class="b1dS" x="44" y="110">with the person key</text>
+        <text class="b1dV" x="44" y="148">96,478</text>
+
+        <text class="b1dH" x="256" y="74">2 · COUNT</text>
+        <text class="b1dS" x="256" y="94">child rows per order</text>
+        <text class="b1dS" x="256" y="110">before any join</text>
+        <text class="b1dV" x="256" y="148">2,875 multi-pay</text>
+
+        <text class="b1dH" x="468" y="74">3 · ROLL UP</text>
+        <text class="b1dS" x="468" y="94">lines, payments,</text>
+        <text class="b1dS" x="468" y="110">first review per order</text>
+        <text class="b1dV" x="468" y="148">1 row each</text>
+
+        <text class="b1dH" x="680" y="74">4 · JOIN, ASSERT</text>
+        <text class="b1dS" x="680" y="94">one-to-one joins</text>
+        <text class="b1dS" x="680" y="110">three assertions</text>
+        <text class="b1dV" x="680" y="148">13,221,498.11</text>
+
+        <text class="b1dN" x="30" y="200">Block 2 is the one people skip. Counting child rows first is how you know which joins can fan out.</text>
+        <text class="b1dN" x="30" y="224">Item value is in BRL; the fact table keeps freight and payments beside it, never inside it.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - count, roll up, join, assert: in that order</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Load the files and keep delivered orders with the person key.</strong> Point <code>d</code> at the downloaded folder.</p>
+        <div class="prompt-box good"><span class="label">★ Block 1 · load</span>import pandas as pd
+d = "path/to/olist/"
+orders = pd.read_csv(d + "olist_orders_dataset.csv", parse_dates=["order_purchase_timestamp", "order_approved_at", "order_delivered_carrier_date", "order_delivered_customer_date"])
+items = pd.read_csv(d + "olist_order_items_dataset.csv")
+pays = pd.read_csv(d + "olist_order_payments_dataset.csv")
+revs = pd.read_csv(d + "olist_order_reviews_dataset.csv", usecols=["review_id", "order_id", "review_score", "review_answer_timestamp"])
+cust = pd.read_csv(d + "olist_customers_dataset.csv")
+
+o = orders[orders.order_status == "delivered"].merge(cust[["customer_id", "customer_unique_id"]], on="customer_id")
+print("orders", len(o), "unique order ids", o.order_id.nunique(), "customers", o.customer_unique_id.nunique())
+
+# prints: orders 96478 unique order ids 96478 customers 93358</div>
+      </div>
+      <div class="step">
+        <p><strong>Count child rows per order before joining anything.</strong> Only the review score column is read from the reviews file; the text stays out of your schema.</p>
+        <div class="prompt-box good"><span class="label">★ Block 2 · count</span>li = items[items.order_id.isin(o.order_id)]
+pa = pays[pays.order_id.isin(o.order_id)]
+rv = revs[revs.order_id.isin(o.order_id)]
+print("lines", len(li), "payments", len(pa), "reviews", len(rv))
+print("orders with &gt;1 payment row", (pa.groupby("order_id").size() &gt; 1).sum())
+print("orders with &gt;1 review", (rv.groupby("order_id").size() &gt; 1).sum())
+
+# prints: lines 110197 payments 100756 reviews 96361
+#         orders with &gt;1 payment row 2875
+#         orders with &gt;1 review 525</div>
+      </div>
+      <div class="step">
+        <p><strong>Reproduce the trap on purpose.</strong> Seeing the inflated number once is what makes the rule stick.</p>
+        <div class="prompt-box good"><span class="label">★ Block 3 · the fan-out, deliberately</span>wrong = li.merge(pa, on="order_id")["price"].sum()
+right = li["price"].sum()
+print(f"item value right {right:,.2f}  after joining payments {wrong:,.2f}  inflation {wrong / right - 1:.2%}")
+
+# prints: item value right 13,221,498.11  after joining payments 13,813,828.71  inflation 4.48%</div>
+      </div>
+      <div class="step">
+        <p><strong>Roll each child table up to order grain, join, and assert.</strong> Keep the first review by answer time, and say so in a comment, because that choice changes the review facts session 7 checks.</p>
+        <div class="prompt-box good"><span class="label">★ Block 4 · the fact table</span>lines_o = li.groupby("order_id").agg(items=("order_item_id", "size"), price=("price", "sum"), freight=("freight_value", "sum"))
+pays_o = pa.groupby("order_id").agg(paid=("payment_value", "sum"), installments=("payment_installments", "max"))
+rev_o = rv.sort_values(["order_id", "review_answer_timestamp", "review_id"]).groupby("order_id").review_score.first()  # first review per order
+fact = o.set_index("order_id").join(lines_o).join(pays_o).join(rev_o)
+
+assert len(fact) == o.order_id.nunique()
+assert fact.index.is_unique
+assert round(fact.price.sum(), 2) == round(li.price.sum(), 2)
+print("fact rows", len(fact), f"item value {fact.price.sum():,.2f}", "orders with no review", fact.review_score.isna().sum())
+
+# prints: fact rows 96478 item value 13,221,498.11 orders with no review 646</div>
+      </div>
+      <div class="step">
+        <p><strong>Write the grain at the top of the file.</strong> One comment per table: "one row per ___". Session 2 turns each of those sentences into a test that fails loudly.</p>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The query that looks finished and is 4.48% wrong</span>
+SELECT SUM(i.price) FROM order_items i JOIN order_payments p ON p.order_id = i.order_id
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 2</h2>
+      <span class="tag exercise">30 min</span>
+    </div>
+    <ol>
+      <li>Add the products table to the schema with its grain and key, and roll the product category up to the line, not the order.</li>
+      <li>Find the order with the most payment rows in the delivered set and print its lines and payments side by side.</li>
+      <li>Change block 4 to keep the LAST review per order instead of the first, and count how many orders change score.</li>
+      <li>Write the mapping contract for one real export your team receives: source column, schema column, unit, key rule.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Builder session 1 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · Why does the store key live on the lines table rather than on orders?</p>
+      <button class="qopt" type="button">A · Because stores change their names often</button>
+      <button class="qopt" type="button">B · Because one order can hold items fulfilled by different sellers, so an order has no single store</button>
+      <button class="qopt" type="button">C · Because the orders table would be too wide</button>
+      <button class="qopt" type="button">D · Because the licence forbids store keys on orders</button>
+      <p class="qwhy">Olist's own notes say each item may be fulfilled by a distinct seller. Putting store on orders forces a choice of one seller per order and silently misattributes the rest.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · Joining lines to payments and summing price gives BRL 13,813,828.71 against BRL 13,221,498.11. What happened?</p>
+      <button class="qopt" type="button">A · Freight was added to price</button>
+      <button class="qopt" type="button">B · Some payments were refunds</button>
+      <button class="qopt" type="button">C · Orders with several payment rows repeated each line once per payment, so their prices were counted more than once</button>
+      <button class="qopt" type="button">D · pandas rounds floats when merging</button>
+      <p class="qwhy">A one-to-many joined to a one-to-many multiplies rows. 2,875 delivered orders have more than one payment row. Roll both tables up to order grain first and the total equals the sum of line prices.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · Which assertion catches a fan-out join that a colleague adds six months from now?</p>
+      <button class="qopt" type="button">A · The fact table's summed item value equals the sum of line prices taken before any join</button>
+      <button class="qopt" type="button">B · The fact table has no missing values</button>
+      <button class="qopt" type="button">C · The script runs without an error</button>
+      <button class="qopt" type="button">D · The column names match the schema</button>
+      <p class="qwhy">A fan-out raises no error and leaves no gaps; it only changes totals. Comparing a total against an independent sum is the check that sees it. The row-count and unique-key assertions catch the cases where it adds rows.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Grain, keys and the five-table schema</span><span class="note">Taught as a method; Serai's row counts come from the data builder on the 8,614-order sample</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Olist structure: multiple items, distinct sellers</span><span class="note">Brazilian E-Commerce Public Dataset by Olist, Kaggle, CC BY-NC-SA 4.0, dataset notes read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The fan-out join and the three assertions</span><span class="note">Build-along run on the full public file; every printed number shown above is what it prints</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">The three-export schema design and the identity gate</span><span class="note">Owned by the Social Commerce Enablers course, Analyst sessions 2 and 3; linked, not retaught</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Warehouse modelling at depth</span><span class="note">Not covered; the data modelling and warehouse courses own dimensional design</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 1 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Grain first</b><span>"One row per ___" at the top of every table, before any column.</span></div>
+      <div class="cheat-item"><b>Store lives on lines</b><span>An order can have items from several sellers; it has no single store.</span></div>
+      <div class="cheat-item"><b>Provenance column</b><span>Stamp source_export on every row so tests report per source.</span></div>
+      <div class="cheat-item"><b>Roll up, then join</b><span>Lines joined to payments inflates item value 4.48% on the full Olist file.</span></div>
+      <div class="cheat-item"><b>Three assertions</b><span>Row count, unique key, total equals the independent sum.</span></div>
+      <div class="cheat-item"><b>Cents and one zone</b><span>Integer money, one timezone, raw timestamps kept beside derived days.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>You have the schema. Session 2 writes the four tests that guard it and makes them fail loudly per export: keys unique, customer keys resolve, timestamps in order, amounts not negative, and the repair rule for each.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Builder session 1 of 10 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← Course home</a> &nbsp;·&nbsp; <a href="b2-tests-that-fail-loudly.html">Next: Data-quality tests that fail loudly →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

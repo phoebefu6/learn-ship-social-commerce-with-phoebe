@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Builder session 4 of 10. Monthly acquisition cohorts, the 90-day repeat label the model in session 5 trains on, and the same-day repeat orders that make up 83 of 197 repeats in Serai's sample. Build the cohort grid and the label in pandas on the public Olist dataset.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="Cohorts and repeat purchase - learn ship social commerce with phoebe">
+<meta property="og:description" content="Builder session 4 of 10. A cohort grid, a 90-day label that knows when it cannot be known, and 83 of 197 repeats placed on the same day.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/b4-cohorts-and-repeat-purchase.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cohorts and repeat purchase - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Builder session 4 of 10. Decide what a repeat is before you count one.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Builder session 4 · Cohorts and repeat purchase - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Builder session 4 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Builder session 4 of 10</div>
+    <h1>Cohorts and <span class="accent">repeat purchase</span></h1>
+    <p class="sub">The registry from session 3 says 3.00% of Serai's customers came back: 250 of 8,333. Serai Commerce is the constructed enabler; its rows are real derived Olist orders. One number for the whole history hides when people came back and whether "came back" means what you think. Tonight you split customers into monthly acquisition cohorts, build the 90-day repeat label the model in session 5 trains on, and face the awkward fact that 83 of the 197 repeats in Serai's sample were placed on the same day as the order before them.</p>
+    <div class="chip-row">
+      <span class="chip level">🟡 Intermediate</span>
+      <span class="chip audience">Analytics engineers</span>
+      <span class="chip audience">Analysts who own retention numbers</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · Cohorts, the 90-day label, same-day repeats</span>
+      <span class="a3" style="flex:4">20-42 · Build-along: grid and label</span>
+      <span class="a4" style="flex:1">42-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>From one repeat rate to a repeat shape</h2>
+    </div>
+    <p class="lede">Session 3 made repeat rate one tested definition: customers with two or more orders divided by customers. That definition is right for a registry and too blunt for a decision. A seller asking "are the people I won in November coming back?" needs the rate split by when people arrived, and the model in session 5 needs a label that says whether a specific order was followed by another within a fixed window. Both live on the repaired frame from session 2. Retention as a discipline, churn modelling and win-back design belong to <a href="https://phoebefu6.github.io/learn-customer-retention-with-phoebe/">Customer retention with Phoebe</a>, and recency, frequency and value scoring to <a href="https://phoebefu6.github.io/learn-rfm-modeling-with-phoebe/">RFM modeling with Phoebe</a>. This session builds the two analytics tables the layers above consume, and stops there.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A pandas script that builds a monthly cohort grid of distinct people, a per-order 90-day repeat label that marks the last 90 days as unknown instead of zero, and a same-day flag so every repeat number you publish can be read with and without same-day orders.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers monthly acquisition cohorts and the cohort grid</span>
+      <h2>Monthly cohorts</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">A cohort is everyone whose first delivered order fell in the same month. Each person joins one row for life, and the columns count how many of them ordered again one, two, three months later. The grid answers a question the single rate cannot: is retention getting better for the people you are winning now, or is an old cohort carrying the average?</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 370" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn cohort grid from the build-along on the full public Olist file, distinct people per cell. Cohort 2017-01: 717 at month 0, then 2, 2, 1. Cohort 2017-02: 1,628, then 3, 5, 2. Cohort 2017-03: 2,503, then 11, 9, 10. Cohort 2017-04: 2,256, then 14, 5, 4. Cohort 2017-05: 3,451, then 16, 16, 10. Cohort 2017-06: 3,037, then 15, 12, 13. The cell for cohort 2017-03 at month 2, nine people, is highlighted. A side panel explains that a person's first order fixes the row and every later order lands in the column for months since.">
+        <defs>
+          <filter id="b4aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="43" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b4aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b4aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b4aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b4aL { font: 600 12px Inter, sans-serif; fill: #1A2232; }
+          .b4aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b4aB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .b4aV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b4aA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b4aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b4aH" x="30" y="26">ONE ROW PER FIRST MONTH, ONE COLUMN PER MONTH SINCE</text>
+        <text class="b4aS" x="30" y="44">distinct people · full public Olist file · printed by the build-along</text>
+
+        <g filter="url(#b4aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="150" y="72" width="90" height="30" rx="4" fill="#FBF5E6"/>
+          <rect x="240" y="72" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="330" y="72" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="420" y="72" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="150" y="106" width="90" height="30" rx="4" fill="#FBF5E6"/>
+          <rect x="240" y="106" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="330" y="106" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="420" y="106" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="150" y="140" width="90" height="30" rx="4" fill="#FBF5E6"/>
+          <rect x="240" y="140" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="330" y="140" width="90" height="30" rx="4" fill="#A9C4EA"/>
+          <rect x="420" y="140" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="150" y="174" width="90" height="30" rx="4" fill="#FBF5E6"/>
+          <rect x="240" y="174" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="330" y="174" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="420" y="174" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="150" y="208" width="90" height="30" rx="4" fill="#FBF5E6"/>
+          <rect x="240" y="208" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="330" y="208" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="420" y="208" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="150" y="242" width="90" height="30" rx="4" fill="#FBF5E6"/>
+          <rect x="240" y="242" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="330" y="242" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <rect x="420" y="242" width="90" height="30" rx="4" fill="#FFFFFF"/>
+          <path d="M150 292 L506 292" marker-end="url(#b4aAr)"/>
+          <rect x="560" y="72" width="290" height="200" rx="12" transform="rotate(0.4 705 172)" fill="#FFFFFF"/>
+          <circle cx="826" cy="214" r="7"/>
+          <path d="M826 221 L826 240 M816 228 L836 228 M826 240 L818 252 M826 240 L834 252"/>
+        </g>
+
+        <text class="b4aA" x="40" y="62">first month</text>
+        <text class="b4aA" x="195" y="62" text-anchor="middle">month 0</text>
+        <text class="b4aA" x="285" y="62" text-anchor="middle">month 1</text>
+        <text class="b4aA" x="375" y="62" text-anchor="middle">month 2</text>
+        <text class="b4aA" x="465" y="62" text-anchor="middle">month 3</text>
+
+        <text class="b4aL" x="40" y="92">2017-01</text>
+        <text class="b4aL" x="195" y="92" text-anchor="middle">717</text>
+        <text class="b4aS" x="285" y="92" text-anchor="middle">2</text>
+        <text class="b4aS" x="375" y="92" text-anchor="middle">2</text>
+        <text class="b4aS" x="465" y="92" text-anchor="middle">1</text>
+
+        <text class="b4aL" x="40" y="126">2017-02</text>
+        <text class="b4aL" x="195" y="126" text-anchor="middle">1,628</text>
+        <text class="b4aS" x="285" y="126" text-anchor="middle">3</text>
+        <text class="b4aS" x="375" y="126" text-anchor="middle">5</text>
+        <text class="b4aS" x="465" y="126" text-anchor="middle">2</text>
+
+        <text class="b4aL" x="40" y="160">2017-03</text>
+        <text class="b4aL" x="195" y="160" text-anchor="middle">2,503</text>
+        <text class="b4aS" x="285" y="160" text-anchor="middle">11</text>
+        <text class="b4aB" x="375" y="160" text-anchor="middle">9</text>
+        <text class="b4aS" x="465" y="160" text-anchor="middle">10</text>
+
+        <text class="b4aL" x="40" y="194">2017-04</text>
+        <text class="b4aL" x="195" y="194" text-anchor="middle">2,256</text>
+        <text class="b4aS" x="285" y="194" text-anchor="middle">14</text>
+        <text class="b4aS" x="375" y="194" text-anchor="middle">5</text>
+        <text class="b4aS" x="465" y="194" text-anchor="middle">4</text>
+
+        <text class="b4aL" x="40" y="228">2017-05</text>
+        <text class="b4aL" x="195" y="228" text-anchor="middle">3,451</text>
+        <text class="b4aS" x="285" y="228" text-anchor="middle">16</text>
+        <text class="b4aS" x="375" y="228" text-anchor="middle">16</text>
+        <text class="b4aS" x="465" y="228" text-anchor="middle">10</text>
+
+        <text class="b4aL" x="40" y="262">2017-06</text>
+        <text class="b4aL" x="195" y="262" text-anchor="middle">3,037</text>
+        <text class="b4aS" x="285" y="262" text-anchor="middle">15</text>
+        <text class="b4aS" x="375" y="262" text-anchor="middle">12</text>
+        <text class="b4aS" x="465" y="262" text-anchor="middle">13</text>
+
+        <text class="b4aA" x="150" y="310">months since the first delivered order</text>
+
+        <text class="b4aH" x="576" y="98">HOW A PERSON LANDS IN A CELL</text>
+        <text class="b4aS" x="576" y="124">1 · first delivered order in March 2017</text>
+        <text class="b4aL" x="590" y="142">row 2017-03, for life</text>
+        <text class="b4aS" x="576" y="166">2 · orders again in May 2017</text>
+        <text class="b4aL" x="590" y="184">column 2: two months later</text>
+        <text class="b4aS" x="576" y="208">3 · a cell counts people, not orders</text>
+        <text class="b4aS" x="576" y="230">4 · divide by month 0 for a share</text>
+        <text class="b4aB" x="576" y="256">the blue cell: 9 of 2,503 people</text>
+
+        <text class="b4aN" x="30" y="336">Month 1 holds 2 to 16 people in these cohorts: well under 1% of each cohort orders again the next month.</text>
+        <text class="b4aN" x="30" y="358">A cell that small moves a lot on one person. Read shares here as a shape, not a trend line.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the first order fixes the row, every later order lands in a column, and the cells count people</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Three decisions that define a cohort grid<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Decision</th><th>Choice here</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Who is a person</strong></td><td>the resolved customer key</td><td>Olist's per-order customer id changes every order; counting it makes every buyer a one-timer. Serai's key comes from the identity gate.</td></tr>
+            <tr><td><strong>What starts a cohort</strong></td><td>month of the first delivered order</td><td>The same frame and status filter as the registry, so the grid's month-0 column adds up to the registry's customer count.</td></tr>
+            <tr><td><strong>What a cell counts</strong></td><td>distinct people with an order in that month</td><td>Counting orders lets one heavy buyer fill a cell. People keep the grid comparable with the repeat rate.</td></tr>
+          </tbody>
+        </table>
+        <p>On the full public file the build-along finds 96,478 delivered orders from 93,358 people in 23 monthly cohorts. Month 0 across all cohorts adds up to 93,358, the same people the registry counts. That check is the cheapest test of a cohort grid: if month 0 does not reconcile to the registry, the grid and the registry are not using the same definition of a customer.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Counts or shares, and why the small cells matter<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Divide each row by its month-0 count and the grid becomes shares: 0.44% of the March 2017 cohort ordered again in month 1, 0.62% of April's. Those shares rest on 11 and 14 people. One extra buyer in April moves month 1 by about 0.04 points, which is as large as some of the differences between cohorts. Publish the count beside every share, and do not draw a trend through cells that hold single-digit people.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Cohort size is a story of its own<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The month-0 column is acquisition: 717 first-time buyers in January 2017 against 7,060 in November 2017 on the full file. A large cohort won during a promotion often behaves differently from one won in a quiet month, so a falling average repeat rate can be nothing more than a change in the mix of cohorts. Compare cohorts at the same age, never the overall rate across months with different mixes.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>A marketplace where almost nobody comes back.</strong> Across all of Olist's delivered orders, 2,801 of 93,358 people placed more than one: 3.00%. Serai's 8,614-order sample was drawn to keep that real ratio, which is why its registry also reads 3.00% (250 of 8,333). In a business like that, a cohort grid is mostly empty cells, and the analyst's job is to stop anyone reading a pattern into two people.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the per-order 90-day repeat label and the open window</span>
+      <h2>Repeat within 90 days</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">The cohort grid is about people. The model in session 5 is about orders: at the moment of this purchase, will the same person order again within 90 days? The label is 1 if they did, 0 if the full 90 days passed without another order, and unknown if the 90 days have not passed yet. That third value is the one people forget.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn timeline of one constructed customer with three orders. Order A on day 0 is followed by order B on day 41, inside A's 90-day window, so A is labelled 1. Order B is followed by order C 119 days later, outside B's window, so B is labelled 0. Order C's window runs past the last purchase in the file, so its label is unknown. On Serai's sample, 197 orders are followed by another within 90 days; on the full file, 18,679 orders fall in the last 90 days.">
+        <defs>
+          <filter id="b4bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="47" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b4bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b4bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b4bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b4bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b4bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b4bB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .b4bV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b4bA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b4bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b4bH" x="30" y="26">ONE CUSTOMER, THREE ORDERS, THREE LABELS</text>
+        <text class="b4bS" x="380" y="26">constructed customer · 90-day window drawn to scale</text>
+
+        <g filter="url(#b4bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="100" y="76" width="288" height="30" rx="6" transform="rotate(-0.3 244 91)" fill="#A9C4EA"/>
+          <rect x="231" y="154" width="288" height="30" rx="6" transform="rotate(0.3 375 169)" fill="#FBF5E6"/>
+          <rect x="612" y="76" width="148" height="30" rx="6" transform="rotate(-0.3 686 91)" fill="#FFFFFF"/>
+          <path d="M760 76 L840 76 M760 106 L840 106" stroke-dasharray="6 6"/>
+          <path d="M60 130 L846 130" marker-end="url(#b4bAr)"/>
+          <circle cx="100" cy="130" r="8" fill="#FFFFFF"/>
+          <circle cx="231" cy="130" r="8" fill="#FFFFFF"/>
+          <circle cx="612" cy="130" r="8" fill="#FFFFFF"/>
+          <path d="M760 52 L760 206" stroke="#4E5869" stroke-dasharray="4 5"/>
+          <rect x="30" y="44" width="22" height="20" rx="3" transform="rotate(-3 41 54)" fill="#FFFFFF"/>
+          <path d="M35 40 L35 47 M47 40 L47 47 M30 51 L52 51"/>
+        </g>
+
+        <text class="b4bB" x="112" y="96">A's 90 days: B lands inside</text>
+        <text class="b4bL" x="243" y="174">B's 90 days: nothing lands</text>
+        <text class="b4bL" x="622" y="96">C's window, still open</text>
+        <text class="b4bS" x="768" y="50">last purchase</text>
+        <text class="b4bS" x="768" y="64">in the file</text>
+
+        <text class="b4bL" x="100" y="226" text-anchor="middle">A · day 0</text>
+        <text class="b4bL" x="231" y="226" text-anchor="middle">B · day 41</text>
+        <text class="b4bL" x="612" y="226" text-anchor="middle">C · day 160</text>
+        <text class="b4bV" x="100" y="250" text-anchor="middle">1</text>
+        <text class="b4bV" x="231" y="250" text-anchor="middle">0</text>
+        <text class="b4bV" x="612" y="250" text-anchor="middle">unknown</text>
+        <text class="b4bA" x="421" y="226" text-anchor="middle">119 days after B</text>
+
+        <text class="b4bN" x="30" y="286">On Serai's 8,614-order sample, 197 orders are followed by another within 90 days and carry label 1.</text>
+        <text class="b4bN" x="30" y="308">On the full file, 18,679 orders fall in the last 90 days: their label is unknown, not 0.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a label is 1, 0, or not yet knowable, and the last 90 days are all the third kind</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The label as a rule, written once<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Sort each person's orders by purchase time. For every order, look at the next order by the same person. If it exists and the gap is 90 days or less, the label is 1. If the gap is longer, or there is no next order and the full 90 days have passed before the data ends, the label is 0. If there is no next order and the data ends inside the 90 days, the label is unknown and the order leaves the training set.</p>
+        <div class="prompt-box good"><span class="label">★ The label in one function</span>def repeat_90(ts, next_ts, data_end, days=90):
+    window = pd.Timedelta(days=days)
+    if pd.notna(next_ts) and next_ts - ts &lt;= window:
+        return 1
+    if ts + window &lt;= data_end:
+        return 0
+    return None   # window still open: unknown, not 0</div>
+        <p>This is the label the bench's model uses. Session 5 trains on orders up to 2017-11-02 so that every label window closes by 2018-01-31, the end of month T, and scores February 2018. On Serai's repaired frame that gives 60 positive labels in 2,744 training orders.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why 90 days, and what changes if you pick another number<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The window is a business choice, not a fact in the data. Shorter windows give more closed labels and fewer positives; longer windows give more positives and push the usable training data further back in time, because more recent orders still have open windows. Pick the window that matches the action the score feeds, write it in the registry beside the definition, and never change it without changing the name. "Repeat within 90 days" and "repeat within 180 days" are two metrics.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Per order, per person, per cohort: three repeat numbers<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The registry's repeat rate is per person over all time: 250 of 8,333 on Serai's frame. The 90-day label is per order: 197 of 8,614 orders are followed within 90 days. The cohort grid is per person per month since first order. All three are correct and none of them equals another. When someone quotes "our repeat rate", the first question is which of the three, over what window. Write the denominator next to every one.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The last orders in a file always look loyal-less.</strong> Olist's public file ends with a purchase on 2018-08-29. An order from mid-August has had two weeks to be followed, not ninety days. Label it 0 and the most recent months look like a retention collapse that never happened. On the full file that is 18,679 orders whose window is still open, about one in five delivered orders.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers same-day repeat orders and what they do to every repeat number</span>
+      <h2>Same-day repeats</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">Of the 197 orders in Serai's sample that are followed by another within 90 days, 83 are followed on the same calendar day. That is a real Olist pattern, not a defect the builder planted. Some of those are surely people coming back for more. Some may be one shopping trip checked out twice. The rows do not say which, and an honest analyst says so rather than picking the reading that flatters the number.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn bar of Serai's 197 orders followed within 90 days, split into 83 followed on the same day and 114 on a later day. Below, the same-day part branches into two readings the rows cannot separate: a split basket, which should not count as a repeat, and a real return, which should. A third panel shows a re-send when the data engineering layer is skipped: the same order under a variant key turns 250 repeat customers into 384, and the repeat rate reads 4.61 percent instead of 3.00 percent.">
+        <defs>
+          <filter id="b4cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="53" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b4cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b4cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b4cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b4cR { font: 800 12px Inter, sans-serif; fill: #991B1B; }
+          .b4cL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b4cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b4cV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b4cX { font: 800 16px Inter, sans-serif; fill: #991B1B; }
+          .b4cA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b4cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b4cH" x="30" y="26">197 REPEATS, AND WHAT A SAME-DAY ORDER MIGHT BE</text>
+        <text class="b4cS" x="410" y="26">Serai's repaired 8,614-order sample · the split is real Olist behaviour</text>
+
+        <g filter="url(#b4cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="60" y="56" width="312" height="44" rx="6" transform="rotate(-0.3 216 78)" fill="#A9C4EA"/>
+          <rect x="372" y="56" width="428" height="44" rx="6" transform="rotate(0.2 586 78)" fill="#FFFFFF"/>
+          <path d="M150 104 L160 160" marker-end="url(#b4cAr)"/>
+          <path d="M300 104 L410 160" marker-end="url(#b4cAr)"/>
+          <rect x="40" y="166" width="260" height="92" rx="10" transform="rotate(-0.6 170 212)" fill="#FFFFFF"/>
+          <rect x="320" y="166" width="260" height="92" rx="10" transform="rotate(0.5 450 212)" fill="#FFFFFF"/>
+          <rect x="600" y="166" width="250" height="92" rx="10" transform="rotate(-0.4 725 212)" fill="#FEF2F2" stroke="#FCA5A5"/>
+          <path d="M303 199 Q303 191 310 191 Q317 191 317 198 Q317 204 310 206 L310 213 M310 220 L310 221"/>
+        </g>
+
+        <text class="b4cL" x="76" y="83">83 followed the same day</text>
+        <text class="b4cL" x="388" y="83">114 followed on a later day, within 90</text>
+
+        <text class="b4cA" x="610" y="156">if the DE layer is skipped</text>
+
+        <text class="b4cH" x="56" y="190">A SPLIT BASKET?</text>
+        <text class="b4cS" x="56" y="210">one shopping trip, checked out</text>
+        <text class="b4cS" x="56" y="226">twice, minutes apart</text>
+        <text class="b4cL" x="56" y="246">not a repeat in the business sense</text>
+
+        <text class="b4cH" x="336" y="190">A REAL RETURN?</text>
+        <text class="b4cS" x="336" y="210">the buyer came back later that</text>
+        <text class="b4cS" x="336" y="226">day for something else</text>
+        <text class="b4cL" x="336" y="246">a repeat by any definition</text>
+
+        <text class="b4cR" x="616" y="190">A RE-SEND</text>
+        <text class="b4cS" x="616" y="210">the same order, a variant key</text>
+        <text class="b4cS" x="616" y="226">250 repeat customers become 384</text>
+        <text class="b4cX" x="616" y="248">4.61% not 3.00%</text>
+
+        <text class="b4cN" x="30" y="296">Olist's order table carries no basket or session id, so the rows cannot tell the first two apart.</text>
+        <text class="b4cN" x="30" y="318">Full file: 890 of 2,148 are same-day; 3.00% repeat with them, 2.16% counting distinct days only.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a same-day repeat is ambiguous in the real data and a lie in the dirty data, and both land in the same column</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Teach the ambiguity, publish both numbers<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>On the full public file the build-along prints 2,148 orders followed within 90 days, 890 of them on the same day: 41.4%, close to Serai's 83 of 197. Count people instead of orders and the all-time repeat rate is 3.00% with same-day orders and 2.16% if only orders on two or more distinct days count. Neither is the true repeat rate. One treats every same-day order as a return; the other treats every one as part of the first trip. Publish both, name which one the registry carries, and add a same-day flag to the label table so the model in session 5 can be checked with and without them.</p>
+        <table class="clean">
+          <thead><tr><th>Reading</th><th>Full Olist file</th><th>Serai sample</th></tr></thead>
+          <tbody>
+            <tr><td>Orders followed within 90 days</td><td>2,148</td><td>197</td></tr>
+            <tr><td>of which the same day</td><td>890 (41.4%)</td><td>83</td></tr>
+            <tr><td>People with 2+ orders</td><td>2,801 of 93,358 (3.00%)</td><td>250 of 8,333 (3.0%)</td></tr>
+            <tr><td>People with orders on 2+ distinct days</td><td>2,015 (2.16%)</td><td>not computed here</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why a re-send hides here<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A re-sent order arrives on the same day, for the same customer, under a variant key. On a frame that has not been through session 2's checks it is indistinguishable from a same-day repeat. That is exactly what the bench shows when the data engineering layer is skipped: the registry counts 384 repeat customers instead of 250 and the repeat rate reads 4.61% instead of 3.00%, with agreement on repeat rate down to 65.14%. The model's training set grows from 60 positive labels to 108. Real same-day repeats make the fake ones look plausible, which is why the key check has to run before any repeat number is computed, not after.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Same-day orders and the review score<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Olist's satisfaction survey goes out once the customer receives the product or the estimated delivery date is due. A same-day repeat is placed before any review of the first order can exist. So review score cannot explain a same-day return, and any feature built from it would be using information from after the purchase. Session 5 leaves review score out of the model for that reason, and session 6 treats it as a timing leak.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>A pattern that survives every sample.</strong> Same-day follow-ups are 83 of 197 repeats in Serai's seeded sample and 890 of 2,148 on the full public file: roughly two in five both times. When a pattern holds at that share in a random sample and the whole population, it is a property of how people buy on the marketplace, and every repeat definition downstream has to take a position on it.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>The cohort grid and the 90-day label, in pandas</h2>
+      <span class="tag demo">★ 22 min · everyone builds</span>
+    </div>
+    <p class="lede">Download the public dataset with <code>kagglehub.dataset_download("olistbr/brazilian-ecommerce")</code> (no login needed) and run each block in order from a scratch folder. The outputs below are what these exact blocks print on the full file. Serai's bench runs the same logic on its seeded 8,614-order sample, so its counts are smaller.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The build-along as a hand-drawn pipeline of four steps on the full public Olist file: load delivered orders with the person key, 96,478 orders; build the cohort grid, 23 cohorts; label each order for a repeat within 90 days, 2,148 labelled 1 and 18,679 with an open window; flag same-day repeats, 890.">
+        <defs>
+          <filter id="b4dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="59" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b4dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b4dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b4dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b4dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b4dV { font: 800 14px Inter, sans-serif; fill: #6A4C04; }
+          .b4dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b4dH" x="30" y="26">SIX BLOCKS, TWO TABLES, ONE FLAG</text>
+
+        <g filter="url(#b4dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="50" width="180" height="120" rx="10" transform="rotate(-0.6 120 110)" fill="#FFFFFF"/>
+          <path d="M214 110 L236 110" marker-end="url(#b4dAr)"/>
+          <rect x="242" y="50" width="180" height="120" rx="10" transform="rotate(0.5 332 110)" fill="#FFFFFF"/>
+          <path d="M426 110 L448 110" marker-end="url(#b4dAr)"/>
+          <rect x="454" y="50" width="180" height="120" rx="10" transform="rotate(-0.5 544 110)" fill="#A9C4EA"/>
+          <path d="M638 110 L660 110" marker-end="url(#b4dAr)"/>
+          <rect x="666" y="50" width="184" height="120" rx="10" transform="rotate(0.5 758 110)" fill="#FFFFFF"/>
+        </g>
+
+        <text class="b4dH" x="44" y="74">1 · LOAD</text>
+        <text class="b4dS" x="44" y="94">delivered orders</text>
+        <text class="b4dS" x="44" y="110">with the person key</text>
+        <text class="b4dV" x="44" y="148">96,478</text>
+
+        <text class="b4dH" x="256" y="74">2-3 · COHORT GRID</text>
+        <text class="b4dS" x="256" y="94">rows: first month</text>
+        <text class="b4dS" x="256" y="110">columns: months since</text>
+        <text class="b4dV" x="256" y="148">23 cohorts</text>
+
+        <text class="b4dH" x="468" y="74">4-5 · 90-DAY LABEL</text>
+        <text class="b4dS" x="468" y="94">next order in 90 days</text>
+        <text class="b4dS" x="468" y="110">open windows set aside</text>
+        <text class="b4dV" x="468" y="148">2,148 labelled 1</text>
+
+        <text class="b4dH" x="680" y="74">6 · SAME-DAY FLAG</text>
+        <text class="b4dS" x="680" y="94">repeat rate with and</text>
+        <text class="b4dS" x="680" y="110">without same-day orders</text>
+        <text class="b4dV" x="680" y="148">890 same-day</text>
+
+        <text class="b4dN" x="30" y="200">Block 5 is the one people skip. 18,679 orders on the full file have a window that has not closed.</text>
+        <text class="b4dN" x="30" y="222">Every count is distinct people or orders on the delivered set, the same frame the registry uses.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - grid, label, open windows, same-day flag: two tables the model and the seller report both read</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Load delivered orders with the person key.</strong> Point <code>d</code> at the downloaded folder. The person is <code>customer_unique_id</code>, not the per-order <code>customer_id</code>.</p>
+        <div class="prompt-box good"><span class="label">★ Block 1 · load</span>import pandas as pd
+d = "path/to/olist/"
+orders = pd.read_csv(d + "olist_orders_dataset.csv", parse_dates=["order_purchase_timestamp"])
+cust = pd.read_csv(d + "olist_customers_dataset.csv")
+o = (orders[orders.order_status == "delivered"]
+     .merge(cust[["customer_id", "customer_unique_id"]], on="customer_id")
+     .rename(columns={"customer_unique_id": "person", "order_purchase_timestamp": "ts"})
+     [["order_id", "person", "ts"]])
+print("orders", len(o), "people", o.person.nunique())
+
+# prints: orders 96478 people 93358</div>
+      </div>
+      <div class="step">
+        <p><strong>Build the cohort grid of distinct people.</strong> The cohort is each person's first month; the age is months since it.</p>
+        <div class="prompt-box good"><span class="label">★ Block 2 · the grid</span>o["month"] = o.ts.dt.to_period("M")
+o["cohort"] = o.groupby("person").month.transform("min")
+o["age"] = (o.month - o.cohort).apply(lambda p: p.n)
+grid = o.groupby(["cohort", "age"]).person.nunique().unstack(fill_value=0)
+print(grid.loc["2017-01":"2017-06", 0:3])
+print("cohorts", len(grid), "| 2017-11 cohort size", grid.loc["2017-11", 0])
+
+# prints:
+# age         0   1   2   3
+# cohort
+# 2017-01   717   2   2   1
+# 2017-02  1628   3   5   2
+# 2017-03  2503  11   9  10
+# 2017-04  2256  14   5   4
+# 2017-05  3451  16  16  10
+# 2017-06  3037  15  12  13
+# cohorts 23 | 2017-11 cohort size 7060</div>
+      </div>
+      <div class="step">
+        <p><strong>Turn counts into shares, and keep the counts beside them.</strong></p>
+        <div class="prompt-box good"><span class="label">★ Block 3 · shares</span>share = grid.div(grid[0], axis=0) * 100
+print(share.loc["2017-01":"2017-06", 1:3].round(2))
+
+# prints:
+# age         1     2     3
+# cohort
+# 2017-01  0.28  0.28  0.14
+# 2017-02  0.18  0.31  0.12
+# 2017-03  0.44  0.36  0.40
+# 2017-04  0.62  0.22  0.18
+# 2017-05  0.46  0.46  0.29
+# 2017-06  0.49  0.40  0.43</div>
+      </div>
+      <div class="step">
+        <p><strong>Label every order: is the same person's next order within 90 days?</strong> Sorting by order id after time makes ties deterministic.</p>
+        <div class="prompt-box good"><span class="label">★ Block 4 · the 90-day label and the same-day flag</span>o = o.sort_values(["person", "ts", "order_id"])
+o["next_ts"] = o.groupby("person").ts.shift(-1)
+o["rep90"] = (o.next_ts - o.ts) &lt;= pd.Timedelta(days=90)
+o["same_day"] = o.rep90 &amp; (o.next_ts.dt.date == o.ts.dt.date)
+print("followed within 90 days", o.rep90.sum(), "| same day", o.same_day.sum(), f"| share {o.same_day.mean() / o.rep90.mean():.1%}")
+
+# prints: followed within 90 days 2148 | same day 890 | share 41.4%</div>
+      </div>
+      <div class="step">
+        <p><strong>Find the orders whose window has not closed.</strong> These are unknown, not 0. Drop them from any training set or retention rate that uses the 90-day label.</p>
+        <div class="prompt-box good"><span class="label">★ Block 5 · open windows</span>last = o.ts.max()
+open_window = o.ts &gt; last - pd.Timedelta(days=90)
+print("last purchase", last.date(), "| windows still open", open_window.sum())
+
+# prints: last purchase 2018-08-29 | windows still open 18679</div>
+      </div>
+      <div class="step">
+        <p><strong>Print the repeat rate both ways.</strong> One line for the registry's definition, one for the distinct-day reading.</p>
+        <div class="prompt-box good"><span class="label">★ Block 6 · with and without same-day orders</span>per = o.groupby("person").agg(n=("order_id", "size"), days=("ts", lambda s: s.dt.date.nunique()))
+print(f"repeat rate {(per.n &gt; 1).mean():.2%} ({(per.n &gt; 1).sum()} of {len(per)})")
+print(f"repeat on 2+ distinct days {(per.days &gt; 1).mean():.2%} ({(per.days &gt; 1).sum()})")
+
+# prints: repeat rate 3.00% (2801 of 93358)
+#         repeat on 2+ distinct days 2.16% (2015)</div>
+      </div>
+      <div class="step">
+        <p><strong>Write the window and the same-day choice at the top of the file.</strong> One comment: "repeat_90 = next order by the same person within 90 days of purchase; open windows are unknown; same_day kept as a flag". Session 5 reads that comment before it trains anything.</p>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">The label that quietly calls the last 90 days a collapse</span>
+o["label"] = o.rep90.astype(int)   # open windows become 0: every August 2018 order "never came back"
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 5</h2>
+      <span class="tag exercise">30 min</span>
+    </div>
+    <ol>
+      <li>Check that month 0 of your grid adds up to the number of distinct people in block 1, and add that as an assertion.</li>
+      <li>Rebuild the 90-day label with a 30-day and a 180-day window, and count positives and open windows for each. Write one sentence on what the trade looks like.</li>
+      <li>For the same-day pairs, compute the gap in minutes between the two purchase timestamps and look at its distribution. Does it settle the split-basket question, or only narrow it? Write down why.</li>
+      <li>Redraw the cohort grid with cohorts in quarters instead of months and say which grid you would show a seller, and why.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Builder session 4 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · A cohort grid counts distinct people per first-purchase month and months since. Which check tells you the grid and the registry agree on what a customer is?</p>
+      <button class="qopt" type="button">A · Every row has at least one non-zero cell after month 0</button>
+      <button class="qopt" type="button">B · Month 0 summed across all cohorts equals the registry's customer count on the same frame</button>
+      <button class="qopt" type="button">C · The shares in each row fall from left to right</button>
+      <button class="qopt" type="button">D · The grid has one row per calendar month in the data</button>
+      <p class="qwhy">Each person sits in exactly one row, so month 0 must add up to the number of distinct people: 93,358 on the full file. If it does not, the grid is using a different key or filter from the registry. Shares need not fall monotonically, and small cells often do not.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · The file ends on 2018-08-29. An order placed on 2018-08-10 has no later order by the same person. What is its 90-day repeat label?</p>
+      <button class="qopt" type="button">A · 0, because no next order exists</button>
+      <button class="qopt" type="button">B · 1, because recent buyers are the most likely to return</button>
+      <button class="qopt" type="button">C · Unknown: its window has not closed, so it leaves the training set</button>
+      <button class="qopt" type="button">D · 0.5, as a neutral prior</button>
+      <p class="qwhy">Only 19 of its 90 days have passed. Calling it 0 makes recent months look like a retention collapse. That is why session 5 trains on orders up to 2017-11-02, so every window closes by 2018-01-31. On the full file, 18,679 orders sit in that open stretch.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · 83 of Serai's 197 repeats within 90 days are same-day. What is the honest way to report repeat purchase?</p>
+      <button class="qopt" type="button">A · Publish the rate with and without same-day orders, name which one the registry carries, and keep a same-day flag on the label</button>
+      <button class="qopt" type="button">B · Drop all same-day orders, because they must be duplicates</button>
+      <button class="qopt" type="button">C · Keep them and say nothing, because they are real Olist rows</button>
+      <button class="qopt" type="button">D · Average the two rates and publish one number</button>
+      <p class="qwhy">The rows carry no basket id, so a split basket and a real return look the same. Dropping them assumes one reading, keeping them silently assumes the other, and averaging hides both. On the full file the two readings are 3.00% and 2.16%; show both and let the definition be a visible choice.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Monthly acquisition cohorts and the cohort grid</span><span class="note">Taught as a method; every grid number is what the build-along prints on the full public Olist file</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The 90-day repeat label and the open window</span><span class="note">The label the bench's model uses; split dates and the 60 training positives from the bench canon</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Same-day repeat orders</span><span class="note">83 of 197 from the data builder on Serai's sample; 890 of 2,148 printed by the build-along on the full file</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Repeat rate 3.00% vs 4.61% with the DE layer skipped</span><span class="note">Bench canon: registry on the repaired frame vs the raw exports, agreement 65.14%</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Olist structure and survey timing</span><span class="note">Brazilian E-Commerce Public Dataset by Olist, Kaggle, CC BY-NC-SA 4.0, dataset notes read at source</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Churn modelling, retention programmes, RFM scoring</span><span class="note">Owned by Customer retention with Phoebe and RFM modeling with Phoebe; linked, not retaught</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 4 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Cohort = first month</b><span>A person joins one row for life; columns are months since first order.</span></div>
+      <div class="cheat-item"><b>Cells count people</b><span>Month 0 must add up to the registry's customers on the same frame.</span></div>
+      <div class="cheat-item"><b>Count beside share</b><span>Month-1 cells hold 2 to 16 people here; never trend single digits.</span></div>
+      <div class="cheat-item"><b>Label is 1, 0 or unknown</b><span>The last 90 days are unknown, not 0: 18,679 orders on the full file.</span></div>
+      <div class="cheat-item"><b>Two readings of same-day</b><span>83 of 197 on Serai; publish with and without, keep the flag.</span></div>
+      <div class="cheat-item"><b>Re-sends look like repeats</b><span>Skip DE and 3.00% reads 4.61%. Run the key check first.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>You have the label and you know which of its windows are closed. Session 5 builds the model on it: seven features known at the moment of purchase, a training set whose label window closes before the cutoff, and logistic regression scored on the month after, with AUC and top-decile lift read against a 4.18% base rate.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Builder session 4 of 10 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="b3-metric-registry-as-code.html">← Prev: Building the metric registry</a> &nbsp;·&nbsp; <a href="b5-model-with-a-time-split.html">Next: A repeat-purchase model with a time split →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Builder session 6 of 10. Hunt the leak in a repeat-purchase model: a backfilled field known only in hindsight lifts training AUC to 0.9913 and drops month T+1 lift to 1.65x, under the 2.0x gate. Learn-predict separation from Kaufman et al., the review-score timing trap, and a leak audit table in pandas that fails loudly.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="The leakage hunt - learn ship social commerce with phoebe">
+<meta property="og:description" content="Builder session 6 of 10. Training AUC 0.9913, month T+1 lift 1.65x: how a field from the future makes a model look perfect and score worse.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/b6-the-leakage-hunt.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The leakage hunt - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Builder session 6 of 10. Stamp every feature with the time it became known, then let a gate refuse the late ones.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Builder session 6 · The leakage hunt - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Builder session 6 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Builder session 6 of 10</div>
+    <h1>The <span class="accent">leakage hunt</span></h1>
+    <p class="sub">Session 5 built an honest repeat-purchase model with a time split. Tonight somebody hands it a better column. The column is real, it sits in the warehouse, and it lifts training AUC from 0.6248 to 0.9913. On the month the model is actually asked about, top-decile lift falls from 3.71x to 1.65x, under Serai's 2.0x gate. You find out why, name the mechanism the literature calls leakage, and build the audit table that keeps the next such column out before it ever reaches a fit.</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Advanced-practical</span>
+      <span class="chip audience">Data scientists and ML engineers</span>
+      <span class="chip audience">Anyone who owns a feature table</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · The future field, the separation, timing traps</span>
+      <span class="a3" style="flex:4">20-42 · Build-along: the leak audit</span>
+      <span class="a4" style="flex:1">42-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>A model that looks perfect is a question, not an answer</h2>
+    </div>
+    <p class="lede">Serai Commerce is the constructed enabler from the Enablers track; its 8,614 orders are real derived Olist rows. Session 5 trained a logistic regression on seven features known at purchase, with a label window that closes on 2018-01-31 and a scoring month of February 2018. Month T+1 has 574 orders and 24 real repeats, a base rate of 4.18%, and the model puts 9 of them in its top 58: lift 3.71x. Tonight's job is the opposite of tuning. You add a column, watch the numbers move the wrong way, and learn to ask one question of every feature before it is allowed near a fit: when was this value known? Model depth beyond the leak, calibration, tuning and monitoring, belongs to the <a href="https://phoebefu6.github.io/learn-ml-production-with-phoebe/">ML production</a>, <a href="https://phoebefu6.github.io/learn-model-evaluation-with-phoebe/">model evaluation</a> and <a href="https://phoebefu6.github.io/learn-feature-engineering-with-phoebe/">feature engineering</a> tracks; this session ships one model and hunts its leak.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A leak audit table for a feature store, one row per feature with the time it becomes known and the time the model needs it, and a gate function that stops the pipeline when a column is unaudited or known too late. Plus a with-and-without fit on the public Olist file that shows you, on your own machine, what a hindsight column does to training AUC and to next-month lift.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the backfilled field and what it does to the numbers</span>
+      <h2>A field from the future</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">The column is <code>has_later_order</code>: does this customer have any order after this one? A nightly reporting job fills it for every historical row, looking back from today. For a training order whose customer came back, it reads 1. For an order being scored in February 2018, the next order has not happened yet, so it reads 0 for all 574 rows. Training sees the answer; scoring does not.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn customer timeline. On the left, a training order and its next order; a backfill job written later looks back and sets has_later_order to 1 on the training order. A dashed line marks the label window closing on 2018-01-31. On the right, an order scored in February 2018 whose next order has not happened, so has_later_order is 0 on all 574 scored rows. Below, two pairs of bars: training AUC 0.6248 without the field against 0.9913 with it, and month T+1 top-decile lift 3.71x without the field against 1.65x with it, beside the 2.0x gate.">
+        <defs>
+          <filter id="b6aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="61" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b6aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b6aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b6aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b6aR { font: 800 12px Inter, sans-serif; fill: #991B1B; }
+          .b6aL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b6aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b6aA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b6aV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b6aX { font: 800 16px Inter, sans-serif; fill: #991B1B; }
+          .b6aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b6aH" x="30" y="26">ONE COLUMN, TWO MOMENTS</text>
+        <text class="b6aS" x="230" y="26">values as the session 10 widget prints them · break button on vs off</text>
+
+        <g filter="url(#b6aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M60 110 L846 110" marker-end="url(#b6aAr)"/>
+          <circle cx="150" cy="110" r="7" fill="#FFFFFF"/>
+          <circle cx="320" cy="110" r="7" fill="#FFFFFF"/>
+          <circle cx="620" cy="110" r="7" fill="#FFFFFF"/>
+          <circle cx="800" cy="110" r="9" stroke-dasharray="3 3" fill="#FFFFFF"/>
+          <path d="M316 100 C 280 66, 190 66, 156 98" marker-end="url(#b6aAr)"/>
+          <path d="M470 48 L470 214" stroke-dasharray="6 5"/>
+          <rect x="60" y="160" width="360" height="52" rx="10" transform="rotate(-0.4 240 186)" fill="#A9C4EA"/>
+          <rect x="560" y="160" width="290" height="52" rx="10" transform="rotate(0.4 705 186)" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="60" y="248" width="150" height="16" rx="3" fill="#FBF5E6"/>
+          <rect x="60" y="276" width="238" height="16" rx="3" fill="url(#b6aHc)"/>
+          <rect x="490" y="248" width="223" height="16" rx="3" fill="#FBF5E6"/>
+          <rect x="490" y="276" width="99" height="16" rx="3" fill="#FEF2F2" stroke="#991B1B"/>
+          <path d="M610 248 L610 298" stroke-dasharray="4 4" stroke="#991B1B"/>
+        </g>
+
+        <text class="b6aS" x="196" y="64">written later, looking back</text>
+        <text class="b6aA" x="478" y="58">label window closes 2018-01-31</text>
+        <text class="b6aL" x="110" y="138">a training order</text>
+        <text class="b6aL" x="285" y="138">its next order</text>
+        <text class="b6aL" x="585" y="138">a scored order</text>
+        <text class="b6aS" x="740" y="138">next order: not yet</text>
+
+        <text class="b6aH" x="76" y="182">BACKFILL, WITH HINDSIGHT</text>
+        <text class="b6aL" x="76" y="200">has_later_order = 1 on the training order</text>
+        <text class="b6aR" x="576" y="182">AT SCORING, FEBRUARY 2018</text>
+        <text class="b6aL" x="576" y="200">has_later_order = 0 on all 574 rows</text>
+
+        <text class="b6aA" x="60" y="240">training AUC, in-sample</text>
+        <text class="b6aV" x="220" y="262">0.6248</text>
+        <text class="b6aS" x="284" y="261">no field</text>
+        <text class="b6aV" x="308" y="290">0.9913</text>
+        <text class="b6aS" x="372" y="289">with the leak</text>
+
+        <text class="b6aA" x="490" y="240">month T+1 top-decile lift</text>
+        <text class="b6aS" x="614" y="311">2.0x gate</text>
+        <text class="b6aV" x="722" y="262">3.71x</text>
+        <text class="b6aS" x="776" y="261">no field</text>
+        <text class="b6aX" x="618" y="290">1.65x</text>
+        <text class="b6aS" x="668" y="289">with the leak</text>
+
+        <text class="b6aN" x="30" y="330">The better training gets, the worse the month that matters gets: the model learned to read a column that will be blank.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a column filled with hindsight is 1 in history and 0 at scoring, so training soars and next month sinks</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Four numbers, before and after<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Setting</th><th>Training AUC</th><th>Month T+1 AUC</th><th>Top 58: real repeats</th><th>Lift</th><th>2.0x gate</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Seven honest features</strong></td><td>0.6248</td><td>0.7894</td><td>9 of 24</td><td>3.71x</td><td>passes</td></tr>
+            <tr><td><strong>Plus has_later_order</strong></td><td>0.9913</td><td>0.6394</td><td>4 of 24</td><td>1.65x</td><td>fails</td></tr>
+            <tr><td><strong>Leak and DE skipped</strong></td><td>0.9914</td><td>0.4922</td><td>3 of 24</td><td>1.24x</td><td>fails</td></tr>
+          </tbody>
+        </table>
+        <p>Read the first column as a warning, not a score. A training AUC of 0.9913 on a label as noisy as "another order within 90 days" is not a model getting good; it is a model that found a column that already contains the label. The honest model's training AUC sits below its month T+1 AUC, which on 24 positives is small-sample noise, not a sign of quality. With 24 positives in month T+1, one hit moves lift by 0.41, so treat 1.65x against 3.71x as "five fewer real repeats in the top decile", not as a precise ratio.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Where the weight goes<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The session 10 widget prints the weights on the standardised features. With the field present, gradient descent puts 1.389 on <code>has_later_order</code> and at most 0.255 on any other feature. The honest features drift, because once the answer column is on the table they barely reduce the loss. At scoring the leaked column is a constant 0, so it adds nothing to the ranking, and what is left is the drifted weights on the seven honest features. That is why the leaked model ranks February worse than the honest one: 4 real repeats in the top 58 instead of 9.</p>
+        <p>Switch on the session 2 anti-lever as well, so the model also trains on raw exports with re-sent orders, and month T+1 AUC falls to 0.4922. Below 0.5 means the ranking is no better than a random draw on this month, and on 24 positives it is probably not meaningfully worse either. Both levers together take the model's 35% share of the product price to zero, which session 9 prices.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Every public dataset is a snapshot taken after the fact.</strong> The Olist file covers orders from 2016 to 2018 and was published once, whole. Any column you compute across the full file, such as "this person has another order later" through <code>customer_unique_id</code>, is computed from the end of 2018 looking back. In a notebook it looks like an ordinary groupby. In production the same groupby runs on the day of scoring and returns 0 for everyone who has not come back yet. A warehouse is the same kind of snapshot, refreshed nightly.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers leakage as defined in the literature and learn-predict separation</span>
+      <h2>Learn-predict separation</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">Kaufman, Rosset, Perlich and Stitelman (2012) define leakage as "the introduction of information about the data mining target that should not be legitimately available to mine from", and propose a "learn-predict separation". Turned into a working rule: stamp every column with the time its value became known, draw a line at the moment of prediction, and build each training row only from what sits to the left of that line.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn time axis with a vertical band marking the moment of prediction, the purchase. Left of the band, seven feature tags known at purchase: prior orders, recency of prior order, order value, freight share, instalments, voucher used, items in order. Right of the band, kept out: review score, known after delivery; has_later_order, known after the next order; and the label itself, another order within 90 days.">
+        <defs>
+          <filter id="b6bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="67" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b6bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b6bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b6bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b6bL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b6bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b6bB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .b6bA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b6bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b6bH" x="30" y="26">EVERY COLUMN CARRIES A TIMESTAMP BEFORE IT CARRIES A WEIGHT</text>
+        <text class="b6bS" x="30" y="44">Kaufman et al. (2012): learn-predict separation · build each training row only from what was known at prediction</text>
+
+        <g filter="url(#b6bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="352" y="62" width="16" height="196" rx="4" fill="#A9C4EA"/>
+          <rect x="40" y="76" width="146" height="26" rx="6" transform="rotate(-1.5 113 89)" fill="#FFFFFF"/>
+          <rect x="194" y="76" width="146" height="26" rx="6" transform="rotate(1.2 267 89)" fill="#FFFFFF"/>
+          <rect x="40" y="112" width="146" height="26" rx="6" transform="rotate(1 113 125)" fill="#FFFFFF"/>
+          <rect x="194" y="112" width="146" height="26" rx="6" transform="rotate(-1.4 267 125)" fill="#FFFFFF"/>
+          <rect x="40" y="148" width="146" height="26" rx="6" transform="rotate(-0.8 113 161)" fill="#FFFFFF"/>
+          <rect x="194" y="148" width="146" height="26" rx="6" transform="rotate(1.6 267 161)" fill="#FFFFFF"/>
+          <rect x="40" y="184" width="146" height="26" rx="6" transform="rotate(1.3 113 197)" fill="#FFFFFF"/>
+          <rect x="400" y="110" width="140" height="28" rx="6" transform="rotate(2 470 124)" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="560" y="146" width="150" height="28" rx="6" transform="rotate(-1.8 635 160)" fill="#FEF2F2" stroke="#991B1B"/>
+          <rect x="700" y="190" width="150" height="28" rx="6" transform="rotate(1.2 775 204)" fill="#FBF5E6"/>
+          <path d="M40 246 L846 246" marker-end="url(#b6bAr)"/>
+          <circle cx="740" cy="72" r="11"/>
+          <path d="M740 72 L740 64 M740 72 L746 75"/>
+        </g>
+
+        <text class="b6bL" x="52" y="93">prior orders (log)</text>
+        <text class="b6bL" x="206" y="93">recency of prior</text>
+        <text class="b6bL" x="52" y="129">order value (log)</text>
+        <text class="b6bL" x="206" y="129">freight share</text>
+        <text class="b6bL" x="52" y="165">instalments</text>
+        <text class="b6bL" x="206" y="165">voucher used</text>
+        <text class="b6bL" x="52" y="201">items in order</text>
+        <text class="b6bS" x="40" y="232">known at purchase: allowed in the training row</text>
+
+        <text class="b6bH" x="400" y="76">KNOWN LATER: KEPT OUT, HOWEVER PREDICTIVE</text>
+        <text class="b6bS" x="400" y="104">known after delivery</text>
+        <text class="b6bL" x="412" y="128">review_score</text>
+        <text class="b6bS" x="560" y="140">known after the next order</text>
+        <text class="b6bL" x="572" y="164">has_later_order</text>
+        <text class="b6bS" x="700" y="184">what we predict</text>
+        <text class="b6bL" x="712" y="208">the label</text>
+        <text class="b6bS" x="700" y="234">another order in 90 days</text>
+
+        <text class="b6bA" x="820" y="264">time</text>
+        <text class="b6bB" x="360" y="280" text-anchor="middle">moment of prediction: the purchase</text>
+
+        <text class="b6bN" x="30" y="306">The label sits right of the line by definition. A column stamped right of the line too is a leak candidate.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - draw the line at the moment of prediction and every feature lands on one side of it</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why a time split cannot save you from a column<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Session 5's split already obeys the scikit-learn warning that shuffled cross-validation on time-ordered data would lead "to training on future data and evaluating on past data". Every training ROW is older than every scoring row. Leakage lives one level down, inside a COLUMN: <code>has_later_order</code> on a 2017 training row was computed in 2018. A clean split of rows does nothing about a column whose values were filled from the future. You need both: rows split by time, and columns stamped by time.</p>
+        <p>The separation is about information, not about whether a column "is the label". <code>has_later_order</code> is not the label (it ignores the 90-day window), yet it carries most of the label's information. Kaufman et al. are explicit that leakage is information about the target that should not be legitimately available, which covers proxies, not just copies.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>What the paper offers, and what is quoted here<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Only the abstract of Kaufman, Rosset, Perlich and Stitelman (2012) has been read at source, so only the abstract is quoted on this page: the definition, the learn-predict separation, and the paper's aim of detecting leakage when the modeler cannot control how the data was collected. That last case is Serai's: the backfill job belongs to the reporting team, not to the person building the model. Anything beyond the abstract, such as specific detection procedures, is not claimed here; read the paper itself before citing its methods.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The documentation that states the row rule.</strong> scikit-learn's TimeSeriesSplit exists because "other cross-validation methods are inappropriate" for time-ordered data, and its successive training sets are supersets of those that come before them. That is the row half of learn-predict separation, built into a library. No library ships the column half: knowing when each value became known is metadata only your team can write down, which is why the build-along below writes it as a table.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers review score as a timing trap and a checklist for late fields</span>
+      <h2>Timing traps</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">Not every leak is a backfill job. Some columns are honest facts about an order that simply arrive after the moment you need them. Review score is the classic one in commerce: it predicts loyalty, it sits on the same order, and it does not exist yet at purchase.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn order timeline: purchase, approval, carrier pickup, delivery, survey sent, review answered. Review score becomes known only at the last step. Below, a second order from the same customer placed on the same day as the first, before any delivery or review exists. In Serai's sample, 83 of the 197 repeat orders within 90 days were same-day.">
+        <defs>
+          <filter id="b6cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="71" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <marker id="b6cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b6cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b6cL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b6cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b6cB { font: 800 11px Inter, sans-serif; fill: #1D3A66; }
+          .b6cV { font: 800 18px Inter, sans-serif; fill: #6A4C04; }
+          .b6cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b6cH" x="30" y="26">WHEN EACH FACT ABOUT ONE OLIST ORDER EXISTS</text>
+        <text class="b6cS" x="370" y="26">survey timing from the Olist dataset notes · counts from Serai's 8,614-order sample</text>
+
+        <g filter="url(#b6cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M60 110 L846 110" marker-end="url(#b6cAr)"/>
+          <circle cx="100" cy="110" r="6" fill="#FFFFFF"/>
+          <circle cx="180" cy="110" r="6" fill="#FFFFFF"/>
+          <circle cx="300" cy="110" r="6" fill="#FFFFFF"/>
+          <circle cx="480" cy="110" r="6" fill="#FFFFFF"/>
+          <circle cx="560" cy="110" r="6" fill="#FFFFFF"/>
+          <circle cx="680" cy="110" r="10" fill="#A9C4EA"/>
+          <rect x="600" y="60" width="26" height="18" rx="2" transform="rotate(-3 613 69)" fill="#FFFFFF"/>
+          <path d="M601 62 L613 71 L625 62"/>
+          <path d="M100 150 L100 158 L680 158 L680 150"/>
+          <path d="M100 118 L100 222" stroke-dasharray="5 5"/>
+          <path d="M60 230 L400 230" marker-end="url(#b6cAr)"/>
+          <circle cx="104" cy="230" r="7" fill="#FEF2F2" stroke="#991B1B"/>
+        </g>
+
+        <text class="b6cL" x="70" y="96">purchase</text>
+        <text class="b6cS" x="160" y="132">approval</text>
+        <text class="b6cL" x="262" y="96">carrier pickup</text>
+        <text class="b6cS" x="456" y="132">delivery</text>
+        <text class="b6cL" x="520" y="96">survey sent</text>
+        <text class="b6cB" x="640" y="138">review answered</text>
+        <text class="b6cS" x="300" y="178">review_score does not exist anywhere in this span</text>
+
+        <text class="b6cH" x="130" y="210">ORDER 2, SAME CUSTOMER, SAME DAY</text>
+        <text class="b6cL" x="124" y="252">placed before order 1 has a delivery or a review</text>
+        <text class="b6cV" x="560" y="238">83 of 197</text>
+        <text class="b6cS" x="560" y="258">90-day repeats in the sample were same-day</text>
+
+        <text class="b6cN" x="30" y="292">Score order 1 at purchase and review_score is a column from the future for every row, not just the odd one.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the survey goes out after delivery, and many repeats happen before it is even sent</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why review score stays out of the repeat model<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The Olist dataset notes say the satisfaction survey is sent once the customer receives the product, or when the estimated delivery date is due. So at the moment of purchase, the only moment Serai's model is asked about, there is no review score for that order. In Serai's sample, 197 orders were followed by another order from the same customer within 90 days, and 83 of those repeats were placed on the same day as the order before them: before a carrier pickup, a delivery or a survey existed. A model trained with review score would be scored, in production, on a column that is always missing at the moment it matters.</p>
+        <p>The same-day repeats carry their own ambiguity, which session 4 treats: some are split baskets, some real second purchases. For leakage the answer does not matter. Either way the second order happened before the first order's review could exist, so review score cannot have caused it and cannot be used to predict it at purchase.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>A checklist for spotting fields known only after the label<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <ul>
+          <li><strong>Who writes it, and when?</strong> A column filled by a nightly or monthly job, rather than at the event, was written later than the row it sits on. Find the job and its schedule.</li>
+          <li><strong>Does its name look forward?</strong> "Later", "lifetime", "total to date", "churned", "returned", "final status", "has ever": each one describes a period that extends past the moment of prediction.</li>
+          <li><strong>Does it come from a downstream event?</strong> Delivery, review, refund, support ticket, chargeback: if the event follows the purchase, so does every column it feeds.</li>
+          <li><strong>Can it be updated after the row is created?</strong> A mutable column holds its latest value, not the value it had on the day. Keep the change history or treat it as late.</li>
+          <li><strong>Is it suspiciously good?</strong> A single feature that pushes training AUC toward 1 on a noisy label is a leak until proven otherwise. Fit with and without it on a time split and compare next-month lift, not training AUC.</li>
+          <li><strong>Is it missing exactly where the future has not happened?</strong> A column that is mostly blank or 0 on the newest rows, and full on the old ones, is being filled with hindsight.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>When the timestamps themselves disagree<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A time-known stamp is only as good as the clock behind it. In Serai's sample, 122 real Olist orders log a carrier pickup before the payment approval, and 1 has no approval timestamp at all. Session 2 flags those rows and keeps them, because they do not change any metric. For a leak audit they are a reminder: if you stamp a feature with "known at approval", check that approval is a reliable event in your data before trusting the order of events. When two clocks disagree, stamp the feature with the later of the two.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>One order, several reviews, several answers.</strong> In Serai's sample, 39 orders carry more than one review and 68 carry none. A review score column at the order grain is therefore a choice (first by answer time, in session 1's fact table) made after every review is in. Even a model that waited until delivery would see a value picked with hindsight about which reviews would arrive. Late facts tend to come with late choices attached.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>A leak audit table for a feature store</h2>
+      <span class="tag demo">★ 22 min · everyone builds</span>
+    </div>
+    <p class="lede">Four blocks in pandas and scikit-learn. Blocks 1 and 2 need no data and their printed output is shown as it ran; the audit rows are constructed for Serai's model. Blocks 3 and 4 run on the public Olist file, downloaded with <code>kagglehub.dataset_download("olistbr/brazilian-ecommerce")</code>; they print nothing here because your numbers will differ from Serai's 8,614-order sample.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 262" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn audit table with four of its nine rows: prior_orders_log known at purchase, needed at purchase, keep; installments known at purchase, needed at purchase, keep; review_score known at review, needed at purchase, leak; has_later_order known at next order, needed at purchase, leak. An arrow leads to a gate that runs before every fit and fails on an unaudited column or a column known too late. 7 of the 9 audited features pass.">
+        <defs>
+          <filter id="b6dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="73" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <marker id="b6dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b6dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b6dR { font: 800 11px Inter, sans-serif; fill: #991B1B; }
+          .b6dL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b6dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b6dV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b6dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b6dH" x="30" y="26">THE AUDIT TABLE, THEN THE GATE</text>
+        <text class="b6dS" x="260" y="26">constructed rows for Serai's model · printed by block 1</text>
+
+        <g filter="url(#b6dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="30" y="50" width="510" height="170" rx="10" transform="rotate(-0.3 285 135)" fill="#FFFFFF"/>
+          <path d="M34 84 L536 84"/>
+          <path d="M34 114 L536 114" stroke="#CDD2DC"/>
+          <path d="M34 144 L536 144" stroke="#CDD2DC"/>
+          <path d="M34 182 L536 182" stroke="#CDD2DC"/>
+          <path d="M546 135 L584 135" marker-end="url(#b6dAr)"/>
+          <rect x="590" y="62" width="260" height="146" rx="12" transform="rotate(0.4 720 135)" fill="#A9C4EA"/>
+          <rect x="814" y="82" width="20" height="16" rx="3"/>
+          <path d="M818 82 L818 76 C 818 68, 830 68, 830 76 L830 82"/>
+        </g>
+
+        <text class="b6dH" x="46" y="72">feature</text>
+        <text class="b6dH" x="210" y="72">time known</text>
+        <text class="b6dH" x="320" y="72">time needed</text>
+        <text class="b6dH" x="440" y="72">verdict</text>
+
+        <text class="b6dL" x="46" y="104">prior_orders_log</text>
+        <text class="b6dS" x="210" y="104">purchase</text>
+        <text class="b6dS" x="320" y="104">purchase</text>
+        <text class="b6dL" x="440" y="104">keep</text>
+
+        <text class="b6dL" x="46" y="134">installments</text>
+        <text class="b6dS" x="210" y="134">purchase</text>
+        <text class="b6dS" x="320" y="134">purchase</text>
+        <text class="b6dL" x="440" y="134">keep</text>
+
+        <text class="b6dL" x="46" y="168">review_score</text>
+        <text class="b6dS" x="210" y="168">review</text>
+        <text class="b6dS" x="320" y="168">purchase</text>
+        <text class="b6dR" x="440" y="168">LEAK</text>
+
+        <text class="b6dL" x="46" y="206">has_later_order</text>
+        <text class="b6dS" x="210" y="206">next order</text>
+        <text class="b6dS" x="320" y="206">purchase</text>
+        <text class="b6dR" x="440" y="206">LEAK</text>
+
+        <text class="b6dH" x="606" y="88">THE LEAK GATE</text>
+        <text class="b6dL" x="606" y="110">runs before every fit</text>
+        <text class="b6dL" x="606" y="130">unaudited column: fail</text>
+        <text class="b6dL" x="606" y="150">known too late: fail</text>
+        <text class="b6dV" x="606" y="186">7 of 9 pass</text>
+
+        <text class="b6dN" x="30" y="246">Four of the nine audited rows shown. The rows are constructed; the two failure rules are the method.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - stamp the time known, compare it with the time needed, and let a gate refuse the late columns</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Write the audit as data.</strong> One row per feature: where it comes from, the event at which its value becomes known, and the event at which the model needs it. Events are ordered, so "known after needed" is a comparison, not a judgement call.</p>
+        <div class="prompt-box good"><span class="label">★ Block 1 · the audit table (constructed rows, output as run)</span>import pandas as pd
+
+# the order in which events happen in one customer's life
+EVENT_ORDER = {"purchase": 0, "approval": 1, "delivery": 2, "review": 3, "next order": 4}
+
+audit = pd.DataFrame([
+    ("prior_orders_log", "orders",          "purchase",   "purchase"),
+    ("recency_prior",    "orders",          "purchase",   "purchase"),
+    ("order_value_log",  "lines",           "purchase",   "purchase"),
+    ("freight_share",    "lines",           "purchase",   "purchase"),
+    ("installments",     "payments",        "purchase",   "purchase"),
+    ("voucher_used",     "payments",        "purchase",   "purchase"),
+    ("items_in_order",   "lines",           "purchase",   "purchase"),
+    ("review_score",     "review_scores",   "review",     "purchase"),
+    ("has_later_order",  "nightly backfill", "next order", "purchase"),
+], columns=["feature", "source", "time_known", "time_needed"])
+
+late = audit.time_known.map(EVENT_ORDER) &gt; audit.time_needed.map(EVENT_ORDER)
+audit["verdict"] = late.map({False: "keep", True: "LEAK"})
+print(audit[["feature", "time_known", "time_needed", "verdict"]].to_string(index=False))
+print("pass", (~late).sum(), "of", len(audit), "| leaks:", list(audit.feature[late]))
+
+# prints:
+#          feature time_known time_needed verdict
+# prior_orders_log   purchase    purchase    keep
+#    recency_prior   purchase    purchase    keep
+#  order_value_log   purchase    purchase    keep
+#    freight_share   purchase    purchase    keep
+#     installments   purchase    purchase    keep
+#     voucher_used   purchase    purchase    keep
+#   items_in_order   purchase    purchase    keep
+#     review_score     review    purchase    LEAK
+#  has_later_order next order    purchase    LEAK
+# pass 7 of 9 | leaks: ['review_score', 'has_later_order']</div>
+      </div>
+      <div class="step">
+        <p><strong>Turn the table into a gate that fails loudly.</strong> Two rules, the same spirit as session 2's tests: a column nobody has audited does not get in, and a column known too late does not get in. Call it at the top of every training script.</p>
+        <div class="prompt-box good"><span class="label">★ Block 2 · the leak gate (output as run)</span>def leak_gate(columns, audit):
+    row = audit.set_index("feature")
+    unaudited = [c for c in columns if c not in row.index]
+    too_late = [c for c in columns if c in row.index and row.verdict[c] == "LEAK"]
+    if unaudited or too_late:
+        raise ValueError(f"leak gate: unaudited {unaudited}, known too late {too_late}")
+
+try:
+    leak_gate(["prior_orders_log", "installments", "review_score", "days_to_ship"], audit)
+except ValueError as e:
+    print(e)
+
+# prints: leak gate: unaudited ['days_to_ship'], known too late ['review_score']</div>
+      </div>
+      <div class="step">
+        <p><strong>Check one timing claim on real rows.</strong> On the full public file, count the repeat orders within 90 days, how many were placed on the same calendar day, and how many were placed before the earlier order's first review was answered. Only the review timestamp is read, never the text.</p>
+        <div class="prompt-box good"><span class="label">★ Block 3 · the review-score timing trap on the public file</span>import numpy as np
+d = "path/to/olist/"
+o = pd.read_csv(d + "olist_orders_dataset.csv", parse_dates=["order_purchase_timestamp"])
+c = pd.read_csv(d + "olist_customers_dataset.csv")
+r = pd.read_csv(d + "olist_order_reviews_dataset.csv", usecols=["order_id", "review_answer_timestamp"], parse_dates=["review_answer_timestamp"])
+
+o = o[o.order_status == "delivered"].merge(c[["customer_id", "customer_unique_id"]], on="customer_id")
+o = o.sort_values(["customer_unique_id", "order_purchase_timestamp"])
+o["next_purchase"] = o.groupby("customer_unique_id").order_purchase_timestamp.shift(-1)
+first_answer = r.sort_values("review_answer_timestamp").groupby("order_id").review_answer_timestamp.first()
+o = o.join(first_answer, on="order_id")
+
+gap = o.next_purchase - o.order_purchase_timestamp
+rep = o[gap &lt;= pd.Timedelta(days=90)]
+print("repeats within 90 days", len(rep))
+print("same calendar day", (rep.next_purchase.dt.date == rep.order_purchase_timestamp.dt.date).sum())
+print("placed before the earlier review was answered", (rep.next_purchase &lt; rep.review_answer_timestamp).sum())
+
+# your numbers will differ from Serai's sample (197 repeats, 83 same-day): the full file is larger</div>
+      </div>
+      <div class="step">
+        <p><strong>Prove a suspect with a with-and-without fit.</strong> Build a few honest features as of purchase, add the backfilled column, split by time as in session 5, and set the column to 0 on the scoring month, because that is what it reads at scoring. Compare month T+1 lift, not training AUC.</p>
+        <div class="prompt-box good"><span class="label">★ Block 4 · the leak, measured (scikit-learn)</span>from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+
+items = pd.read_csv(d + "olist_order_items_dataset.csv")
+pays = pd.read_csv(d + "olist_order_payments_dataset.csv")
+lines = items.groupby("order_id").agg(price=("price", "sum"), freight=("freight_value", "sum"), n_items=("order_item_id", "size"))
+inst = pays.groupby("order_id").payment_installments.max().rename("installments")
+o = o.join(lines, on="order_id").join(inst, on="order_id").dropna(subset=["price", "installments"])
+
+o["prior_orders"] = np.log1p(o.groupby("customer_unique_id").cumcount())
+o["value_log"] = np.log1p(o.price)
+o["freight_share"] = o.freight / (o.price + o.freight)
+o["label"] = (gap.reindex(o.index) &lt;= pd.Timedelta(days=90)).astype(int)
+o["has_later_order"] = o.next_purchase.notna().astype(int)   # the backfill: hindsight
+
+t = o.order_purchase_timestamp
+train = o[t &lt;= "2017-11-02"].copy()
+test = o[(t &gt;= "2018-02-01") &amp; (t &lt; "2018-03-01")].copy()
+test["has_later_order"] = 0                                     # at scoring, no later order exists yet
+
+def top_decile_lift(y, p):
+    k = max(1, len(y) // 10)
+    top = np.argsort(-p)[:k]
+    return y.values[top].mean() / y.mean()
+
+honest = ["prior_orders", "value_log", "freight_share", "installments", "n_items"]
+for name, cols in [("honest", honest), ("with the leak", honest + ["has_later_order"])]:
+    m = LogisticRegression(max_iter=1000).fit(train[cols], train.label)
+    p_tr = m.predict_proba(train[cols])[:, 1]
+    p_te = m.predict_proba(test[cols])[:, 1]
+    print(f"{name:14s} train AUC {roc_auc_score(train.label, p_tr):.4f}  month T+1 AUC {roc_auc_score(test.label, p_te):.4f}  lift {top_decile_lift(test.label, p_te):.2f}x")
+
+# your numbers will differ from the session 10 widget's 0.9913 and 1.65x:
+# different sample, five features instead of seven, a different solver</div>
+      </div>
+      <div class="step">
+        <p><strong>Register the audit beside the feature table.</strong> The audit is metadata, so store it where the features live and review it like code. A new column without an audit row fails block 2 by design: the cheapest moment to ask "when is this known?" is before anyone has seen how predictive it is.</p>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The feature that looks like an ordinary groupby</span>
+o["has_later_order"] = o.groupby("customer_unique_id").order_purchase_timestamp.transform("max") &gt; o.order_purchase_timestamp
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 7</h2>
+      <span class="tag exercise">30 min</span>
+    </div>
+    <ol>
+      <li>Add three more candidate features to the audit table, one of which must be a "lifetime" or "to date" total, and decide each verdict by the event order alone.</li>
+      <li>Change the time needed for review_score to "delivery" (a model that scores at delivery, not at purchase) and explain in two sentences why the verdict still holds.</li>
+      <li>Run block 4 with the leaked column left at its hindsight value on the test month, and write down which number now looks great and why nobody could ever see it in production.</li>
+      <li>Audit five columns of a real feature table your team owns: source, time known, time needed, and who could answer if you cannot.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Builder session 6 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · Adding has_later_order lifts training AUC to 0.9913 and drops month T+1 lift to 1.65x. What happened?</p>
+      <button class="qopt" type="button">A · The time split put future rows in the training set</button>
+      <button class="qopt" type="button">B · The model has too many features for 2,744 training orders</button>
+      <button class="qopt" type="button">C · The column was filled with hindsight, so it is 1 in history wherever a later order came and 0 for every row at scoring</button>
+      <button class="qopt" type="button">D · February 2018 had unusually few repeat customers</button>
+      <p class="qwhy">The rows are split cleanly by time; the problem is inside a column. Training learns to lean on it (weight 1.389 against at most 0.255 elsewhere), and at scoring it is a constant, leaving drifted weights to rank the month: 4 real repeats in the top 58 instead of 9.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · Which rule is the learn-predict separation of Kaufman et al., put to work?</p>
+      <button class="qopt" type="button">A · Build each training row only from information that would have been available at the moment of prediction</button>
+      <button class="qopt" type="button">B · Keep the training and scoring code in separate repositories</button>
+      <button class="qopt" type="button">C · Shuffle rows before cross-validation so every fold sees every month</button>
+      <button class="qopt" type="button">D · Drop any feature with a weight above 1.0</button>
+      <p class="qwhy">Leakage is information about the target that should not be legitimately available to mine from. Stamping each column with when it became known, and drawing the line at the moment of prediction, is that separation as a working rule. Shuffling time-ordered rows does the opposite.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">3 · Review score clearly relates to loyalty. Why is it left out of Serai's repeat model?</p>
+      <button class="qopt" type="button">A · The licence forbids using review scores</button>
+      <button class="qopt" type="button">B · Review scores are too noisy to help any model</button>
+      <button class="qopt" type="button">C · Only 39 orders have a review</button>
+      <button class="qopt" type="button">D · The survey goes out after delivery, so at purchase there is no score, and 83 of 197 repeats within 90 days happened the same day</button>
+      <p class="qwhy">The model is asked at purchase. Olist's survey is sent once the product arrives or the estimated date is due, so the column is always missing at that moment. Scores are licensed for use here; only the review text stays out. 39 is the count of orders with more than one review.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Leakage and the learn-predict separation</span><span class="note">Kaufman, Rosset, Perlich and Stitelman (2012), Leakage in data mining: formulation, detection, and avoidance, ACM TKDD 6(4), article 15; abstract read at source, only the abstract quoted</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The backfilled field: AUC, lift and weights</span><span class="note">Computed by the session 10 widget's engine and agreed by an independent Python reference: training AUC 0.9913, month T+1 lift 1.65x, weights 1.389 vs at most 0.255; both levers AUC 0.4922</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Time-ordered splits</span><span class="note">scikit-learn developers, TimeSeriesSplit and roc_auc_score documentation, read at source</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Survey timing and same-day repeats</span><span class="note">Olist (2018), Brazilian E-Commerce Public Dataset, Kaggle, CC BY-NC-SA 4.0, dataset notes read at source; 83 of 197 from the data builder on Serai's sample</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The leak audit table and gate</span><span class="note">Taught as a method; the audit rows are constructed for Serai's model, blocks 1 and 2 output shown as run</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Feature stores, monitoring and point-in-time joins at depth</span><span class="note">Not covered; owned by the ML production and feature engineering tracks</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 6 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>The leak, in numbers</b><span>Training AUC 0.9913, month T+1 lift 1.65x, under the 2.0x gate. Honest: 3.71x.</span></div>
+      <div class="cheat-item"><b>The definition</b><span>Information about the target that should not be legitimately available to mine from (Kaufman et al., 2012).</span></div>
+      <div class="cheat-item"><b>Learn-predict separation</b><span>Stamp every column with when it was known; train only on what sits before the moment of prediction.</span></div>
+      <div class="cheat-item"><b>Rows and columns</b><span>A time split fixes rows. Only a time-known stamp fixes a column filled with hindsight.</span></div>
+      <div class="cheat-item"><b>Timing trap</b><span>Review score arrives after delivery; 83 of 197 repeats within 90 days were same-day.</span></div>
+      <div class="cheat-item"><b>The gate</b><span>Unaudited column: fail. Known too late: fail. Compare next-month lift, never training AUC.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>The model layer is honest again. Session 7 moves up to gen AI: listing copy and review summaries scored by a rubric written as code, where the facts in the copy are recomputed from the rows, so a dirty frame breaks good copy just as a late column broke a good model.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Builder session 6 of 10 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="b5-model-with-a-time-split.html">← Prev: A repeat-purchase model with a time split</a> &nbsp;·&nbsp; <a href="b7-copy-and-summaries-scored.html">Next: Listing copy and review summaries, scored →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

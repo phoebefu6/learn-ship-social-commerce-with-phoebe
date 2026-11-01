@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- social:start -->
+<meta name="description" content="Builder session 9 of 10. Package the top layer of a social-commerce data estate: a seller benchmark pack built from the metric registry, the repeat-purchase model and the gen AI layer. Write the spec as code, turn tests into service levels, decide who may see which seller's data, and price it as a range where each layer's share switches off when its gate fails.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Learn with Phoebe">
+<meta property="og:title" content="Packaging the data product - learn ship social commerce with phoebe">
+<meta property="og:description" content="Builder session 9 of 10. Three parts, three gates, one access rule, and a first-year price range that crosses zero.">
+<meta property="og:url" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/courses/b9-packaging-the-data-product.html">
+<meta property="og:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Packaging the data product - learn ship social commerce with phoebe">
+<meta name="twitter:description" content="Builder session 9 of 10. A part ships only while its gate passes, and the price says so.">
+<meta name="twitter:image" content="https://phoebefu6.github.io/learn-ship-social-commerce-with-phoebe/assets/og-cover.png">
+<!-- social:end -->
+<title>Builder session 9 · Packaging the data product - learn ship social commerce with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-ship-social-commerce-with-phoebe</a> / Builder session 9 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Ship It: Social Commerce, End to End · Builder session 9 of 10</div>
+    <h1>Packaging the <span class="accent">data product</span></h1>
+    <p class="sub">Eight sessions built the layers. Tonight Serai Commerce, the constructed enabler, puts them in a box a seller would pay for: registry numbers each brand can benchmark itself against, a list of its customers likely to order again, and draft copy that passed its check. You write the spec as code, turn the tests you already have into service levels, decide who may see which seller's data, and price the pack as a range in which each layer's share switches off the moment its gate fails.</p>
+    <div class="chip-row">
+      <span class="chip level">🔴 Advanced</span>
+      <span class="chip audience">Data and analytics engineers</span>
+      <span class="chip audience">Data product owners</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:5">3-20 · The pack, service levels, the price</span>
+      <span class="a3" style="flex:4">20-42 · Build-along: the spec as code</span>
+      <span class="a4" style="flex:1">42-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Where packaging sits on the build</h2>
+    </div>
+    <p class="lede">Sessions 1 and 2 gave Serai a schema and the tests that guard it. Sessions 3 and 4 built the metric registry and cohorts. Sessions 5 and 6 trained one repeat-purchase model and hunted its leak. Sessions 7 and 8 scored listing copy and built a seller-support agent with its evals. Tonight none of that is rebuilt; it is wrapped. A data product is the layers below plus four things they do not have on their own: a written contract of contents and definitions, service levels with consequences, an access rule, and a price. Packaging and pricing strategy at depth, from willingness to pay to pricing models, belongs to <a href="https://phoebefu6.github.io/learn-data-product-with-phoebe/">Learn Data Product with Phoebe</a> and <a href="https://phoebefu6.github.io/learn-data-monetisation-with-phoebe/">Learn Data Monetisation with Phoebe</a>; tonight takes this side of the seam and packages one product. Leader session 5 prices the same pack in business words.</p>
+
+    <div class="legend">
+      <span class="pill">🎫 Clear all three quiz questions to stamp your passport</span>
+      <span class="pill">Live = presented in the 45 minutes</span>
+      <span class="pill">Self-study = the full depth, after class</span>
+      <span class="pill">🔍 Every diagram zooms</span>
+    </div>
+
+    <div class="callout win">
+      <p><strong>★ What you walk out with tonight.</strong> A product spec written as Python data, with a function that reads each layer's measured gate and returns the live share of the price, a function that turns four stated assumptions into first-year revenue, cost and net ranges, a sensitivity check that finds the assumption deciding the sign, and a seller view that shows a store its own numbers beside a pooled peer median, or withholds the benchmark when there are too few peers.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-1">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the pack, its gates and who may see which seller's data</span>
+      <h2>What ships, and what each part waits on</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">The pack has three parts, and each one is built on a different layer. Each part ships only while its layer passes its gate, and all three stand on the data engineering floor: zero blocking failures after repair. Write that dependency into the spec before writing a line of the product, because it is the thing a seller will ask about the day a number moves.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 422" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn pack of three parts for Serai's constructed seller growth pack. Registry tables, 40 percent of the price, wait on a gate of agreement at least 99.5 percent, measured 100.00 percent. The repeat list, 35 percent, waits on month T+1 lift at least 2.0x, measured 3.71x. Copy drafts, 25 percent, wait on a rubric pass of at least 70 percent and golden agreement of at least 85 percent, measured 75 percent and 90 percent. All three gates stand on the data engineering floor, 333 blocking failures before repair and 0 after. Below, the access rule: a store sees its own rows, peers appear only pooled, and a benchmark with too few peers is withheld.">
+        <defs>
+          <filter id="b9aSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="91" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b9aHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b9aAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b9aH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b9aL { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b9aS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b9aV { font: 800 16px Inter, sans-serif; fill: #6A4C04; }
+          .b9aN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b9aH" x="30" y="26">WHAT SHIPS IN SERAI'S SELLER GROWTH PACK</text>
+        <text class="b9aS" x="350" y="26">constructed pack · shares and gates are Serai's policy, not a standard</text>
+
+        <g filter="url(#b9aSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="818" y="12" width="34" height="24" rx="3" transform="rotate(-3 835 24)" fill="#FBF5E6"/>
+          <path d="M818 20 L852 18 M835 12 L836 36"/>
+          <rect x="30" y="52" width="250" height="96" rx="10" transform="rotate(-0.6 155 100)" fill="#FFFFFF"/>
+          <rect x="315" y="52" width="250" height="96" rx="10" transform="rotate(0.5 440 100)" fill="#FFFFFF"/>
+          <rect x="600" y="52" width="250" height="96" rx="10" transform="rotate(-0.4 725 100)" fill="#FFFFFF"/>
+          <path d="M155 178 L155 154" marker-end="url(#b9aAr)"/>
+          <path d="M440 178 L440 154" marker-end="url(#b9aAr)"/>
+          <path d="M725 178 L725 154" marker-end="url(#b9aAr)"/>
+          <rect x="30" y="180" width="250" height="48" rx="8" transform="rotate(0.4 155 204)" fill="#A9C4EA"/>
+          <rect x="315" y="180" width="250" height="48" rx="8" transform="rotate(-0.4 440 204)" fill="#A9C4EA"/>
+          <rect x="600" y="180" width="250" height="48" rx="8" transform="rotate(0.3 725 204)" fill="#A9C4EA"/>
+          <path d="M155 254 L155 234" marker-end="url(#b9aAr)"/>
+          <path d="M440 254 L440 234" marker-end="url(#b9aAr)"/>
+          <path d="M725 254 L725 234" marker-end="url(#b9aAr)"/>
+          <rect x="30" y="256" width="820" height="46" rx="10" transform="rotate(-0.2 440 279)" fill="#FBF5E6"/>
+          <rect x="30" y="344" width="250" height="46" rx="8" transform="rotate(-0.5 155 367)" fill="#FFFFFF"/>
+          <rect x="315" y="344" width="250" height="46" rx="8" transform="rotate(0.4 440 367)" fill="#FFFFFF"/>
+          <rect x="600" y="344" width="250" height="46" rx="8" transform="rotate(-0.4 725 367)" fill="#FFFFFF"/>
+        </g>
+
+        <text class="b9aH" x="46" y="76">REGISTRY TABLES</text>
+        <text class="b9aS" x="46" y="94">orders, GMV, repeat rate per store</text>
+        <text class="b9aS" x="46" y="110">one definition each, session 3</text>
+        <text class="b9aV" x="46" y="136">40% of price</text>
+
+        <text class="b9aH" x="331" y="76">REPEAT LIST</text>
+        <text class="b9aS" x="331" y="94">customers ranked by the chance of</text>
+        <text class="b9aS" x="331" y="110">another order within 90 days</text>
+        <text class="b9aV" x="331" y="136">35% of price</text>
+
+        <text class="b9aH" x="616" y="76">COPY DRAFTS</text>
+        <text class="b9aS" x="616" y="94">listing copy, review summaries</text>
+        <text class="b9aS" x="616" y="110">facts read from rows, session 7</text>
+        <text class="b9aV" x="616" y="136">25% of price</text>
+
+        <text class="b9aL" x="44" y="200">GATE · agreement &gt;= 99.5%</text>
+        <text class="b9aL" x="44" y="218">measured 100.00%, live</text>
+        <text class="b9aL" x="329" y="200">GATE · month T+1 lift &gt;= 2.0x</text>
+        <text class="b9aL" x="329" y="218">measured 3.71x, live</text>
+        <text class="b9aL" x="614" y="200">GATE · pass &gt;= 70%, golden &gt;= 85%</text>
+        <text class="b9aL" x="614" y="218">measured 75% and 90%, live</text>
+
+        <text class="b9aH" x="46" y="276">DE FLOOR UNDER ALL THREE</text>
+        <text class="b9aS" x="46" y="293">four checks per export · 333 blocking failures before repair, 0 after · fail it and nothing above ships</text>
+
+        <text class="b9aH" x="30" y="332">WHO MAY SEE WHICH SELLER'S DATA</text>
+        <text class="b9aL" x="44" y="364">A store sees its own rows</text>
+        <text class="b9aS" x="44" y="380">its numbers, its repeat list, its copy</text>
+        <text class="b9aL" x="329" y="364">Peers appear only pooled</text>
+        <text class="b9aS" x="329" y="380">a median, never a named store</text>
+        <text class="b9aL" x="614" y="364">Too few peers: withheld</text>
+        <text class="b9aS" x="614" y="380">the minimum is written in the spec</text>
+
+        <text class="b9aN" x="30" y="412">Each part ships only while its gate passes; the access rule ships with every part.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - three parts, three gates, one floor, and an access rule that travels with all of them</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The pack, part by part<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <table class="clean">
+          <thead><tr><th>Part</th><th>Built on</th><th>Contents</th><th>Gate (Serai's constructed policy)</th><th>Share of price</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Registry tables</strong></td><td>Analytics, sessions 3 and 4</td><td>Orders, GMV as item price without freight, repeat rate, per store and pooled</td><td>Agreement with the reference total &gt;= 99.5% on all three</td><td>40%</td></tr>
+            <tr><td><strong>Repeat list</strong></td><td>Machine learning, sessions 5 and 6</td><td>The store's own customers ranked by the model's score</td><td>Month T+1 top-decile lift &gt;= 2.0x</td><td>35%</td></tr>
+            <tr><td><strong>Copy drafts</strong></td><td>Gen AI, sessions 7 and 8</td><td>Listing copy and review summaries that passed the rubric</td><td>Rubric pass &gt;= 70% and golden agreement &gt;= 85%</td><td>25%</td></tr>
+            <tr><td><strong>Under all three</strong></td><td>Data engineering, sessions 1 and 2</td><td>The repaired frame</td><td>Zero blocking failures after repair</td><td>none of its own</td></tr>
+          </tbody>
+        </table>
+        <p>Every gate, every share and every price figure on this page is constructed for Serai; the measured values beside the gates are the ones session 10 computes on Serai's 8,614 orders. The seller-support agent from session 8 is not in the pack. It answers questions about orders and policy; it was never measured in session 10, so nothing in the price depends on it. If a part cannot name the gate it waits on, it is a feature, not a part of the product, and it carries no share.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Who may see which seller's data<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A benchmark is only useful if a store can compare itself with others, and only trustworthy if no store can read another's numbers. Three rules make both true, and all three belong in the spec, not in a reviewer's memory:</p>
+        <ul>
+          <li><strong>Own rows only.</strong> A store sees its own orders, GMV and repeat rate, its own repeat list and its own copy drafts. The repeat list never carries another store's customers, even when one person buys from both.</li>
+          <li><strong>Peers pooled, never named.</strong> The comparison is an aggregate over the store's segment, such as a median, with the store itself taken out of the pool.</li>
+          <li><strong>A minimum pool size.</strong> When a segment holds too few other stores, a pooled number can be read back to a single competitor, so the benchmark is withheld and the page says why. The minimum is a choice you write down and defend; there is no universal number to copy.</li>
+        </ul>
+        <p>The customer keys are already masked by the schema from session 1 and resolved by the identity gate the Enablers course builds (<a href="https://phoebefu6.github.io/learn-ship-ecommerce-enabler-with-phoebe/courses/b3-the-identity-gate.html">Analyst session 3 there</a>). Masking keys is not the same as an access rule: a masked repeat list handed to the wrong store is still a leak of that store's customers.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Decide what a seller is before you count them<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>"Paying sellers" is the input that decides the sign of the price range in Part 3, so its unit matters. A seller could be a brand, a storefront on one marketplace, or a legal entity that runs several storefronts. Serai manages 48 brands across three marketplaces. Each definition gives a different count, a different peer pool for the benchmark and a different access boundary. Pick one, write it at the top of the spec beside the grain sentences from session 1, and use it in all three places.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>One order, several sellers.</strong> The Olist dataset notes say an order may hold several items, each fulfilled by a distinct seller. A per-store benchmark built on the orders table would hand one store's items to another. That is why store lives on lines in Serai's schema, and why every per-store number in the pack is rolled up from lines: the access rule is only as good as the grain it is computed on.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-2">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the session 2 checks and registry agreement as service levels</span>
+      <h2>Tests become service levels</h2>
+      <span class="tag concept">6 min live</span>
+    </div>
+    <p class="lede">You already wrote the tests. A service level is a test with two things added: a threshold the buyer can read, and a consequence when it is missed. The consequence is the part teams leave out, and without it a service level is a dashboard nobody has to act on.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 404" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Five hand-drawn rows, each turning a test into a service level and a consequence. Keys unique: 333 blocking failures before repair, 0 after; service level zero duplicate order keys per load; if missed the load stops. Customer key resolves: 113 orphans resolved through the crosswalk; every key resolves; load stops until mapped. Amounts not negative: 64 refund lines in Export B; refunds live in adjustments; quarantined and the load goes on. Timestamps ordered: 122 real inversions and 1 missing approval; flagged and counted, not blocking; kept and published. Registry agreement: 100.00 percent on the repaired rows, 65.14 percent on the raw exports; at least 99.5 percent on all three; the registry's 40 percent share is held.">
+        <defs>
+          <filter id="b9bSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="93" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b9bHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b9bAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b9bH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b9bL { font: 600 12px Inter, sans-serif; fill: #1A2232; }
+          .b9bS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b9bA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b9bN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b9bH" x="30" y="26">A TEST BECOMES A SERVICE LEVEL WHEN IT HAS A NUMBER AND A CONSEQUENCE</text>
+        <text class="b9bS" x="30" y="46">measured values from session 10 on Serai's rows · thresholds and consequences are Serai's constructed policy</text>
+
+        <g filter="url(#b9bSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="836" cy="26" r="14" fill="#FBF5E6"/>
+          <path d="M829 26 L834 31 L843 20"/>
+          <rect x="30" y="84" width="270" height="50" rx="8" transform="rotate(-0.5 165 109)" fill="#FFFFFF"/>
+          <rect x="330" y="84" width="280" height="50" rx="8" transform="rotate(0.4 470 109)" fill="#FFFFFF"/>
+          <rect x="640" y="84" width="210" height="50" rx="8" transform="rotate(-0.4 745 109)" fill="#FFFFFF"/>
+          <path d="M302 109 L326 109" marker-end="url(#b9bAr)"/>
+          <path d="M612 109 L636 109" marker-end="url(#b9bAr)"/>
+          <rect x="30" y="142" width="270" height="50" rx="8" transform="rotate(0.4 165 167)" fill="#FFFFFF"/>
+          <rect x="330" y="142" width="280" height="50" rx="8" transform="rotate(-0.4 470 167)" fill="#FFFFFF"/>
+          <rect x="640" y="142" width="210" height="50" rx="8" transform="rotate(0.5 745 167)" fill="#FFFFFF"/>
+          <path d="M302 167 L326 167" marker-end="url(#b9bAr)"/>
+          <path d="M612 167 L636 167" marker-end="url(#b9bAr)"/>
+          <rect x="30" y="200" width="270" height="50" rx="8" transform="rotate(-0.4 165 225)" fill="#FFFFFF"/>
+          <rect x="330" y="200" width="280" height="50" rx="8" transform="rotate(0.5 470 225)" fill="#FFFFFF"/>
+          <rect x="640" y="200" width="210" height="50" rx="8" transform="rotate(-0.5 745 225)" fill="#FFFFFF"/>
+          <path d="M302 225 L326 225" marker-end="url(#b9bAr)"/>
+          <path d="M612 225 L636 225" marker-end="url(#b9bAr)"/>
+          <rect x="30" y="258" width="270" height="50" rx="8" transform="rotate(0.5 165 283)" fill="#FFFFFF"/>
+          <rect x="330" y="258" width="280" height="50" rx="8" transform="rotate(-0.4 470 283)" fill="#FBF5E6"/>
+          <rect x="640" y="258" width="210" height="50" rx="8" transform="rotate(0.4 745 283)" fill="#FFFFFF"/>
+          <path d="M302 283 L326 283" marker-end="url(#b9bAr)"/>
+          <path d="M612 283 L636 283" marker-end="url(#b9bAr)"/>
+          <rect x="30" y="316" width="270" height="50" rx="8" transform="rotate(-0.4 165 341)" fill="#FFFFFF"/>
+          <rect x="330" y="316" width="280" height="50" rx="8" transform="rotate(0.4 470 341)" fill="#A9C4EA"/>
+          <rect x="640" y="316" width="210" height="50" rx="8" transform="rotate(-0.5 745 341)" fill="#FFFFFF"/>
+          <path d="M302 341 L326 341" marker-end="url(#b9bAr)"/>
+          <path d="M612 341 L636 341" marker-end="url(#b9bAr)"/>
+        </g>
+
+        <text class="b9bA" x="30" y="74">TEST, SESSIONS 2 AND 3</text>
+        <text class="b9bA" x="330" y="74">SERVICE LEVEL IN THE SPEC</text>
+        <text class="b9bA" x="640" y="74">IF IT IS MISSED</text>
+
+        <text class="b9bL" x="44" y="105">Keys unique</text>
+        <text class="b9bS" x="44" y="122">333 blocking before repair, 0 after</text>
+        <text class="b9bL" x="344" y="105">0 duplicate order keys per load</text>
+        <text class="b9bS" x="344" y="122">re-sends dropped by the repair rule</text>
+        <text class="b9bL" x="654" y="105">Load stops</text>
+        <text class="b9bS" x="654" y="122">nothing above it refreshes</text>
+
+        <text class="b9bL" x="44" y="163">Customer key resolves</text>
+        <text class="b9bS" x="44" y="180">113 orphans resolved via crosswalk</text>
+        <text class="b9bL" x="344" y="163">Every customer key resolves</text>
+        <text class="b9bS" x="344" y="180">through the identity gate's crosswalk</text>
+        <text class="b9bL" x="654" y="163">Load stops</text>
+        <text class="b9bS" x="654" y="180">until the key is mapped</text>
+
+        <text class="b9bL" x="44" y="221">Amounts not negative</text>
+        <text class="b9bS" x="44" y="238">64 refund lines in Export B</text>
+        <text class="b9bL" x="344" y="221">Refunds live in adjustments</text>
+        <text class="b9bS" x="344" y="238">never inside item value</text>
+        <text class="b9bL" x="654" y="221">Quarantined</text>
+        <text class="b9bS" x="654" y="238">the load goes on</text>
+
+        <text class="b9bL" x="44" y="279">Timestamps ordered</text>
+        <text class="b9bS" x="44" y="296">122 real inversions, 1 missing</text>
+        <text class="b9bL" x="344" y="279">Flagged and counted, not blocking</text>
+        <text class="b9bS" x="344" y="296">they change no metric</text>
+        <text class="b9bL" x="654" y="279">Kept and published</text>
+        <text class="b9bS" x="654" y="296">in the release notes</text>
+
+        <text class="b9bL" x="44" y="337">Registry agreement</text>
+        <text class="b9bS" x="44" y="354">100.00% repaired, 65.14% on raw rows</text>
+        <text class="b9bL" x="344" y="337">&gt;= 99.5% on orders, GMV, repeat</text>
+        <text class="b9bL" x="344" y="354">against the reference totals</text>
+        <text class="b9bL" x="654" y="337">Registry's 40% held</text>
+        <text class="b9bS" x="654" y="354">the share switches off</text>
+
+        <text class="b9bN" x="30" y="392">The last row is the one a buyer feels: a missed service level removes a part of the product, not a decimal.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - each test gets a threshold the buyer can read and a consequence somebody owns</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Service levels as data, beside the tests<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Keep the service levels in the same file as the spec, so a reviewer can read the promise and the test that enforces it side by side. Each entry names the test from session 2 or 3, the threshold, whether a miss blocks the load, and what the buyer sees.</p>
+        <div class="prompt-box good"><span class="label">★ Service levels, one entry per test</span>SERVICE_LEVELS = [
+  # test                     threshold                      blocks load   buyer sees on a miss
+  ("keys_unique",            "0 duplicate keys after repair", True,        "no refresh today, reason shown"),
+  ("customer_key_resolves",  "100% after the crosswalk",      True,        "no refresh today, reason shown"),
+  ("amounts_not_negative",   "refunds quarantined",           False,       "nothing; adjustments table grows"),
+  ("timestamps_ordered",     "flagged, counted, published",   False,       "a count in the release notes"),
+  ("registry_agreement",     "&gt;= 99.5% on all three",          False,       "registry part held, share off"),
+]</div>
+        <p>Notice that the registry row does not block the load. The load finishes, the numbers are computed, and the part is held. Blocking the load would also stop the repeat list, which might be passing; holding the part removes only what failed.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Measure on a second path, then manage<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Registry agreement means something only because the reference totals come from a separate code path: the data builder computed 8,614 orders, BRL 1,197,842.24 and 250 of 8,333 customers repeating straight from the source rows, and the registry on the repaired frame matches all three at 100.00%. Run the registry on the raw exports and repeat-rate agreement falls to 65.14%, because each re-sent order turns a one-time buyer into a repeat one. A service level checked against itself always passes.</p>
+        <p>The NIST AI Risk Management Framework names four functions, "govern, map, measure, and manage". A service level is "measure" with a threshold someone owns; the consequence column is "manage". Write both, or the product has a number nobody has to act on.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>A service level measured on 24 events<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The repeat list's gate is month T+1 lift of at least 2.0x. That month holds 574 orders and 24 real repeats; the top decile of 58 orders caught 9, lift 3.71x. One hit more or less moves lift by 0.41. With the leaked field from session 6 the model caught 4, lift 1.65x, and the part was held. Before a share of the price rests on a service level, write next to it how many events it was measured on and how far one event moves it. A gate that one customer can flip deserves a re-check every month, not a quarterly glance.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The 122 orders that would block forever.</strong> In the real Olist rows, 122 of Serai's orders log a carrier pickup before payment approval, and 1 has no approval timestamp at all. They are a source quirk, not a pipeline bug, and they change no metric. A service level that blocked on them would stop every load until the source changed, which it will not. So they are flagged, counted and published, and the threshold says exactly that. A service level you cannot meet on real data is a service level that will be quietly switched off.</p>
+    </div>
+  </section>
+
+  <section class="section" id="part-3">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers revenue, cost and net ranges and the live share</span>
+      <h2>The price is a range, and the gates set its share</h2>
+      <span class="tag concept">5 min live</span>
+    </div>
+    <p class="lede">Nobody knows yet how many sellers will pay, or how much. So the spec writes four assumptions as low and high values and lets arithmetic do the rest. Each layer's share of the price counts only while its gate passes. A failed gate does not discount the product; it switches that share off, and the cost does not move.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 418" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three hand-drawn rows of the live share of price with first-year ranges in USD, all from Serai's constructed assumptions. Every layer built: registry 40, model 35 and gen AI 25 percent all live; revenue 72,000 to 672,000; cost 159,600 to 307,200; net -235,200 to 512,400. Leaked field: model held, share 65 percent; revenue 46,800 to 436,800; same cost; net -260,400 to 277,200. Data engineering skipped: registry and gen AI held, share 35 percent; revenue 25,200 to 235,200; same cost; net -282,000 to 75,600. Below, a line from today's low end of -235,200: moving paying sellers alone from 40 to 160 lifts it to -19,200, still short of break-even.">
+        <defs>
+          <filter id="b9cSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="97" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b9cHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b9cAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b9cH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b9cL { font: 600 12px Inter, sans-serif; fill: #1A2232; }
+          .b9cT { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b9cS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b9cA { font: 700 11px Inter, sans-serif; fill: #6A4C04; }
+          .b9cR { font: 800 11px Inter, sans-serif; fill: #991B1B; }
+          .b9cN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b9cH" x="30" y="26">A FAILED GATE SWITCHES ITS SHARE OFF; THE COST STAYS</text>
+        <text class="b9cS" x="30" y="46">gates measured in session 10 · every price, cost and seller count is Serai's constructed ASSUMPTION · USD, first year</text>
+
+        <g filter="url(#b9cSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="822" y="14" width="28" height="18" rx="9" fill="#FFFFFF"/>
+          <circle cx="841" cy="23" r="5" fill="#E8D29A"/>
+          <rect x="30" y="108" width="118" height="32" rx="4" fill="#A9C4EA"/>
+          <rect x="150" y="108" width="103" height="32" rx="4" fill="#A9C4EA"/>
+          <rect x="255" y="108" width="75" height="32" rx="4" fill="#A9C4EA"/>
+          <rect x="30" y="178" width="118" height="32" rx="4" fill="#A9C4EA"/>
+          <rect x="150" y="178" width="103" height="32" rx="4" fill="#FFFFFF" stroke-dasharray="5 4"/>
+          <rect x="255" y="178" width="75" height="32" rx="4" fill="#A9C4EA"/>
+          <rect x="30" y="248" width="118" height="32" rx="4" fill="#FFFFFF" stroke-dasharray="5 4"/>
+          <rect x="150" y="248" width="103" height="32" rx="4" fill="#A9C4EA"/>
+          <rect x="255" y="248" width="75" height="32" rx="4" fill="#FFFFFF" stroke-dasharray="5 4"/>
+          <rect x="74" y="352" width="648" height="14" rx="3" fill="url(#b9cHc)"/>
+          <path d="M60 359 L840 359"/>
+          <path d="M780 346 L780 372" stroke-dasharray="4 4"/>
+        </g>
+
+        <text class="b9cA" x="30" y="78">LIVE SHARE OF PRICE</text>
+        <text class="b9cA" x="360" y="78">REVENUE</text>
+        <text class="b9cA" x="520" y="78">COST</text>
+        <text class="b9cA" x="690" y="78">NET</text>
+
+        <text class="b9cL" x="30" y="100">Every layer built · 100%</text>
+        <text class="b9cT" x="38" y="128">registry 40%</text>
+        <text class="b9cT" x="158" y="128">model 35%</text>
+        <text class="b9cT" x="261" y="128">gen AI 25%</text>
+        <text class="b9cA" x="360" y="128">USD 72,000 to 672,000</text>
+        <text class="b9cA" x="520" y="128">USD 159,600 to 307,200</text>
+        <text class="b9cA" x="690" y="120">-USD 235,200</text>
+        <text class="b9cA" x="690" y="136">to USD 512,400</text>
+
+        <text class="b9cL" x="30" y="170">Leaked field: model lift 1.65x · 65%</text>
+        <text class="b9cT" x="38" y="198">registry 40%</text>
+        <text class="b9cR" x="158" y="198">model held</text>
+        <text class="b9cT" x="261" y="198">gen AI 25%</text>
+        <text class="b9cA" x="360" y="198">USD 46,800 to 436,800</text>
+        <text class="b9cA" x="520" y="198">USD 159,600 to 307,200</text>
+        <text class="b9cA" x="690" y="190">-USD 260,400</text>
+        <text class="b9cA" x="690" y="206">to USD 277,200</text>
+
+        <text class="b9cL" x="30" y="240">DE skipped: registry and gen AI fail · 35%</text>
+        <text class="b9cR" x="38" y="268">registry held</text>
+        <text class="b9cT" x="158" y="268">model 35%</text>
+        <text class="b9cR" x="263" y="268">held</text>
+        <text class="b9cA" x="360" y="268">USD 25,200 to 235,200</text>
+        <text class="b9cA" x="520" y="268">USD 159,600 to 307,200</text>
+        <text class="b9cA" x="690" y="260">-USD 282,000</text>
+        <text class="b9cA" x="690" y="276">to USD 75,600</text>
+
+        <text class="b9cN" x="30" y="304">The cost column never moves: the run cost is paid per seller served, whether a part is live or held.</text>
+
+        <text class="b9cH" x="30" y="336">NO SINGLE ASSUMPTION LIFTS THE LOW END ABOVE ZERO</text>
+        <text class="b9cS" x="780" y="338" text-anchor="middle">break-even</text>
+        <text class="b9cS" x="60" y="388">today's low end -USD 235,200</text>
+        <text class="b9cA" x="722" y="388" text-anchor="end">-USD 19,200 with 160 paying sellers</text>
+
+        <text class="b9cN" x="30" y="410">Paying sellers moves the low end most, by USD 216,000, and it still ends below zero. Arithmetic, not a forecast.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a held share removes revenue while the cost stays put, and the seller count decides the sign</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Four assumptions, two ranges, one net<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Serai's four stated assumptions: 40 to 160 paying sellers, USD 150 to 350 a seller a month, a build of USD 150,000 to 240,000, and a run cost of USD 20 to 35 a seller a month. Revenue is sellers x price x 12 x live share; cost is build plus run cost x sellers x 12. The net is low revenue minus high cost, to high revenue minus low cost.</p>
+        <table class="clean">
+          <thead><tr><th>Setting</th><th>Live share</th><th>First-year revenue</th><th>First-year net</th></tr></thead>
+          <tbody>
+            <tr><td>Every layer built</td><td>100%</td><td>USD 72,000 to 672,000</td><td>-USD 235,200 to USD 512,400</td></tr>
+            <tr><td>Leaked field (repeat list held)</td><td>65%</td><td>USD 46,800 to 436,800</td><td>-USD 260,400 to USD 277,200</td></tr>
+            <tr><td>DE layer skipped</td><td>35%</td><td>USD 25,200 to 235,200</td><td>-USD 282,000 to USD 75,600</td></tr>
+            <tr><td>Both at once</td><td>0%</td><td>USD 0</td><td>-USD 307,200 to -USD 159,600</td></tr>
+          </tbody>
+        </table>
+        <p>Cost is USD 159,600 to 307,200 in every row. That net is a corner bound: each end takes every input at its worst or best together, and the low end even charges the run cost of 160 sellers against the revenue of 40. It is deliberately wide. Its job is to show which input to test first, not to forecast a year.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The assumption that decides the sign<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Move each input alone from the value the low end uses to its other end, hold the rest, and watch the low end. The build-along prints this table; it is arithmetic on stated assumptions, nothing measured.</p>
+        <table class="clean">
+          <thead><tr><th>Input moved alone</th><th>Low end rises by</th><th>New low end</th></tr></thead>
+          <tbody>
+            <tr><td>Paying sellers, 40 to 160</td><td>USD 216,000</td><td>-USD 19,200</td></tr>
+            <tr><td>Price, USD 150 to 350 a month</td><td>USD 96,000</td><td>-USD 139,200</td></tr>
+            <tr><td>Build, USD 240,000 to 150,000</td><td>USD 90,000</td><td>-USD 145,200</td></tr>
+            <tr><td>Sellers served, 160 to 40 (cost side)</td><td>USD 50,400</td><td>-USD 184,800</td></tr>
+            <tr><td>Run cost, USD 35 to 20 a month</td><td>USD 28,800</td><td>-USD 206,400</td></tr>
+          </tbody>
+        </table>
+        <p>Paying sellers decides the sign: it moves the low end more than twice as far as any other input. And no single input flips the low end above zero; the best of them still leaves it at minus USD 19,200. So the first piece of evidence the product needs is not a better model or a cheaper build. It is a count of sellers who would pay, gathered with a written price before build money is released.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Why no conversion uplift goes into the price<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>It is tempting to raise the price input by quoting a published sales uplift for AI-written copy. The evidence disagrees, so it cannot carry a price. Fang, Yuan, Zhang, Donati and Sarvary (2026) ran randomized field experiments on a cross-border e-commerce platform and report effects "ranging from no detectable impact to 16.3%", depending on the workflow; summaries of an earlier version put AI product descriptions at about 2% (reported; versions differ). Cicek, Gursoy and Lu (2024, reported via a university press release) found in survey experiments that products described as using AI were less popular, more so for high-risk products; that study is about mentioning AI in copy, not about AI-written copy. Different questions, settings and outcomes. Neither tells you whether Serai's sellers would sell more. Leave the uplift out of the price and measure it on your own catalogue.</p>
+      </div>
+    </details>
+
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>The licence is a line in the spec.</strong> Serai's rows are derived from the Olist public dataset, published on Kaggle under CC BY-NC-SA 4.0: non-commercial and share-alike. That is fine for learning and for proving the method on real orders. It also means a pack sold for money could not ship these rows. A commercial seller benchmark would need its own data, collected from its own sellers under their contracts, and the spec says so in its licence line before anyone quotes a price.</p>
+    </div>
+  </section>
+
+  <section class="section" id="demo-1">
+    <div class="section-kicker">
+      <span class="klabel">Build-along</span>
+      <h2>The product spec, as code</h2>
+      <span class="tag demo">★ 22 min · everyone builds</span>
+    </div>
+    <p class="lede">Plain Python and pandas, no download needed. Blocks 2 to 4 use only the gate values session 10 measures and Serai's four stated assumptions, so the printed lines below are what the script prints. Block 5 runs on six constructed stores, not Olist rows. Run each block in one file, in order.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 292" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A hand-drawn product spec in six boxes. Contents: registry tables, repeat list, copy drafts. Definitions: orders, GMV as item price, repeat rate as customers with two or more orders over customers. Service levels: four DE checks, agreement at least 99.5 percent, lift at least 2.0x, 70 and 85 percent. Freshness: refreshed after each daily load, and stale data says so. Access: own rows, pooled peers, small groups withheld. Licence, highlighted: derived Olist rows are CC BY-NC-SA 4.0, non-commercial, so a paid product needs its own data.">
+        <defs>
+          <filter id="b9dSk" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="99" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+          <pattern id="b9dHc" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#966E08" stroke-width="1" opacity=".5"/></pattern>
+          <marker id="b9dAr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A2232" stroke-width="1.6" stroke-linecap="round"/></marker>
+        </defs>
+        <style>
+          .b9dH { font: 800 12px Inter, sans-serif; fill: #1A2232; }
+          .b9dS { font: 400 11px Inter, sans-serif; fill: #4E5869; }
+          .b9dT { font: 600 11px Inter, sans-serif; fill: #1A2232; }
+          .b9dN { font: 400 12px Inter, sans-serif; fill: #4E5869; }
+        </style>
+
+        <text class="b9dH" x="30" y="26">ONE SPEC, SIX SECTIONS, WRITTEN BEFORE THE PRICE</text>
+
+        <g filter="url(#b9dSk)" fill="none" stroke="#1A2232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M836 12 L836 36 Q836 42 830 42 Q824 42 824 36 L824 18 Q824 14 828 14 Q832 14 832 18 L832 34"/>
+          <rect x="30" y="48" width="260" height="80" rx="10" transform="rotate(-0.6 160 88)" fill="#FFFFFF"/>
+          <rect x="310" y="48" width="260" height="80" rx="10" transform="rotate(0.5 440 88)" fill="#FFFFFF"/>
+          <rect x="590" y="48" width="260" height="80" rx="10" transform="rotate(-0.4 720 88)" fill="#FFFFFF"/>
+          <rect x="30" y="146" width="260" height="80" rx="10" transform="rotate(0.4 160 186)" fill="#FFFFFF"/>
+          <rect x="310" y="146" width="260" height="80" rx="10" transform="rotate(-0.5 440 186)" fill="#FFFFFF"/>
+          <rect x="590" y="146" width="260" height="80" rx="10" transform="rotate(0.5 720 186)" fill="#A9C4EA"/>
+        </g>
+
+        <text class="b9dH" x="46" y="74">1 · CONTENTS</text>
+        <text class="b9dS" x="46" y="94">registry tables, repeat list,</text>
+        <text class="b9dS" x="46" y="110">copy drafts, one set per store</text>
+
+        <text class="b9dH" x="326" y="74">2 · DEFINITIONS</text>
+        <text class="b9dS" x="326" y="94">orders, GMV as item price,</text>
+        <text class="b9dS" x="326" y="110">repeat = 2+ orders / customers</text>
+
+        <text class="b9dH" x="606" y="74">3 · SERVICE LEVELS</text>
+        <text class="b9dS" x="606" y="94">four DE checks, agreement</text>
+        <text class="b9dS" x="606" y="110">&gt;= 99.5%, lift &gt;= 2.0x, 70% / 85%</text>
+
+        <text class="b9dH" x="46" y="172">4 · FRESHNESS</text>
+        <text class="b9dS" x="46" y="192">refreshed after each daily load</text>
+        <text class="b9dS" x="46" y="208">stale data says so on the page</text>
+
+        <text class="b9dH" x="326" y="172">5 · ACCESS</text>
+        <text class="b9dS" x="326" y="192">own rows, pooled peers,</text>
+        <text class="b9dS" x="326" y="208">small groups withheld</text>
+
+        <text class="b9dH" x="606" y="172">6 · LICENCE</text>
+        <text class="b9dT" x="606" y="192">derived Olist rows: CC BY-NC-SA 4.0</text>
+        <text class="b9dT" x="606" y="208">non-commercial: sell your own data</text>
+
+        <text class="b9dN" x="30" y="254">The price comes after all six. A part that cannot fill sections 2 and 3 carries no share.</text>
+        <text class="b9dN" x="30" y="278">Every gate, share and price figure is Serai's constructed policy; the measured values come from session 10.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - contents, definitions, service levels, freshness, access, licence, and only then a price</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <p><strong>Write the spec as data.</strong> One dictionary a reviewer can read without running anything. The values are Serai's constructed policy; replace them with your own.</p>
+        <div class="prompt-box good"><span class="label">★ Block 1 · the spec</span>SPEC = {
+    "product": "Serai seller growth pack (constructed)",
+    "seller": "one brand, across all three marketplaces",
+    "contents": {
+        "registry_tables": "orders, GMV, repeat rate per store, plus a pooled peer median",
+        "repeat_list": "the store's own customers, ranked by chance of another order within 90 days",
+        "copy_drafts": "listing copy and review summaries that passed the rubric",
+    },
+    "definitions": {
+        "orders": "distinct order keys after repair",
+        "gmv": "sum of item price, no freight, no adjustments",
+        "repeat_rate": "customers with 2+ orders / customers",
+    },
+    "freshness": "refreshed after each daily load; a held part shows its last good date",
+    "access": "own rows only; peers pooled and never named; small pools withheld",
+    "licence": "derived Olist rows, CC BY-NC-SA 4.0: non-commercial; a paid product needs its own data",
+}
+# prints nothing: this block is the contract the next four enforce</div>
+      </div>
+      <div class="step">
+        <p><strong>Turn measured gates into a live share.</strong> The measured values are the ones session 10 prints for each setting. A failed gate removes its whole share.</p>
+        <div class="prompt-box good"><span class="label">★ Block 2 · gates to live share</span>GATES = {
+    "registry": lambda m: m["registry_agree_min"] &gt;= 0.995,
+    "model":    lambda m: m["lift_t1"] &gt;= 2.0,
+    "genai":    lambda m: m["genai_pass"] &gt;= 0.70 and m["golden_agree"] &gt;= 0.85,
+}
+SHARE = {"registry": 0.40, "model": 0.35, "genai": 0.25}
+
+def live_share(m):
+    live = {layer: ok(m) for layer, ok in GATES.items()}
+    return live, round(sum(SHARE[k] for k, on in live.items() if on), 2)
+
+settings = {
+    "every layer built": dict(registry_agree_min=1.0000, lift_t1=3.71, genai_pass=15/20, golden_agree=18/20),
+    "leaked field":      dict(registry_agree_min=1.0000, lift_t1=1.65, genai_pass=15/20, golden_agree=18/20),
+    "DE skipped":        dict(registry_agree_min=0.6514, lift_t1=3.30, genai_pass=7/20,  golden_agree=10/20),
+}
+for name, m in settings.items():
+    live, share = live_share(m)
+    print(f"{name:18} {share:.0%}  held: {[k for k, on in live.items() if not on]}")
+
+# prints: every layer built  100%  held: []
+#         leaked field       65%  held: ['model']
+#         DE skipped         35%  held: ['registry', 'genai']</div>
+      </div>
+      <div class="step">
+        <p><strong>Turn four assumptions into three ranges.</strong> The net pairs low revenue with high cost, and back.</p>
+        <div class="prompt-box good"><span class="label">★ Block 3 · revenue, cost, net</span>A = {"sellers": (40, 160), "price_month": (150, 350), "build": (150_000, 240_000), "run_seller_month": (20, 35)}
+
+def year_one(share, a=A):
+    rev = (a["sellers"][0] * a["price_month"][0] * 12 * share, a["sellers"][1] * a["price_month"][1] * 12 * share)
+    cost = (a["build"][0] + a["run_seller_month"][0] * a["sellers"][0] * 12,
+            a["build"][1] + a["run_seller_month"][1] * a["sellers"][1] * 12)
+    return rev, cost, (rev[0] - cost[1], rev[1] - cost[0])
+
+for share in (1.00, 0.65, 0.35, 0.00):
+    rev, cost, net = year_one(share)
+    print(f"share {share:.0%}  revenue {rev[0]:,.0f} to {rev[1]:,.0f}  cost {cost[0]:,.0f} to {cost[1]:,.0f}  net {net[0]:,.0f} to {net[1]:,.0f}")
+
+# prints: share 100%  revenue 72,000 to 672,000  cost 159,600 to 307,200  net -235,200 to 512,400
+#         share 65%  revenue 46,800 to 436,800  cost 159,600 to 307,200  net -260,400 to 277,200
+#         share 35%  revenue 25,200 to 235,200  cost 159,600 to 307,200  net -282,000 to 75,600
+#         share 0%  revenue 0 to 0  cost 159,600 to 307,200  net -307,200 to -159,600</div>
+      </div>
+      <div class="step">
+        <p><strong>Find the assumption that decides the sign.</strong> Move one input at a time from the value the low end uses to its other end.</p>
+        <div class="prompt-box good"><span class="label">★ Block 4 · what lifts the low end</span>def low_end(sellers_pay=40, price=150, build=240_000, run=35, sellers_served=160, share=1.0):
+    return sellers_pay * price * 12 * share - (build + run * sellers_served * 12)
+
+base = low_end()
+moves = {
+    "paying sellers 40 -&gt; 160": low_end(sellers_pay=160),
+    "price 150 -&gt; 350":         low_end(price=350),
+    "build 240k -&gt; 150k":       low_end(build=150_000),
+    "sellers served 160 -&gt; 40": low_end(sellers_served=40),
+    "run cost 35 -&gt; 20":        low_end(run=20),
+}
+print(f"low end today {base:,.0f}")
+for k, v in sorted(moves.items(), key=lambda kv: -kv[1]):
+    print(f"{k:26} +{v - base:,.0f}  low end {v:,.0f}  {'above zero' if v &gt; 0 else 'still below zero'}")
+
+# prints: low end today -235,200
+#         paying sellers 40 -&gt; 160   +216,000  low end -19,200  still below zero
+#         price 150 -&gt; 350           +96,000  low end -139,200  still below zero
+#         build 240k -&gt; 150k         +90,000  low end -145,200  still below zero
+#         sellers served 160 -&gt; 40   +50,400  low end -184,800  still below zero
+#         run cost 35 -&gt; 20          +28,800  low end -206,400  still below zero</div>
+      </div>
+      <div class="step">
+        <p><strong>Write the seller view, with the access rule inside it.</strong> Six constructed stores in two segments, so the withheld branch actually runs. The minimum pool size is a choice for your spec, not a standard.</p>
+        <div class="prompt-box good"><span class="label">★ Block 5 · own rows, pooled peers</span>import pandas as pd
+
+stores = pd.DataFrame({          # constructed rows, not Olist
+    "store":   ["S1", "S2", "S3", "S4", "S5", "S6"],
+    "segment": ["home", "home", "home", "home", "toys", "toys"],
+    "orders":  [410, 220, 180, 95, 300, 60],
+    "repeat_rate": [0.034, 0.029, 0.041, 0.022, 0.031, 0.018],
+})
+MIN_PEERS = 3   # a choice you write in the spec, not a standard
+
+def seller_view(df, me, min_peers=MIN_PEERS):
+    mine = df[df.store == me].iloc[0]
+    peers = df[(df.segment == mine.segment) &amp; (df.store != me)]
+    if len(peers) &lt; min_peers:
+        return {"store": me, "repeat_rate": mine.repeat_rate, "peer_median": None, "note": f"only {len(peers)} peers, benchmark withheld"}
+    return {"store": me, "repeat_rate": mine.repeat_rate, "peer_median": round(peers.repeat_rate.median(), 3), "peers": len(peers)}
+
+print(seller_view(stores, "S2"))
+print(seller_view(stores, "S5"))
+
+# prints: {'store': 'S2', 'repeat_rate': 0.029, 'peer_median': 0.034, 'peers': 3}
+#         {'store': 'S5', 'repeat_rate': 0.031, 'peer_median': None, 'note': 'only 1 peers, benchmark withheld'}</div>
+      </div>
+      <div class="step">
+        <p><strong>Read the spec against the licence line.</strong> Before anyone quotes a price, check that every source the product ships allows selling it. For Serai's derived Olist rows the answer is no, and the spec says so in plain words.</p>
+      </div>
+    </div>
+
+    <div class="prompt-box bad">
+      <span class="label">✗ The spec that sounds finished and promises nothing</span>
+Seller insights platform: real-time benchmarks, AI-powered predictions and copy,
+enterprise-grade data quality, strong recurring revenue from year one.
+    </div>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session 10</h2>
+      <span class="tag exercise">30 min</span>
+    </div>
+    <ol>
+      <li>Add a sixth row to SERVICE_LEVELS for the repeat list, with the number of events it was measured on and how far one event moves it.</li>
+      <li>Change block 2 so a held part reports which gate failed and by how much, and print it for the DE-skipped setting.</li>
+      <li>In block 4, move two inputs at once and find the smallest pair of moves that lifts the low end above zero. Write which two and why that pair is plausible or not.</li>
+      <li>Change MIN_PEERS in block 5 to 4 and to 2, and write one sentence for the spec on which you would choose and what a competitor could learn at the other.</li>
+    </ol>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions</h2>
+    </div>
+    <p>Clear all three and Builder session 9 gets stamped in your passport.</p>
+
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · The DE layer is skipped. The model still passes at 3.30x lift; the registry and gen AI gates fail. What live share of the price does the spec allow?</p>
+      <button class="qopt" type="button">A · 100%, because the model still works</button>
+      <button class="qopt" type="button">B · 65%, the registry and model shares</button>
+      <button class="qopt" type="button">C · 35%, only the repeat list's share</button>
+      <button class="qopt" type="button">D · 0%, because a skipped layer stops everything</button>
+      <p class="qwhy">A failed gate switches its share off; it does not discount it. Only the model passes, so only its 35% stays live, and the net falls to -USD 282,000 to USD 75,600 while the cost stays at USD 159,600 to 307,200.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · Moving each assumption alone, which one moves the low end of the net most, and does it lift it above zero?</p>
+      <button class="qopt" type="button">A · Paying sellers, by USD 216,000, and the low end still sits at -USD 19,200</button>
+      <button class="qopt" type="button">B · Price a month, and it lifts the low end above zero</button>
+      <button class="qopt" type="button">C · The build cost, because it is the largest single number</button>
+      <button class="qopt" type="button">D · The run cost, because it scales with every seller</button>
+      <p class="qwhy">Paying sellers from 40 to 160 lifts the low end from -USD 235,200 to -USD 19,200, more than twice any other input. No single input flips the sign, so the seller count is the assumption to test first, with a written price.</p>
+    </div>
+
+    <div class="quiz-q" data-answer="3">
+      <p class="qtext">3 · Store S5 has one other store in its segment. What should its seller view show?</p>
+      <button class="qopt" type="button">A · Its numbers beside the other store's numbers, named</button>
+      <button class="qopt" type="button">B · Its numbers beside a peer median of that one store</button>
+      <button class="qopt" type="button">C · Nothing at all, not even its own numbers</button>
+      <button class="qopt" type="button">D · Its own numbers, with the benchmark withheld and the reason shown</button>
+      <p class="qwhy">A "median" of one peer is that peer's number, readable by a competitor. The store still sees its own rows; the pooled comparison is withheld until the pool reaches the minimum the spec sets.</p>
+    </div>
+
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Sources covered</span>
+      <h2>What this session teaches, and where it came from</h2>
+    </div>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The pack, its gates and the live share of the price</span><span class="note">Gates, shares and the pack are Serai's constructed policy; measured gate values (100.00%, 65.14%, 3.71x, 3.30x, 1.65x, 15 of 20, 90%) are computed live in session 10</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Revenue, cost and net ranges, and the low-end sensitivity</span><span class="note">Arithmetic on four stated, constructed assumptions; the build-along prints every figure shown</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Tests as service levels; "govern, map, measure, and manage"</span><span class="note">NIST AI RMF 1.0, NIST AI 100-1 (2023), core functions read at source; DE checks and registry agreement from sessions 2 and 3</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Multi-seller orders, the 122 timestamp inversions, the licence</span><span class="note">Brazilian E-Commerce Public Dataset by Olist, Kaggle, CC BY-NC-SA 4.0, dataset notes read at source</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">AI copy and sales: the disagreement</span><span class="note">Fang et al. (2026), arXiv 2510.12049, abstract read at source; Cicek, Gursoy and Lu (2024), reported via a press release; taught as disagreement, never as a forecast</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Product strategy, willingness to pay and pricing models</span><span class="note">Not covered; owned by Learn Data Product with Phoebe and Learn Data Monetisation with Phoebe</span></div>
+    </div>
+    <p class="mono" style="margin-top:14px">Every fact on this page, and its verification tier, is recorded in the course's source map.</p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 9 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Three parts, three gates</b><span>Registry 40%, repeat list 35%, copy drafts 25%, all on the DE floor.</span></div>
+      <div class="cheat-item"><b>Switch off, never discount</b><span>A failed gate removes its whole share; cost stays at USD 159,600 to 307,200.</span></div>
+      <div class="cheat-item"><b>Test plus consequence</b><span>A service level is a threshold the buyer reads and an action someone owns.</span></div>
+      <div class="cheat-item"><b>Own rows, pooled peers</b><span>Never a named competitor; withhold a benchmark when the pool is too small.</span></div>
+      <div class="cheat-item"><b>Sellers decide the sign</b><span>40 to 160 paying sellers lifts the low end USD 216,000, still -USD 19,200.</span></div>
+      <div class="cheat-item"><b>Licence first</b><span>Derived Olist rows are CC BY-NC-SA 4.0; a paid product needs its own data.</span></div>
+    </div>
+  </section>
+
+  <div class="callout next">
+    <span class="nx-pill">Next session</span>
+    <p>You have the spec, the service levels and the price. Session 10 runs all five layers live on Serai's 8,614 orders, prints every gate this page relied on, and lets you skip the DE layer or plant the leaked field to watch the live share and the net move.</p>
+  </div>
+
+  <footer class="pagefoot">
+    <span>Builder session 9 of 10 · learn-ship-social-commerce-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="b8-seller-support-agent-evals.html">← Prev: A seller-support agent and its evals</a> &nbsp;·&nbsp; <a href="b10-the-five-layer-value-bench.html">Next: The five-layer value bench →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>
