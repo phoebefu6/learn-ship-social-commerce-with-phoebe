@@ -1348,7 +1348,7 @@ span.mono {
 .hb-findings li:last-child { border-bottom: 0; }
 .hb-sev { font-size: .68rem; font-weight: 800; border-radius: 999px; padding: .1rem .45rem; white-space: nowrap; }
 .hb-s4 { background: #991B1B; color: #fff; }
-.hb-s3 { background: #A9C4EA; color: #fff; }
+.hb-s3 { background: #A9C4EA; color: var(--ink); }
 .hb-s2 { background: var(--amber-50); color: var(--amber-ink); }
 .hb-s1 { background: var(--indigo-50); color: var(--indigo-deep); }
 .hb-findings .hb-src { font-size: .72rem; color: var(--muted); white-space: nowrap; }
